@@ -10,7 +10,7 @@ Hi! I’m really excited that you are interested in contributing to the ModelHel
 
 ## Issue Reporting Guidelines
 
-- Always use [https://github.com/Modelhelper/cli/issues/new/choose/](https://github.com/Modelhelper/cli/issues/new/choose/) to create new issues.
+- Always use [https://github.com/Modelhelper/cli/issues/new/choose](https://github.com/Modelhelper/cli/issues) to create new issues.
 
 ## Pull Request Guidelines
 
