@@ -1,0 +1,19 @@
+package defaults
+
+func Configuration() string {
+	return `
+version: 3.0
+appVersion: 3.0
+
+templates:
+  shared:
+  global:
+    location: ./templates
+
+languages:
+  definitions: ./languages
+
+logging:
+  enabled: true
+`
+}
