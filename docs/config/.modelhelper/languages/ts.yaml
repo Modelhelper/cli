@@ -1,7 +1,7 @@
-language: <lang> # must be the same as template e.g cs, go, java
+language: ts # must be the same as template e.g cs, go, java
 version: 3.0
 
-usesNamespace: true
+useNamespace: true
 canInject: true
 
 moduleLevelVariablePrefix: "_"
@@ -12,30 +12,19 @@ defaultImports: [
 
 types:
   -interface:
-    key: "interface"   
+    namePrefix: I
+  -repositoryInterface:
     namePostfix: Repository
     namePrefix: I
   -models:
-    key: "model"      
     namePostfix: Model
   -repository:   
-    key: "repository"   
     namePostfix: Repository
-    imports: [
-      "using {{ .Code.RootNamespace }}.Extensions"
-    ]
   -service:
-    key: "service"  
     namePostfix: "Service"
   -controller:
-    namePostfix: "Controller" 
-    imports: [
-      "using {{ .Code.RootNamespace }}.Extensions"
-    ]
-  -extension:
-    namePostfix: "Extension"      
-    namespace: "{{ .Code.RootNamespace }}.Extensions"
-
+    namePostfix: "Controller"
+    
 inject:  
   -logging:
     name: ILogger<{{ .Name }}>
@@ -46,22 +35,13 @@ inject:
       "using Microsoft.Logging"
     ]
 
-## only on init
-importCommands: [
-  "dotnet ...."
-]
-
-## only on init
 preferredPackages:
   -mssql: ["Microsoft.Data"]
   -postgres: ["<package>"]
   -metrics: ["metrics"]
   -logging: ["logging"]
 
-## maps datatype to language type
-## can be a mix of mssql, postgres, mysql etc
 datatypes: 
-  -string: string
   -bigint: Int64
   -binary: Byte[]
   -bit: bool

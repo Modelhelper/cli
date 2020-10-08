@@ -1,0 +1,76 @@
+commands:
+  info: shows info about the modelhelper cli
+  config: 
+    set: updates or creates a value in the configuration file
+    get: gets a value from the configuration file
+  create: 
+    secret: takes a key and a value and stores in the encrypted config.secrets file
+    key: creates a key based on passphrase (user provide its own or a suggested one). the passphrase is a SHA512 hashed key stored in a known place
+    
+    # target version 3.5
+    project: creates a new project, this is based on a 'project'- file in config.project-template (a yaml file) and name 'patolab create project <type> <name> [--location <path>]'
+    
+    # target version 3.5
+    template: creates a new template
+  
+  entity: root command for all related to entities in a database    
+  
+  # target 3.4
+  source: root command for things related to input sources (can be entity, graphql, rest, proto)
+
+  # target 3.4
+  graphql: root command for all related to graphql api
+  # target 3.4
+  rest: root command for all related to rest api
+  # target 3.4
+  proto: root command for all related to proto files
+  database: 
+    optimize: tools to optimize an entity or run rules against the database or entity 
+    document:
+      usage: mh database document <tablename>[.column] <description>      
+  template: root command for templates
+  project: 
+    desc: works with the current project
+    config:
+      get:
+      set:
+    sources:      
+    source:
+      list:
+      add:
+      set:
+      remove:
+    option:
+      set:
+      get:
+      remove:
+      list:
+  # target 3.3
+  serve: 
+    desc: serves a webserver located at localhost port 4500 (port is specified in config file). Opens a web
+    api: "starts a server with a api for the current modelhelper project"
+    web: "starts a web application"
+  generate:    
+    options:
+      show: shows the code in the cli
+    note: |
+      should be able to input a yaml file that describes what to generate
+  code:
+    generate: Same as generate on root
+
+    # target 3.1
+    init: | 
+      based on language(s) for the project initializes a set of code. 
+      Must be logged to init (yaml) file and based on a template (cs_init with type: init)
+  
+  # target version 3.2
+  cheatsheet:
+    template: 
+      desc: shows a cheatsheet for a template
+      range:
+      loop:
+      if:
+    # target version 3.3
+    database: 
+    # target version 3.4
+    git:
