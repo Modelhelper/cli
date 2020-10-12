@@ -54,7 +54,7 @@ import: table # values entity | database | project | options | template | none |
 exportFileName: file_to_export
 
     # optional (former ExportType). A key cannot contain .
-locationkey: api.interface 
+locationKey: api.interface 
     
 
 # target version 3.1

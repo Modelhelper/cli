@@ -47,6 +47,11 @@ sources:
     options:
       -option_1: value_1
       -option_2: value_2
+  -sys:
+    name: sys
+    desc: setup for user defined input, based on the table => column model
+    connection: ./models/* 
+    type: file.yaml
 
 ## this section specifies how to generate code for this project
 code:

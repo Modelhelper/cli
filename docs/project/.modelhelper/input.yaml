@@ -1,0 +1,28 @@
+# this file can be used to setup code generation, 
+# instead of using parameters in the cli
+# a file like this will enable column selection an be more targeted
+
+# eg mg generate -t templatename -e entityname -source lab
+version: 3.0
+
+template: templatename
+templates: [list, of, templates]
+templateGroup: templateGroupname
+templateGroups: [list, of, template, groups]
+
+source:
+  name: lab
+  entity: entityname
+  filter:
+      columns: [Id, Name]
+  entities: [list, of, entity]
+  entityGroup: entityGroupname
+  entityGroups: [list, of, entity, groups]
+
+showResult: true # prints the result
+
+export:
+  useKey: true
+
+options: 
+  -option_1: value_1
