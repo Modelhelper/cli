@@ -14,8 +14,8 @@ type CodeImportModel struct {
 	GlobalVariablePrefix  string
 	GlobalVariablePostfix string
 	CanInject             bool
-	Inject                []CodeInjectImportModel
-	Types                 []CodeTypeImportModel
+	Inject                map[string]CodeInjectImportModel
+	Types                 map[string]CodeTypeImportModel
 	Imports               []string
 	Language              string
 	// Locations             []CodeLocationImportModel

@@ -22,7 +22,9 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
+	"html/template"
+	"modelhelper/cli/types"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -30,15 +32,15 @@ import (
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:   "generate",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Generates code based on language, template and source",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("generate called")
+		entity := testTable()
+
+		c := testTemplate()
+		tpl := template.Must(template.New("poco").Parse(c))
+
+		tpl.Execute(os.Stdout, entity)
+
 	},
 }
 
@@ -54,4 +56,56 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// generateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func testTable() *types.EntityImportModel {
+	table := types.EntityImportModel{
+		Code: types.CodeImportModel{
+			Language: "cs",
+			Creator:  types.CreatorImportModel{CompanyName: "Patogen", DeveloperName: "Hans-Petter Eitvet"},
+			Types:    testTypes(),
+			Imports: []string{
+				"using Microsoft.Logging",
+				"using Microsoft.DependencyInjection",
+			},
+		},
+		Name: "TestTable",
+
+		NonIgnoredColumns: []types.EntityColumnImportModel{
+			{Name: "TestId", DataType: "string"},
+			{Name: "FirstName", DataType: "string"},
+			{Name: "LastName", DataType: "string"},
+		},
+	}
+
+	return &table
+}
+
+func testTemplate() string {
+	return `// code her - indent by SPACE not TAB
+{{- $model := index .Code.Types "model" }}
+using System;
+{{- range .Code.Imports }}
+{{.}}
+{{- end }}
+
+namespace {{ $model.NameSpace}}
+{	
+	
+	public class {{ .Name | Prefix | Pascal | Singular }}{{ $model.NamePrefix }}
+	{
+	{{- range .NonIgnoredColumns }}
+		public {{ .Name }} { get; set; }
+	{{- end }}    
+	}
+}
+	
+`
+}
+
+func testTypes() map[string]types.CodeTypeImportModel {
+	tl := make(map[string]types.CodeTypeImportModel)
+
+	tl["model"] = types.CodeTypeImportModel{NamePostfix: "Model", NameSpace: "Testing.Test.Test", NamePrefix: "Bla", Key: "key"}
+	return tl
 }

@@ -12,7 +12,7 @@ type Entity struct {
 	Alias       string
 	Description string
 	Columns     []EntityColumn
-	Relations   []EntityRelation
+
 	// Parents     []EntityRelation
 	// Children    []EntityRelation
 	Indexes []EntityIndex

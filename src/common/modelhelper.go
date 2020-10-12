@@ -1,4 +1,4 @@
-package modelhelper
+package common
 
 import (
 	"fmt"
