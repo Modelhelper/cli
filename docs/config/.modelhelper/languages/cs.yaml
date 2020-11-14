@@ -58,10 +58,22 @@ preferredPackages:
   -metrics: ["metrics"]
   -logging: ["logging"]
 
+casing:
+  -Default: Pascal
+  -Method: Pascal
+  -Variable: Camel
+  -Property: Pascal
 ## maps datatype to language type
 ## can be a mix of mssql, postgres, mysql etc
-datatypes: 
-  -string: string
+
+
+defaultDataTypes:
+  -strings: {notNull: string, Nullable: string, NullableAlternative: string}
+  -integers: {notNull: int, Nullable: int?, NullableAlternative: Nullable<int>}
+  -floats: {notNull: decimal, Nullable: decimal?, NullableAlternative: Nullable<decimal>}
+
+dataTypes: 
+  -string: {NotNull: string, Nullable: string, NullableAlternative: string}
   -bigint: Int64
   -binary: Byte[]
   -bit: bool

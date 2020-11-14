@@ -1,0 +1,23 @@
+pipelines:
+  Upper: UPPERCASING
+  Lower: lowercasing
+  Proper: Proper Casing
+  Camel: camelCasing
+  Pascal: PascalCasing
+  Snake: snake_casing
+  Kebab: kebab-casing
+  Singular: The singular form of the input text (Children => Child, Items => Item)
+  Plural: The plural form of the input text (Child => Children, Item => Items)
+  Abr: Abbreviates the set of words (PascalCasing => PC, Pascal Casing => PC)
+  Trim: Trims the text front and back
+  Date: Formats the date, accepts input like 'yyyy.MM.dd'
+  DataType: converts the input value to a datatype, argument = language to convert to
+  Sentence: Writes like a sentence
+  
+  Replace: two arguments
+  SubString: ""
+  Reverse: Reverses the input
+  # sample of pipe usage
+  # { .DataType | DataType 'go' } 'nvarchar' => string
+  # { .CreatedOn | Date 'yyyy.MM.dd' } '2020-10-22 09:58:44Z' => 2020.10.22
+  # { .Name | Snake | Upper } 'TestValue' = 'TEST_VALUE'
