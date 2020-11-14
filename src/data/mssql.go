@@ -16,3 +16,16 @@ func GetEntity(entityName string, db *sql.DB) (*types.Entity, error) {
 	fmt.Println(d)
 	return nil, nil
 }
+
+type MsSql struct{}
+
+func (server *MsSql) Connect(source string) (*sql.DB, error) {
+	return nil, nil
+}
+
+func (server *MsSql) Entity(name string) (*types.Entity, error) {
+	return nil, nil
+}
+func (server *MsSql) Entities(pattern string) (*[]types.Entity, error) {
+	return nil, nil
+}
