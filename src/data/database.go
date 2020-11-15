@@ -6,18 +6,19 @@ import (
 )
 
 type Database interface {
-	Connect(source string) (*sql.DB, error)
+	// Connect(source string) (*sql.DB, error)
+	CanConnect() (bool, error)
+	Entity(name string) (*Entity, error)
+	Entities(pattern string) (*[]Entity, error)
 
-	Entity(name string) (*types.Entity, error)
-	Entities(pattern string) (*[]types.Entity, error)
+	// Columns(entityName string) (*[]Column, error)
 
-	Columns(entityName string) (*[]types.EntityColumn, error)
+	// ParentRelations(entityName string) (*[]Relation, error)
+	// ChildRelations(entityName string) (*[]Relation, error)
 
-	ParentRelations(entityName string) (*[]types.EntityRelation, error)
-	ChildRelations(entityName string) (*[]types.EntityRelation, error)
-
-	Indexes(entityName string) (*[]types.EntityIndex, error)
+	// Indexes(entityName string) (*[]Index, error)
 }
 
-type Optimize interface {
+type DatabaseOptimizer interface {
+	RebuildIndexes()
 }
