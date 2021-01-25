@@ -1,0 +1,10 @@
+name: Entity
+type: table
+alias: e
+columns: [
+  {
+    name: name,
+    propertyName: propertyName,
+    dataType: varchar
+    }
+]

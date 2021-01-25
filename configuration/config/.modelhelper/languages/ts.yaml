@@ -1,0 +1,75 @@
+language: ts # must be the same as template e.g cs, go, java
+version: 3.0
+
+useNamespace: true
+canInject: true
+
+moduleLevelVariablePrefix: "_"
+
+defaultImports: [
+  "System;"
+]
+
+types:
+  -interface:
+    namePrefix: I
+  -repositoryInterface:
+    namePostfix: Repository
+    namePrefix: I
+  -models:
+    namePostfix: Model
+  -repository:   
+    namePostfix: Repository
+  -service:
+    namePostfix: "Service"
+  -controller:
+    namePostfix: "Controller"
+    
+inject:  
+  -logging:
+    name: ILogger<{{ .Name }}>
+    keys: [logging]
+    language: cs      
+    propertyName: logger
+    imports: [
+      "using Microsoft.Logging"
+    ]
+
+preferredPackages:
+  -mssql: ["Microsoft.Data"]
+  -postgres: ["<package>"]
+  -metrics: ["metrics"]
+  -logging: ["logging"]
+
+datatypes: 
+  -bigint: Int64
+  -binary: Byte[]
+  -bit: bool
+  -char: char
+  -date: DateTime
+  -datetime: DateTime
+  -datetime2: DateTime
+  -datetimeoffset: DateTime
+  -decimal: decimal
+  -float: decimal
+  -geography: string
+  -geometry: string
+  -image: string
+  -int: int
+  -money: decimal
+  -nchar: string
+  -ntext: string
+  -numeric: decimal
+  -nvarchar: string
+  -real: decimal
+  -smalldatetime: decimal
+  -smallint: decimal
+  -smallmoney: decimal
+  -text: string
+  -time: DateTime
+  -timestamp: string
+  -tinyint: number
+  -uniqueidentifier: Guid
+  -varbinary: Byte[]
+  -varchar: string
+  -xml: XElement

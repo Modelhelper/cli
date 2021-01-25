@@ -1,0 +1,63 @@
+configVersion: 3.0
+appVersion: 3.0
+
+templates:
+  shared:
+  global:
+    location: ./templates
+
+languages:
+  definitions: ./languages
+
+
+logging:
+  enabled: true
+
+defaultSource: lab
+
+sources:
+  -lab:
+    name: lab
+    connection: Data Source=patest01;Password=%**PWD_PATOLAB**%;User name=Test
+    schema: dbo
+    type: mssql
+    mapping: 
+      -IsActive:
+        Name: "IsActive"
+        isIgnored: true
+        trueValue: 1 | true | yes
+        falseValue: 0 | false | no
+        deletedMarker: true
+      -CreatedOn:
+        name: "CreatedOn"  
+        isIgnored: true        
+        isCreationDate: true    
+    groups:
+      -histology:
+        items: [
+          entity_1
+          entity_2
+          entity_3
+        ]
+
+        options:
+          -option_1: value_1
+
+defaults:
+  code:
+    -cs:
+      globalVariablePrefix: "_"          
+  types:
+    -interface:
+      key: "interface"   
+      namePostfix: Repository
+      namePrefix: I
+    -models:
+      key: "model"      
+      namePostfix: Model
+    -repository:   
+      key: "repository"   
+      namePostfix: Repository
+    -service:
+      key: "service"  
+      namePostfix: "Service"
