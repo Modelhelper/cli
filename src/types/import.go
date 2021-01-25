@@ -38,18 +38,18 @@ type CodeInjectImportModel struct {
 }
 
 type EntityImportModel struct {
-	Code               CodeImportModel
-	Options            map[string]string
-	Name               string
-	Schema             string
-	Type               string
-	RowCount           int
-	Created            string
-	Alias              string
-	Description        string
-	Columns            []EntityColumnImportModel
-	Parents            []EntityRelation
-	Children           []EntityRelation
+	Code        CodeImportModel
+	Options     map[string]string
+	Name        string
+	Schema      string
+	Type        string
+	RowCount    int
+	Created     string
+	Alias       string
+	Description string
+	Columns     []EntityColumnImportModel
+	// Parents            []EntityRelation
+	// Children           []EntityRelation
 	ModelName          string
 	ContextualName     string
 	NonIgnoredColumns  []EntityColumnImportModel

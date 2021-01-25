@@ -17,17 +17,20 @@ package cmd
 
 import (
 	"fmt"
+	"modelhelper/cli/app"
+	"modelhelper/cli/common"
 	modelhelper "modelhelper/cli/common"
 	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
 
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
+var mhConfig app.Config
+var source string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -89,6 +92,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVarP(&source, "source", "s", "", "Sets the source")
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
@@ -103,26 +107,65 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+
+	configPath := common.ConfigFolder()
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+
+	viper.AddConfigPath(configPath) // optionally look for config in the working directory
+	err := viper.ReadInConfig()     // Find and read the config file
+	if err != nil {                 // Handle errors reading the config file
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	}
+
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Config file not found; ignore error if desired
+		} else {
+			// Config file was found but another error was produced
 		}
-
-		// Search config in home directory with name ".cli" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".cli")
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	err = viper.Unmarshal(&mhConfig)
+	if err != nil {
+		// t.Fatalf("unable to decode into struct, %v", err)
 	}
+	// if cfgFile != "" {
+	// 	// Use config file from the flag.
+	// 	viper.SetConfigFile(cfgFile)
+	// } else {
+	// 	// Find home directory.
+	// 	home, err := homedir.Dir()
+	// 	if err != nil {
+	// 		fmt.Println(err)
+	// 		os.Exit(1)
+	// 	}
+
+	// 	// Search config in home directory with name ".cli" (without extension).
+	// 	viper.AddConfigPath(home)
+	// 	viper.SetConfigName(".cli")
+	// }
+
+	// viper.AutomaticEnv() // read in environment variables that match
+
+	// // If a config file is found, read it in.
+	// if err := viper.ReadInConfig(); err == nil {
+	// 	fmt.Println("Using config file:", viper.ConfigFileUsed())
+	// }
+
+	// defaultSource := mhConfig.DefaultSource
+
+	// if len(defaultSource) == 0 {
+	// 	if len(mhConfig.Sources) == 0 {
+	// 		defaultSource = ""
+	// 	} else {
+	// 		for _, s := range mhConfig.Sources {
+
+	// 			defaultSource = s.Name
+	// 			break
+	// 		}
+	// 	}
+
+	// }
+
 }

@@ -1,4 +1,4 @@
-package data
+package input
 
 // Entity represents an object in the relational database. Either a Table or a view
 type Entity struct {

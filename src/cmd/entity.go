@@ -23,35 +23,69 @@ package cmd
 
 import (
 	"fmt"
+	"modelhelper/cli/input"
+	table "modelhelper/cli/ui"
 
+	_ "github.com/gookit/color"
 	"github.com/spf13/cobra"
 )
 
 // entityCmd represents the entity command
 var entityCmd = &cobra.Command{
-	Use:   "entity",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:     "entity",
+	Aliases: []string{"e"},
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("entity called")
+		src := source
+
+		if len(source) == 0 {
+			src = getSourceName()
+		}
+
+		input := input.GetSource(src, mhConfig)
+
+		e, err := input.Entity("dbo.[Order]")
+		if err != nil {
+
+		}
+		fmt.Println(src, e.Name, e.Type, e.Schema, e.Description)
+		// sss := c.Green.String()
+		// fmt.Println(sss)
+		// headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+		// columnFmt := color.New(color.FgYellow).SprintfFunc()
+
+		tbl := table.New("Name", "Type", "Description")
+		//tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+
+		for _, c := range e.Columns {
+			tbl.AddRow(c.Name, c.DataType, c.Description)
+		}
+
+		tbl.Print()
+
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(entityCmd)
+}
 
-	// Here you will define your flags and configuration settings.
+func getSourceName() string {
+	defaultSource := mhConfig.DefaultSource
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// entityCmd.PersistentFlags().String("foo", "", "A help for foo")
+	if len(defaultSource) == 0 {
+		if len(mhConfig.Sources) == 0 {
+			defaultSource = ""
+		} else {
+			for _, s := range mhConfig.Sources {
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// entityCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+				defaultSource = s.Name
+				break
+			}
+		}
+
+	}
+
+	return defaultSource
 }
