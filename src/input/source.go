@@ -25,8 +25,11 @@ type DatabaseOptimizer interface {
 func GetSource(name string, config app.Config) Source {
 	s := config.Sources[name]
 
-	var m Source
+	if name == "demo" {
+		return &DemoInput{}
+	}
 
+	var m Source
 	switch s.Type {
 	case "mssql":
 		m = &MsSql{Source: s}

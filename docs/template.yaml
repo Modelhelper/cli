@@ -20,7 +20,7 @@ scope: project | global
 
 # target version for init: 3.1
 # mandatory, default: file 
-type: init | file | snippet  
+type: init | file | snippet | package
 
 # optional
 description: |

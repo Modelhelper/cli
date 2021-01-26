@@ -36,7 +36,7 @@ var entityCmd = &cobra.Command{
 	Aliases: []string{"e"},
 
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("entity called")
+		// fmt.Println("entity called")
 		src := source
 
 		if len(source) == 0 {
@@ -45,24 +45,41 @@ var entityCmd = &cobra.Command{
 
 		input := input.GetSource(src, mhConfig)
 
-		e, err := input.Entity("dbo.[Order]")
-		if err != nil {
+		if len(args) > 0 {
+			en := args[0]
+			e, err := input.Entity(en)
+			if err != nil {
 
+			}
+
+			if e == nil {
+				fmt.Println("The entity could not be found")
+			}
+
+			fmt.Println(src, e.Name, e.Type, e.Schema, e.Description)
+			// sss := c.Green.String()
+			// fmt.Println(sss)
+			// headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+			// columnFmt := color.New(color.FgYellow).SprintfFunc()
+
+			tbl := table.New("Name", "Type", "Description")
+			//tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+
+			for _, c := range e.Columns {
+				tbl.AddRow(c.Name, c.DataType, c.Description)
+			}
+
+			tbl.Print()
+		} else {
+			ents, _ := input.Entities("")
+			tbl := table.New("Name", "Type", "Description")
+			//tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+
+			for _, c := range *ents {
+				tbl.AddRow(c.Name, c.Schema, c.Description)
+			}
+			tbl.Print()
 		}
-		fmt.Println(src, e.Name, e.Type, e.Schema, e.Description)
-		// sss := c.Green.String()
-		// fmt.Println(sss)
-		// headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
-		// columnFmt := color.New(color.FgYellow).SprintfFunc()
-
-		tbl := table.New("Name", "Type", "Description")
-		//tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
-
-		for _, c := range e.Columns {
-			tbl.AddRow(c.Name, c.DataType, c.Description)
-		}
-
-		tbl.Print()
 
 	},
 }

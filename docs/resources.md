@@ -14,3 +14,5 @@ https://pkg.go.dev/golang.org/x/text/feature/plural
 Hent inn pluralize- filen i prosjektet (+ testene)
 
 Må finne ut av denne: https://pkg.go.dev/mod/golang.org/x/text?tab=overview
+
+StripPrefix
