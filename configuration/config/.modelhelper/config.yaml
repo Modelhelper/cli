@@ -13,14 +13,30 @@ languages:
 logging:
   enabled: true
 
-defaultSource: lab
-
-sources:
-  -lab:
-    name: lab
-    connection: Data Source=patest01;Password=%**PWD_PATOLAB**%;User name=Test
-    schema: dbo
+defaultConnection: patest01
+connections: 
+  -patest01:
     type: mssql
+    connectionString: Data Source=patest01;Password=%**PWD_PATOLAB**%;User name=Test
+    connection:
+      userId: test
+      pwd: "%**PWD_PATOLAB**%"
+      datasource: patest01
+      port: 1243
+
+defaultSource: patolab
+sources:
+  -patolab:
+    connection: lab
+    connectionString: lab
+    name: patolab_test
+    # connection: Data Source=patest01;Password=%**PWD_PATOLAB**%;User name=Test
+    schema: dbo
+    schemas: [
+      dbo
+      owner
+    ]
+    type: database
     mapping: 
       -IsActive:
         Name: "IsActive"
