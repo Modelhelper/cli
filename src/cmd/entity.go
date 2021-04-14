@@ -30,6 +30,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var skipDescription bool
+
 // entityCmd represents the entity command
 var entityCmd = &cobra.Command{
 	Use:     "entity",
@@ -56,28 +58,55 @@ var entityCmd = &cobra.Command{
 				fmt.Println("The entity could not be found")
 			}
 
-			fmt.Println(src, e.Name, e.Type, e.Schema, e.Description)
+			var tbl table.Table
+			if skipDescription {
+				tbl = table.New("Name", "Type")
+
+				for _, c := range e.Columns {
+					tbl.AddRow(c.Name, c.DataType)
+				}
+
+			} else {
+				tbl = table.New("Name", "Type", "Description")
+
+				for _, c := range e.Columns {
+					tbl.AddRow(c.Name, c.DataType, c.Description)
+				}
+
+				// fmt.Println(src, e.Name, e.Type, e.Schema, e.Description)
+			}
+
 			// sss := c.Green.String()
 			// fmt.Println(sss)
 			// headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
 			// columnFmt := color.New(color.FgYellow).SprintfFunc()
 
-			tbl := table.New("Name", "Type", "Description")
 			//tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
-
-			for _, c := range e.Columns {
-				tbl.AddRow(c.Name, c.DataType, c.Description)
-			}
 
 			tbl.Print()
 		} else {
 			ents, _ := input.Entities("")
-			tbl := table.New("Name", "Type", "Description")
+
+			if ents == nil {
+				return
+			}
+
+			var tbl table.Table
+
+			if skipDescription {
+				tbl = table.New("Name", "Schema", "Alias", "Rows")
+				for _, c := range *ents {
+					tbl.AddRow(c.Name, c.Schema, c.Alias, c.RowCount)
+				}
+			} else {
+				tbl = table.New("Name", "Schema", "Alias", "Rows", "Description")
+				for _, c := range *ents {
+					tbl.AddRow(c.Name, c.Schema, c.Alias, c.RowCount, c.Description)
+				}
+
+			}
 			//tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
-			for _, c := range *ents {
-				tbl.AddRow(c.Name, c.Schema, c.Description)
-			}
 			tbl.Print()
 		}
 
@@ -86,6 +115,8 @@ var entityCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(entityCmd)
+
+	entityCmd.Flags().BoolVarP(&skipDescription, "skip-description", "", false, "Does not show description")
 }
 
 func getSourceName() string {
