@@ -44,7 +44,77 @@ func (server *MsSql) Entity(name string) (*Entity, error) {
 	return e, nil
 }
 func (server *MsSql) Entities(pattern string) (*[]Entity, error) {
-	return nil, nil
+	sql := `
+	with rowcnt (object_id, rowcnt) as (
+		SELECT p.object_id, SUM(CASE WHEN (p.index_id < 2) AND (a.type = 1) THEN p.rows ELSE 0 END) 
+		FROM sys.partitions p 
+		INNER JOIN sys.allocation_units a ON p.partition_id = a.container_id
+		join sys.objects o on p.object_id = o.object_id and o.type = 'U'
+		--where p.object_id = object_id('Add')
+		group by p.object_id
+		)
+		select 
+			o.name
+			,type = CASE when o.type = 'U' then 'Table' when o.type = 'V' then 'View' end  
+			,[Schema] = s.name
+			, Alias = Left(o.name, 1)
+			, [RowCount] = isnull(rc.RowCnt, 0)
+			, Description = isnull(ep.value, '')
+		from sys.objects o
+		join sys.schemas s on s.schema_id = o.schema_id
+		left join rowcnt rc on rc.object_id = o.object_id    
+		left join sys.extended_properties ep on o.object_id = ep.major_id and minor_id = 0 and ep.name = 'MS_description'
+		where o.name not in ('sysdiagrams') 
+		and [type] in ('V', 'U')
+		order by s.name, o.[type], o.name		
+	`
+
+	// --and type in {entityFilter}
+	// {tableFilter}
+	db, err := server.openConnection()
+	if err != nil {
+		return nil, err
+	}
+
+	defer db.Close()
+	ctx := context.Background()
+
+	stmt, err := db.PrepareContext(ctx, sql)
+
+	if err != nil {
+		return nil, err
+	}
+	// Execute query
+	rows, err := stmt.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	list := []Entity{}
+
+	var e Entity
+
+	for rows.Next() {
+
+		if err := rows.Scan(
+			&e.Name,
+			&e.Type,
+			&e.Schema,
+			&e.Alias,
+			&e.RowCount,
+			&e.Description,
+		); err != nil {
+			return nil, err
+		} else {
+			list = append(list, e)
+
+		}
+
+	}
+	// fmt.Println(sql)
+	return &list, nil
 }
 
 func (server *MsSql) getEntity(entityName string) (*Entity, error) {
@@ -225,8 +295,10 @@ func (server *MsSql) getColumns(schema string, entityName string) (*[]Column, er
 
 func (server *MsSql) openConnection() (*sql.DB, error) {
 
+	cs := server.Source.ConnectionString
+	// fmt.Println("Connect with: " + cs)
 	// var err error
-	db, err := sql.Open("sqlserver", server.Source.Connection)
+	db, err := sql.Open("sqlserver", cs)
 	if err != nil {
 		log.Fatal("Error creating connection pool: ", err.Error())
 	}
