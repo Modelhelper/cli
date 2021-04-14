@@ -22,9 +22,9 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"html/template"
+	"fmt"
+	tpl "modelhelper/cli/tpl"
 	"modelhelper/cli/types"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -36,26 +36,26 @@ var generateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		entity := testTable()
 
-		c := testTemplate()
-		tpl := template.Must(template.New("poco").Parse(c))
+		tt := oneMoreTest()
 
-		tpl.Execute(os.Stdout, entity)
+		cnt, err := tt.Generate(entity)
+
+		if err != nil {
+
+		}
+
+		fmt.Println(cnt)
+
+		// c := testTemplate()
+		// tpl := template.Must(template.New("poco").Parse(c))
+
+		// tpl.Execute(os.Stdout, entity)
 
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(generateCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// generateCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// generateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 func testTable() *types.EntityImportModel {
@@ -81,25 +81,23 @@ func testTable() *types.EntityImportModel {
 	return &table
 }
 
+func oneMoreTest() *tpl.Template {
+	t := tpl.Template{}
+
+	t.Language = "poco"
+	t.Body = testTemplate()
+
+	return &t
+}
+
 func testTemplate() string {
-	return `// code her - indent by SPACE not TAB
+	return `
+// code her - indent by SPACE not TAB
 {{- $model := index .Code.Types "model" }}
 using System;
 {{- range .Code.Imports }}
 {{.}}
 {{- end }}
-
-namespace {{ $model.NameSpace}}
-{	
-	
-	public class {{ .Name | Prefix | Pascal | Singular }}{{ $model.NamePrefix }}
-	{
-	{{- range .NonIgnoredColumns }}
-		public {{ .Name }} { get; set; }
-	{{- end }}    
-	}
-}
-	
 `
 }
 

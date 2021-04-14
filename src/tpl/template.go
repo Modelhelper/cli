@@ -1,4 +1,9 @@
-package types
+package tpl
+
+import (
+	"bytes"
+	"text/template"
+)
 
 type TemplateScope string
 
@@ -8,6 +13,7 @@ const (
 )
 
 type Template struct {
+	Name            string
 	Version         string
 	InjectKey       string
 	Language        string
@@ -39,3 +45,18 @@ var (
 		"init":    TemplateType{Name: "init", IsSnippet: false, CanExport: false},
 	}
 )
+
+type Generator interface {
+	Generate(model interface{}) (string, error)
+}
+
+func (t *Template) Generate(model interface{}) (string, error) {
+
+	tpl := template.Must(template.New(t.Language).Parse(t.Body))
+	buf := new(bytes.Buffer)
+
+	// buf.String() // returns a string of what was written to it
+	tpl.Execute(buf, model)
+
+	return buf.String(), nil
+}
