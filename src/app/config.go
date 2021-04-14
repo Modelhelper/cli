@@ -12,8 +12,8 @@ type Config struct {
 }
 
 type ConfigSource struct {
-	Name       string
-	Connection string
-	Schema     string
-	Type       string
+	Name             string
+	ConnectionString string
+	Schema           string
+	Type             string
 }
