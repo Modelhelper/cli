@@ -30,7 +30,7 @@ import (
 // infoCmd represents the info command
 var infoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "A brief description of your command",
+	Short: "<not implemented>",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -43,7 +43,7 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	rootCmd.AddCommand(infoCmd)
+	//rootCmd.AddCommand(infoCmd)
 
 	// Here you will define your flags and configuration settings.
 

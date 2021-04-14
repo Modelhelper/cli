@@ -30,7 +30,7 @@ import (
 // projectCmd represents the project command
 var projectCmd = &cobra.Command{
 	Use:   "project",
-	Short: "A brief description of your command",
+	Short: "<not implemented>",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -43,7 +43,7 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	rootCmd.AddCommand(projectCmd)
+	//rootCmd.AddCommand(projectCmd)
 
 	// Here you will define your flags and configuration settings.
 

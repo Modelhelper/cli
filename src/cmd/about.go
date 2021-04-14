@@ -23,6 +23,9 @@ package cmd
 
 import (
 	"fmt"
+	"modelhelper/cli/app"
+
+	"github.com/gookit/color"
 
 	"github.com/spf13/cobra"
 )
@@ -30,28 +33,18 @@ import (
 // aboutCmd represents the about command
 var aboutCmd = &cobra.Command{
 	Use:   "about",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "<not implemented>",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("about")
+		printLogoInfo()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(aboutCmd)
+}
 
-	// Here you will define your flags and configuration settings.
+func printLogoInfo() {
+	color.Green.Print(app.Logo())
+	fmt.Println(app.Info())
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// aboutCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// aboutCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

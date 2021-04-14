@@ -30,7 +30,7 @@ import (
 // databaseCmd represents the database command
 var databaseCmd = &cobra.Command{
 	Use:   "database",
-	Short: "A brief description of your command",
+	Short: "<not implemented>",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -44,7 +44,7 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	rootCmd.AddCommand(databaseCmd)
+	//rootCmd.AddCommand(databaseCmd)
 
 	// Here you will define your flags and configuration settings.
 

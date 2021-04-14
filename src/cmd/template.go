@@ -30,7 +30,7 @@ import (
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{
 	Use:   "template",
-	Short: "A brief description of your command",
+	Short: "<not implemented>",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
