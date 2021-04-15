@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 Hans-Petter Eitvet
+Copyright © 2021 Hans-Petter Eitvet
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,16 +23,14 @@ package cmd
 
 import (
 	"fmt"
-	"modelhelper/cli/app"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-// configCmd represents the config command
-var configCmd = &cobra.Command{
-	Use:   "config",
-	Short: "<not implemented>",
+// configSourceCmd represents the configSource command
+var configSourceCmd = &cobra.Command{
+	Use:   "source",
+	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -40,47 +38,20 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(mhConfig.AppVersion)
-		fmt.Println(mhConfig.ConfigVersion)
-		fmt.Println(mhConfig.Languages.Definitions)
-		fmt.Println(mhConfig.Templates.Location)
-
-		for _, source := range mhConfig.Sources {
-			fmt.Println(source.Name)
-
-			for _, opt := range source.Options {
-				fmt.Println(opt)
-			}
-
-			for _, grp := range source.Groups {
-				for _, itm := range grp.Items {
-
-					fmt.Println(itm)
-				}
-			}
-		}
-
-		is := []string{"test_1", "test_2", "test_3"}
-		g := app.ConfigSourceGroup{
-			Items: is,
-		}
-
-		gg := make(map[string]app.ConfigSourceGroup)
-		gg["basic"] = g
-
-		s := app.ConfigSource{
-			Name:   "testing",
-			Schema: "dbo",
-			Groups: gg,
-		}
-		mhConfig.Sources["testing"] = s
-
-		viper.Set("AppVersion", 3)
-		viper.Set("Sources", mhConfig.Sources)
-		viper.WriteConfig()
+		fmt.Println("configSource called")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(configCmd)
+	configCmd.AddCommand(configSourceCmd)
+
+	// Here you will define your flags and configuration settings.
+
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	// configSourceCmd.PersistentFlags().String("foo", "", "A help for foo")
+
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	// configSourceCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
