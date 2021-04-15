@@ -41,7 +41,7 @@ var generateCmd = &cobra.Command{
 		cnt, err := tt.Generate(entity)
 
 		if err != nil {
-
+			fmt.Println(err)
 		}
 
 		fmt.Println(cnt)
@@ -84,7 +84,7 @@ func testTable() *types.EntityImportModel {
 func oneMoreTest() *tpl.Template {
 	t := tpl.Template{}
 
-	t.Language = "poco"
+	t.Name = "poco"
 	t.Body = testTemplate()
 
 	return &t
@@ -98,9 +98,36 @@ using System;
 {{- range .Code.Imports }}
 {{.}}
 {{- end }}
+
+//namespace from block
+namespace {{ template "namespace" $model }} {
+	public class {{ template "classname" . }} {
+		
+	}
+}
+
+//namespace from template
+namespace {{ $model.NameSpace }} 
+{	
+	
+	public class {{ .Name }}{{ $model.NamePostfix}} 
+	{
+
+	}
+}
+
+{{.}}
 `
 }
 
+/*
+
+//namespace from block
+namespace {{ template "block1" $model }} {
+
+}
+
+*/
 func testTypes() map[string]types.CodeTypeImportModel {
 	tl := make(map[string]types.CodeTypeImportModel)
 
