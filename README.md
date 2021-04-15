@@ -1,6 +1,11 @@
 # ModelHelper cli
 
-ModelHelper CLI is a code generator using go text/templates and input sources from database structure.
+ModelHelper CLI is a developer tool written in Go.
+
+ModelHelper can help with:
+
+- Understand structure of a database
+- Generate code using templates and input sources from a database.
 
 ## Contributing
 
