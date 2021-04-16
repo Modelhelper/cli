@@ -8,6 +8,8 @@ import (
 	// "github.com/spf13/viper"
 )
 
+var AppConfig string = "Something"
+
 func main() {
 
 	rootExists := common.ConfigFolderExists()

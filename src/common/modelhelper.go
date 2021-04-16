@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"modelhelper/cli/defaults"
 	"os"
+	"path/filepath"
 )
 
 //ConfigFolder returns the root path of ModelHelper
@@ -15,6 +16,15 @@ func ConfigFolder() string {
 
 	return fmt.Sprintf("%s/.modelhelper", homeDir)
 
+}
+
+func TemplateFolder(templateLocation string) string {
+	var tl = ""
+	if len(templateLocation) > 2 && templateLocation[0] == '.' {
+		tl = filepath.Join(ConfigFolder(), templateLocation[2:])
+	}
+
+	return tl
 }
 
 // ConfigFolderExists checks if the config folder exists

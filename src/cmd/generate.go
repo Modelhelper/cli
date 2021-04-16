@@ -23,7 +23,9 @@ package cmd
 
 import (
 	"fmt"
-	tpl "modelhelper/cli/tpl"
+
+	"modelhelper/cli/common"
+	"modelhelper/cli/tpl"
 	"modelhelper/cli/types"
 
 	"github.com/spf13/cobra"
@@ -34,24 +36,45 @@ var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generates code based on language, template and source",
 	Run: func(cmd *cobra.Command, args []string) {
-		entity := testTable()
 
-		tt := oneMoreTest()
+		// start := time.Now()
 
-		cnt, err := tt.Generate(entity)
-
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		fmt.Println(cnt)
+		// //generateTestT()
+		// duration := time.Since(start)
+		// fmt.Printf("\nIt took %vms to generate this code. You saved around 2 hours not typing it youreself", duration.Milliseconds())
 
 		// c := testTemplate()
 		// tpl := template.Must(template.New("poco").Parse(c))
+		tl := tpl.TemplateLoader{
+			Directory: common.TemplateFolder(mhConfig.Templates.Location),
+		}
 
+		// ttt, _ := tl.LoadTemplates("", "")
+		// if ttt != nil {
+
+		// 	fmt.Println(ttt)
+		// }
+
+		tt, _ := tl.LoadTemplate("cs-blocks-poco")
+		fmt.Println(tt.Name, tt.Version, tt.Body)
 		// tpl.Execute(os.Stdout, entity)
 
 	},
+}
+
+func generateTestT() {
+	entity := testTable()
+
+	tt := oneMoreTest()
+
+	cnt, err := tt.Generate(entity)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(cnt)
+
 }
 
 func init() {
@@ -102,7 +125,7 @@ using System;
 //namespace from block
 namespace {{ template "namespace" $model }} {
 	public class {{ template "classname" . }} {
-		
+
 	}
 }
 
