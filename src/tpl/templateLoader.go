@@ -41,20 +41,21 @@ func (l *TemplateLoader) LoadTemplate(name string) (*Template, error) {
 	files := loadTemplateFiles(l.Directory, "*")
 
 	var f = files[name]
-	var t Template
+	// var t Template
 
 	if len(f) > 0 {
 		t, err := loadTemplateFromFile(f)
-
+		t.Name = name
 		if err != nil {
 			log.Fatalf("cannot load file: %v", err)
 			return nil, err
 		}
 
-		t.Name = name
+		// t.Name = name
+		return t, nil
 	}
 
-	return &t, nil
+	return nil, nil
 }
 
 func loadTemplateFromFile(fileName string) (*Template, error) {
@@ -66,7 +67,7 @@ func loadTemplateFromFile(fileName string) (*Template, error) {
 		return nil, e
 	}
 
-	err := yaml.Unmarshal(dat, t)
+	err := yaml.Unmarshal(dat, &t)
 	if err != nil {
 		log.Fatalf("cannot unmarshal data: %v", err)
 		return nil, err
