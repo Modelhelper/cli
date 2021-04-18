@@ -1,9 +1,10 @@
 package input
 
-import (
-	"modelhelper/cli/app"
-)
+import "modelhelper/cli/config"
 
+type LanguageDef struct {
+	Definitions string
+}
 type Source interface {
 	// Connect(source string) (*sql.DB, error)
 	// CanConnect() (bool, error)
@@ -22,7 +23,7 @@ type DatabaseOptimizer interface {
 	RebuildIndexes()
 }
 
-func GetSource(name string, config app.Config) Source {
+func GetSource(name string, config config.Config) Source {
 	s := config.Sources[name]
 
 	if name == "demo" {

@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"modelhelper/cli/config"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,6 +11,10 @@ import (
 
 	"github.com/spf13/cobra"
 )
+
+type Initializer interface {
+	Initialize() error
+}
 
 // Version shows the current application version
 var Version = "3.0.0"
@@ -167,3 +172,42 @@ func UsageInfo() string {
   'mh [command] [subcommand] [args] [flags]'
   `
 }
+
+func TemplateFolder(templateLocation string) string {
+	var tl = ""
+	if len(templateLocation) > 2 && templateLocation[0] == '.' {
+		tl = filepath.Join(config.Location(), templateLocation[2:])
+	}
+
+	return tl
+}
+
+func Initialize(initializer Initializer) error {
+	err := initializer.Initialize()
+	return err
+}
+
+// func InitializeConfiguration() {
+// 	// ConfigFolder Does not exists..
+// 	rootFolder := ConfigFolder()
+
+// 	fmt.Println("Initializing the ModelHelper configuration")
+
+// 	err := os.Mkdir(rootFolder, os.ModeDir)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	f, err := os.Create(rootFolder + "/config.yaml")
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	defer f.Close()
+
+// 	cfg := config.New()
+// 	fmt.Println(cfg)
+// 	_, err = f.WriteString("cfg")
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// }

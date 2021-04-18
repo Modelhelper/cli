@@ -24,7 +24,7 @@ package cmd
 import (
 	"fmt"
 
-	"modelhelper/cli/common"
+	"modelhelper/cli/app"
 	"modelhelper/cli/tpl"
 	"modelhelper/cli/types"
 
@@ -46,7 +46,7 @@ var generateCmd = &cobra.Command{
 		// c := testTemplate()
 		// tpl := template.Must(template.New("poco").Parse(c))
 		tl := tpl.TemplateLoader{
-			Directory: common.TemplateFolder(mhConfig.Templates.Location),
+			Directory: app.TemplateFolder(mhConfig.Templates.Location),
 		}
 
 		// ttt, _ := tl.LoadTemplates("", "")

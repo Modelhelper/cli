@@ -23,7 +23,7 @@ package cmd
 
 import (
 	"fmt"
-	"modelhelper/cli/app"
+	"modelhelper/cli/config"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -61,14 +61,14 @@ to quickly create a Cobra application.`,
 		}
 
 		is := []string{"test_1", "test_2", "test_3"}
-		g := app.ConfigSourceGroup{
+		g := config.SourceGroup{
 			Items: is,
 		}
 
-		gg := make(map[string]app.ConfigSourceGroup)
+		gg := make(map[string]config.SourceGroup)
 		gg["basic"] = g
 
-		s := app.ConfigSource{
+		s := config.Source{
 			Name:   "testing",
 			Schema: "dbo",
 			Groups: gg,

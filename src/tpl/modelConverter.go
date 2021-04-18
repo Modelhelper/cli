@@ -1,9 +1,6 @@
 package tpl
 
-import (
-	"modelhelper/cli/types"
-)
-
+// obsolete
 type ModelConverter interface {
-	ToDataModel() (types.EntityImportModel, error)
+	Convert() (*interface{}, error)
 }

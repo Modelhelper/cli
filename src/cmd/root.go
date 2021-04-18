@@ -17,9 +17,7 @@ package cmd
 
 import (
 	"fmt"
-	"modelhelper/cli/app"
-	"modelhelper/cli/common"
-	modelhelper "modelhelper/cli/common"
+	"modelhelper/cli/config"
 	"os"
 	"path/filepath"
 
@@ -29,7 +27,7 @@ import (
 )
 
 var cfgFile string
-var mhConfig app.Config
+var mhConfig config.Config
 var source string
 
 // rootCmd represents the base command when called without any subcommands
@@ -46,7 +44,7 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 
-		rootExists := modelhelper.ConfigFolderExists()
+		rootExists := config.LocationExists()
 
 		if rootExists == false {
 			ex, err := os.Executable()
@@ -108,7 +106,7 @@ func init() {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 
-	configPath := common.ConfigFolder()
+	configPath := config.Location()
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 

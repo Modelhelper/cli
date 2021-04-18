@@ -1,5 +1,6 @@
 package tpl
 
+// obsolete
 type TemplateExporter interface {
-	Export() (interface{}, error)
+	Export(b []byte) error
 }

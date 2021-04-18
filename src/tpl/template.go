@@ -7,6 +7,7 @@ const (
 	ProjectScope               = "project"
 )
 
+// obsolete
 type LoadHandler interface {
 	LoadBlock(path string, pattern string) (*[]Template, error)
 	LoadSnippets(path string, pattern string) (*[]Template, error)
@@ -14,6 +15,7 @@ type LoadHandler interface {
 	LoadTemplate(name string) (*Template, error)
 }
 
+// obsolete
 type Generator interface {
 	Generate(model interface{}) (string, error)
 }

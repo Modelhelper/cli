@@ -4,13 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"log"
-	"modelhelper/cli/app"
+	"modelhelper/cli/source"
 
 	_ "github.com/denisenkom/go-mssqldb"
 )
 
 type MsSql struct {
-	Source app.ConfigSource
+	Source source.Source
 }
 
 // type Database interface {

@@ -3,8 +3,9 @@ package main
 import (
 	// "fmt"
 
+	"modelhelper/cli/app"
 	"modelhelper/cli/cmd"
-	"modelhelper/cli/common"
+	"modelhelper/cli/config"
 	// "github.com/spf13/viper"
 )
 
@@ -12,10 +13,17 @@ var AppConfig string = "Something"
 
 func main() {
 
-	rootExists := common.ConfigFolderExists()
+	rootExists := config.LocationExists()
 
 	if rootExists == false {
-		common.InitializeConfiguration()
+		cfg := config.New()
+
+		// initialize config
+		err := app.Initialize(cfg)
+
+		if err != nil {
+			panic(err)
+		}
 	} else {
 		// configPath := common.ConfigFolder()
 		// viper.SetConfigName("config")
