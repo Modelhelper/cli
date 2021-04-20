@@ -20,7 +20,7 @@ scope: project | global
 
 # target version for init: 3.1
 # mandatory, default: file 
-type: init | file | snippet | package
+type: init | file | snippet | package | block
 
 # optional
 description: |
@@ -53,8 +53,8 @@ import: table # values entity | database | project | options | template | none |
 # optional if ExportType = none
 exportFileName: file_to_export
 
-    # optional (former ExportType). A key cannot contain .
-locationKey: api.interface 
+    # optional (former ExportType). A key cannot contain . (dot)
+locationKey: api-interface 
     
 
 # target version 3.1

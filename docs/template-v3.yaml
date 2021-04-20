@@ -1,0 +1,26 @@
+Key: api.interface # former ExportType
+Version: 3
+Language: cs # mandatory field. connects with correct language definition
+Description: |
+    Long description if needed. Will show when 'mh template <template>'
+
+# Should show then the user enter
+# mh template
+ShortDescription: This should be short an consice
+Tags: [tag1, tag2, tag3]
+Groups: [group1, group2, group3]
+
+# If false the user do not need to input an entity to generate content
+EntityIsMandatory: true
+
+CanExport: true
+ExportFileName: file-to-export {{fileName}}
+
+# use for snippets only. If one need to insert som code
+# the InsertIdentifier should be found in the code file
+IsInsertableSnippet: true,
+InsertIdentifier: // MH-TRANSIENT-PLACEHOLDER,
+
+# the body of the template
+Body: |
+    This is the template body

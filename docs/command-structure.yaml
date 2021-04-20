@@ -14,15 +14,11 @@ commands:
     template: creates a new template
   
   entity: root command for all related to entities in a database    
-  
-  # target 3.4
-  source: root command for things related to input sources (can be entity, graphql, rest, proto)
 
   # target 3.4
+  source: root command for things related to input sources (can be entity, graphql, rest, proto)
   graphql: root command for all related to graphql api
-  # target 3.4
   rest: root command for all related to rest api
-  # target 3.4
   proto: root command for all related to proto files
   database: 
     optimize: tools to optimize an entity or run rules against the database or entity 
@@ -45,6 +41,7 @@ commands:
       get:
       remove:
       list:
+  
   # target 3.3
   serve: 
     desc: serves a webserver located at localhost port 4500 (port is specified in config file). Opens a web
