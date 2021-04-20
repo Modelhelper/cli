@@ -9,20 +9,20 @@ import (
 type Config struct {
 
 	// ConfigVersion gets the version that this configuration file is using.
-	ConfigVersion string
-	AppVersion    string
-	Sources       map[string]source.Source //[]Source
-	DefaultSource string
+	ConfigVersion string                   `json:"configVersion"`
+	AppVersion    string                   `json:"appVersion"`
+	Sources       map[string]source.Source `json:"sources"`
+	DefaultSource string                   `json:"defaultSource"`
 
 	Templates struct {
-		Location string
-	}
+		Location string `json:"configVersion"`
+	} `json:"templates"`
 	Languages struct {
-		Definitions string
-	}
+		Definitions string `json:"definitions"`
+	} `json:"languages"`
 	Logging struct {
-		Enabled bool
-	}
+		Enabled bool `json:"enabled"`
+	} `json:"logging"`
 }
 
 type LanguageDef struct {
