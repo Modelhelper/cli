@@ -23,8 +23,10 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"modelhelper/cli/app"
+	"modelhelper/cli/input"
 	"modelhelper/cli/tpl"
 	"modelhelper/cli/types"
 
@@ -35,50 +37,88 @@ import (
 var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generates code based on language, template and source",
+
 	Run: func(cmd *cobra.Command, args []string) {
 
-		// start := time.Now()
+		charCount := 0
 
-		// //generateTestT()
-		// duration := time.Since(start)
-		// fmt.Printf("\nIt took %vms to generate this code. You saved around 2 hours not typing it youreself", duration.Milliseconds())
-
-		// c := testTemplate()
-		// tpl := template.Must(template.New("poco").Parse(c))
-		tl := tpl.TemplateLoader{
-			Directory: app.TemplateFolder(mhConfig.Templates.Location),
+		codeOnly, _ := cmd.Flags().GetBool("code-only")
+		isDemo, _ := cmd.Flags().GetBool("demo")
+		entities, _ := cmd.Flags().GetStringArray("entity")
+		if isDemo == false && len(entities) == 0 {
+			return
 		}
 
-		// ttt, _ := tl.LoadTemplates("", "")
-		// if ttt != nil {
+		templates, err := cmd.Flags().GetStringArray("template")
 
-		// 	fmt.Println(ttt)
-		// }
+		if err != nil {
+			panic(err)
+		}
 
-		tt, _ := tl.LoadTemplate("cs-blocks-poco")
-		fmt.Println(tt.Name, tt.Version, tt.Body)
-		// tpl.Execute(os.Stdout, entity)
+		printScreen, _ := cmd.Flags().GetBool("screen")
+		start := time.Now()
 
+		var generatedCode []string
+		if len(templates) > 0 {
+
+			tl := tpl.TemplateLoader{
+				Directory: app.TemplateFolder(mhConfig.Templates.Location),
+			}
+
+			for _, tname := range templates {
+				tt, _ := tl.LoadTemplate(tname)
+
+				if tt != nil {
+					// var m = types.EntityImportModel{}
+
+					if isDemo {
+						o, _ := tt.Generate(testTable())
+
+						generatedCode = append(generatedCode, o)
+
+					} else {
+
+						for _, entity := range entities {
+							fmt.Println(entity)
+							o, _ := tt.Generate(testTable())
+							generatedCode = append(generatedCode, o)
+						}
+					}
+
+				}
+
+			}
+
+			if printScreen && len(generatedCode) > 0 {
+				screenWriter := tpl.ScreenExporter{}
+				for _, s := range generatedCode {
+					charCount += len(s)
+					screenWriter.Export([]byte(s))
+				}
+			}
+
+		}
+
+		duration := time.Since(start)
+
+		if !codeOnly {
+			con := 1.2
+			min := float64(charCount) * con / 60
+			fmt.Printf("\nIt took %vms to generate this code. You saved around %v minutes not typing it youreself", duration.Milliseconds(), min)
+		}
 	},
-}
-
-func generateTestT() {
-	entity := testTable()
-
-	tt := oneMoreTest()
-
-	cnt, err := tt.Generate(entity)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println(cnt)
-
 }
 
 func init() {
 	rootCmd.AddCommand(generateCmd)
+
+	generateCmd.Flags().StringArrayP("template", "t", []string{}, "a list of template to convert")
+	generateCmd.Flags().StringArrayP("entity", "e", []string{}, "a list of entits to use as a model")
+	generateCmd.Flags().Bool("screen", false, "List the output to the screen")
+	generateCmd.Flags().String("export", "", "Exports to a directory")
+	generateCmd.Flags().Bool("export-bykey", false, "Exports the code using the template keys")
+	generateCmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code")
+	generateCmd.Flags().Bool("demo", false, "Uses a demo as input source, this will override any other input sources (entity, graphql) ")
 }
 
 func testTable() *types.EntityImportModel {
@@ -88,72 +128,95 @@ func testTable() *types.EntityImportModel {
 			Creator:  types.CreatorImportModel{CompanyName: "Patogen", DeveloperName: "Hans-Petter Eitvet"},
 			Types:    testTypes(),
 			Imports: []string{
-				"using Microsoft.Logging",
-				"using Microsoft.DependencyInjection",
+				"using Microsoft.Logging;",
+				"using Microsoft.DependencyInjection;",
 			},
 		},
-		Name: "TestTable",
+		Name:           "Contact",
+		Description:    "This is a description provided from the table",
+		HasDescription: true,
+		Columns: []types.EntityColumnImportModel{
+			{Name: "Id", DataType: "int", IsNullable: false, HasDescription: true, Description: "Description for this column"},
+			{Name: "FirstName", DataType: "varchar", IsNullable: false},
+			{Name: "LastName", DataType: "varchar", IsNullable: false},
+			{Name: "Age", DataType: "int", IsNullable: true},
+			{Name: "IsCool", DataType: "bit", IsNullable: true},
+			{Name: "TypeId", DataType: "int", IsNullable: true},
 
-		NonIgnoredColumns: []types.EntityColumnImportModel{
-			{Name: "TestId", DataType: "string"},
-			{Name: "FirstName", DataType: "string"},
-			{Name: "LastName", DataType: "string"},
+			{Name: "ChildTest", DataType: "varchar", IsNullable: true, HasPrefix: true, NameWithoutPrefix: "Test"},
+		},
+	}
+	c1 := types.EntityRelation{
+		Name: "ContactAddress",
+		ReleatedColumn: types.EntityColumnProps{
+			Name: "ContactId", DataType: "int", IsNullable: true,
+		},
+		OwnerColumn: types.EntityColumnProps{
+			Name: "Id", DataType: "int", IsNullable: false,
 		},
 	}
 
+	p1 := types.EntityRelation{
+		Name: "ContactType",
+		ReleatedColumn: types.EntityColumnProps{
+			Name: "TypeId", DataType: "int", IsNullable: true,
+		},
+		OwnerColumn: types.EntityColumnProps{
+			Name: "Id", DataType: "int", IsNullable: false,
+		},
+	}
+
+	table.Children = append(table.Children, c1)
+	table.Parents = append(table.Parents, p1)
 	return &table
 }
 
-func oneMoreTest() *tpl.Template {
-	t := tpl.Template{}
-
-	t.Name = "poco"
-	t.Body = testTemplate()
-
-	return &t
-}
-
-func testTemplate() string {
-	return `
-// code her - indent by SPACE not TAB
-{{- $model := index .Code.Types "model" }}
-using System;
-{{- range .Code.Imports }}
-{{.}}
-{{- end }}
-
-//namespace from block
-namespace {{ template "namespace" $model }} {
-	public class {{ template "classname" . }} {
-
-	}
-}
-
-//namespace from template
-namespace {{ $model.NameSpace }} 
-{	
-	
-	public class {{ .Name }}{{ $model.NamePostfix}} 
-	{
-
-	}
-}
-
-{{.}}
-`
-}
-
-/*
-
-//namespace from block
-namespace {{ template "block1" $model }} {
-
-}
-
-*/
 func testTypes() map[string]types.CodeTypeImportModel {
 	tl := make(map[string]types.CodeTypeImportModel)
 
-	tl["model"] = types.CodeTypeImportModel{NamePostfix: "Model", NameSpace: "Testing.Test.Test", NamePrefix: "Bla", Key: "key"}
+	tl["model"] = types.CodeTypeImportModel{
+		NamePostfix: "",
+		NameSpace:   "Testing.Models",
+		Key:         "key",
+		Imports:     []string{"using HotChocolate;"},
+		// Imports:     []string{},
+	}
+	tl["resolver"] = types.CodeTypeImportModel{
+		NamePostfix: "Resolver",
+		NameSpace:   "Testing.Resolvers",
+		Key:         "key",
+	}
+	tl["inteface"] = types.CodeTypeImportModel{
+		NamePostfix: "Repository",
+		NameSpace:   "Testing.Data",
+		NamePrefix:  "I",
+		Key:         "key",
+	}
+	tl["repository"] = types.CodeTypeImportModel{
+		NamePostfix: "Repository",
+		NameSpace:   "Testing.Data",
+		Key:         "key",
+	}
 	return tl
+}
+
+func getEntityModel(name string) interface{} {
+	src := source
+
+	if len(source) == 0 {
+		src = getSourceName()
+	}
+	input := input.GetSource(src, mhConfig)
+
+	e, err := input.Entity(name)
+	if err == nil {
+		fmt.Println("The entity could not be found")
+	}
+
+	// em := tpl.EntityToModel{
+	// 	Entity: e,
+	// }
+	// m := em.Convert()
+
+	return e
 }
