@@ -23,10 +23,8 @@ package cmd
 
 import (
 	"fmt"
-	"modelhelper/cli/config"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // configCmd represents the config command
@@ -45,39 +43,39 @@ to quickly create a Cobra application.`,
 		fmt.Println(mhConfig.Languages.Definitions)
 		fmt.Println(mhConfig.Templates.Location)
 
-		for _, source := range mhConfig.Sources {
-			fmt.Println(source.Name)
+		// for _, source := range mhConfig.Sources {
+		// 	fmt.Println(source.Name)
 
-			for _, opt := range source.Options {
-				fmt.Println(opt)
-			}
+		// 	for _, opt := range source.Options {
+		// 		fmt.Println(opt)
+		// 	}
 
-			for _, grp := range source.Groups {
-				for _, itm := range grp.Items {
+		// 	for _, grp := range source.Groups {
+		// 		for _, itm := range grp.Items {
 
-					fmt.Println(itm)
-				}
-			}
-		}
+		// 			fmt.Println(itm)
+		// 		}
+		// 	}
+		// }
 
-		is := []string{"test_1", "test_2", "test_3"}
-		g := config.SourceGroup{
-			Items: is,
-		}
+		// is := []string{"test_1", "test_2", "test_3"}
+		// g := config.SourceGroup{
+		// 	Items: is,
+		// }
 
-		gg := make(map[string]config.SourceGroup)
-		gg["basic"] = g
+		// gg := make(map[string]config.SourceGroup)
+		// gg["basic"] = g
 
-		s := config.Source{
-			Name:   "testing",
-			Schema: "dbo",
-			Groups: gg,
-		}
-		mhConfig.Sources["testing"] = s
+		// s := config.Source{
+		// 	Name:   "testing",
+		// 	Schema: "dbo",
+		// 	Groups: gg,
+		// }
+		// mhConfig.Sources["testing"] = s
 
-		viper.Set("AppVersion", 3)
-		viper.Set("Sources", mhConfig.Sources)
-		viper.WriteConfig()
+		// viper.Set("AppVersion", 3)
+		// viper.Set("Sources", mhConfig.Sources)
+		// viper.WriteConfig()
 	},
 }
 
