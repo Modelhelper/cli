@@ -26,6 +26,7 @@ type CodeTypeImportModel struct {
 	NamePostfix string
 	NamePrefix  string
 	NameSpace   string
+	Imports     []string
 }
 
 type CodeInjectImportModel struct {
@@ -38,20 +39,23 @@ type CodeInjectImportModel struct {
 }
 
 type EntityImportModel struct {
-	Code        CodeImportModel
-	Options     map[string]string
-	Name        string
-	Schema      string
-	Type        string
-	RowCount    int
-	Created     string
-	Alias       string
-	Description string
-	Columns     []EntityColumnImportModel
-	// Parents            []EntityRelation
-	// Children           []EntityRelation
-	ModelName          string
-	ContextualName     string
+	Code              CodeImportModel
+	Options           map[string]string
+	Name              string
+	Schema            string
+	Type              string
+	RowCount          int
+	Created           string
+	Alias             string
+	Description       string
+	HasDescription    bool
+	HasPrefix         bool
+	NameWithoutPrefix string
+	Columns           []EntityColumnImportModel
+	Parents           []EntityRelation
+	Children          []EntityRelation
+	// ModelName          string
+	// ContextualName     string
 	NonIgnoredColumns  []EntityColumnImportModel
 	IgnoredColumns     []EntityColumnImportModel
 	PrimaryKeys        []EntityColumnImportModel
@@ -60,6 +64,37 @@ type EntityImportModel struct {
 	UsesIdentityColumn bool
 }
 
+type EntityRelation struct {
+	IsSelfJoin bool
+
+	ReleatedColumn   EntityColumnProps
+	IncomingRelation EntityColumnProps
+	OwnerColumn      EntityColumnProps
+	ForeignColumn    EntityColumnProps
+
+	// GroupIndex         int
+	Name              string
+	Schema            string
+	Type              string
+	Alias             string
+	Description       string
+	HasDescription    bool
+	HasPrefix         bool
+	NameWithoutPrefix string
+	// Columns            []EntityColumnImportModel
+	// NonIgnoredColumns  []EntityColumnImportModel
+	// IgnoredColumns     []EntityColumnImportModel
+	// PrimaryKeys        []EntityColumnImportModel
+	// ForeignKeys        []EntityColumnImportModel
+	// UsedAsColumns      []EntityColumnImportModel
+	UsesIdentityColumn bool
+}
+
+type EntityColumnProps struct {
+	Name       string
+	DataType   string
+	IsNullable bool
+}
 type EntityColumnImportModel struct {
 	Description      string
 	IsForeignKey     bool
@@ -72,13 +107,15 @@ type EntityColumnImportModel struct {
 	IsCreatedByUser  bool
 	IsModifiedDate   bool
 	IsModifiedByUser bool
-
+	HasPrefix        bool
+	HasDescription   bool
 	Name             string
-	PropertyName     string
-	ContextualName   string
-	Collation        string
-	ReferencesColumn string
-	ReferencesTable  string
+	// PropertyName      string
+	// ContextualName    string
+	NameWithoutPrefix string
+	Collation         string
+	ReferencesColumn  string
+	ReferencesTable   string
 
 	DataType string
 	DbType   string
