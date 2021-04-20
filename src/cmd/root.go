@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"modelhelper/cli/app"
 	"modelhelper/cli/config"
 	"os"
 	"path/filepath"
@@ -88,6 +89,9 @@ func Execute() {
 	}
 }
 
+func GetConfig() *config.Config {
+	return &mhConfig
+}
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVarP(&source, "source", "s", "", "Sets the source")
@@ -165,5 +169,7 @@ func initConfig() {
 	// 	}
 
 	// }
+
+	app.SetConfig(mhConfig)
 
 }
