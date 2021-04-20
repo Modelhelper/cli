@@ -2,26 +2,40 @@ package input
 
 // Entity represents an object in the relational database. Either a Table or a view
 type Entity struct {
-	Name                 string
-	ModelName            string
-	ContextualName       string
-	Type                 string
-	Schema               string
-	Alias                string
-	RowCount             int	
-	UsesIdentityColumn   bool
-	UsesDeletedColumn    bool
-	DeletedColumnName    string
-	Columns              []Column
-	ParentRelations      []Relation
-	ChildRelations       []Relation
-	Indexes              []Index
-	Description          string
+	Name               string
+	ModelName          string
+	ContextualName     string
+	Type               string
+	Schema             string
+	Alias              string
+	RowCount           int
+	UsesIdentityColumn bool
+	UsesDeletedColumn  bool
+	DeletedColumnName  string
+	Columns            []Column
+	ParentRelations    []Relation
+	ChildRelations     []Relation
+	Indexes            []Index
+	Description        string
+}
+
+type EntityStat struct {
+	Schema        string
+	Name          string
+	Description   string
+	PkCount       int
+	FkCount       int
+	RowCount      int
+	ColumnCount   int
+	ChildrenCount int
+	ParentCount   int
+	IndexCount    int
+	Size          int
 }
 
 // Column represents the column of an entity, either a table or a view
 type Column struct {
-	ID int
+	ID               int
 	Name             string
 	PropertyName     string
 	DbType           string
@@ -87,19 +101,29 @@ type TableRelation struct {
 }
 
 type Relation struct {
-	SortIndex            int
-	Level                int
-	FullPath             string
-	Depth                int
-	Family               string
-	ReferenceName        string
-	ParentTableName      string
-	ParentColumnName     string
-	ParentColumnType     string
-	ReferencedTableName  string
-	ReferencedColumnName string
-	ReferencedColumnType string
-	IsSelfJoin           bool
+	GroupIndex          int
+	Name                string
+	Schema              string
+	Type                string
+	SortIndex           int
+	Depth               int
+	Family              string
+	OwnerColumnName     string
+	OwnerColumnType     string
+	OwnerColumnNullable bool
+	ColumnName          string
+	ColumnType          string
+	ColumnNullable      bool
+	ContraintName       string
+	IsSelfJoin          bool
+	// Level               int
+	// FullPath            string
+	// ReferenceName       string
+	// ParentTableName       string
+	// ReferencedTableName   string
+	// ForeignColumnName     string
+	// ForeignColumnType     string
+	// ForeignColumnNullable bool
 }
 
 type DatabaseInformation struct {
