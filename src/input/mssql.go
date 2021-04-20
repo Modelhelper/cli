@@ -41,6 +41,20 @@ func (server *MsSql) Entity(name string) (*Entity, error) {
 
 	e.Columns = *c
 
+	p, err := server.getParents(e.Schema, e.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	e.ParentRelations = *p
+
+	cr, err := server.getChildren(e.Schema, e.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	e.ChildRelations = *cr
+
 	return e, nil
 }
 func (server *MsSql) Entities(pattern string) (*[]Entity, error) {
@@ -291,6 +305,163 @@ func (server *MsSql) getColumns(schema string, entityName string) (*[]Column, er
 		}
 	}
 	return &cl, nil
+}
+
+func (server *MsSql) getParents(schema string, entityName string) (*[]Relation, error) {
+	db, err := server.openConnection()
+	if err != nil {
+		return nil, err
+	}
+
+	defer db.Close()
+	ctx := context.Background()
+
+	query := `
+select 
+	GroupIndex = row_number() over (partition by p1.name order by p1.create_date desc),
+	p1.name, 
+	[Schema] = SCHEMA_NAME(p1.schema_id),
+    type = CASE when p1.type = 'U' then 'Table' when p1.type = 'V' then 'View' end,  	
+	ForeignColumnName = cp.name, 
+	ForeignColumnType = type_name(cp.user_type_id),
+    ForeignColumnNullable = cp.is_nullable,
+
+    PrimaryColumnName = cc.name,
+    PrimaryColumnType = type_name(cc.user_type_id),
+    PrimaryColumnNullable = cc.is_nullable,
+	
+	ConstraintName = o1.name, 
+	IsSelfJoin = cast(case when fkc.parent_object_id = fkc.referenced_object_id then 1 else 0 end as bit )
+from sys.foreign_key_columns fkc
+
+join sys.objects o1 on o1.object_id = fkc.constraint_object_id
+join sys.objects r1 on r1.object_id = fkc.parent_object_id
+join sys.objects p1 on p1.object_id = fkc.referenced_object_id
+join sys.columns cc on fkc.parent_column_id = cc.column_id and cc.object_id = fkc.parent_object_id
+join sys.columns cp on fkc.referenced_column_id = cp.column_id and cp.object_id = fkc.referenced_object_id
+where fkc.parent_object_id = OBJECT_ID(@entityName)
+	`
+
+	stmt, err := db.PrepareContext(ctx, query)
+
+	if err != nil {
+		return nil, err
+	}
+	// Execute query
+	rows, err := stmt.Query(query, sql.Named("entityName", entityName))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []Relation{}
+	var r Relation
+
+	for rows.Next() {
+
+		if err := rows.Scan(
+			&r.GroupIndex,
+			&r.Name,
+			&r.Schema,
+			&r.Type,
+			&r.ColumnName,
+			&r.ColumnType,
+			&r.ColumnNullable,
+			&r.OwnerColumnName,
+			&r.OwnerColumnType,
+			&r.OwnerColumnNullable,
+			&r.ContraintName,
+			&r.IsSelfJoin,
+		); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			} else {
+				return nil, err
+			}
+		} else {
+			list = append(list, r)
+		}
+	}
+	return &list, nil
+}
+
+func (server *MsSql) getChildren(schema string, entityName string) (*[]Relation, error) {
+	db, err := server.openConnection()
+	if err != nil {
+		return nil, err
+	}
+
+	defer db.Close()
+	ctx := context.Background()
+
+	query := `
+select 	
+	GroupIndex = row_number() over (partition by p1.name order by p1.create_date desc),
+	p1.name ,
+	[Schema] = SCHEMA_NAME(p1.schema_id),
+    type = CASE when p1.type = 'U' then 'Table' when p1.type = 'V' then 'View' end,  	
+	PrimaryColumnName = cp.name, 
+    PrimaryColumnType = type_name(cp.user_type_id),
+    PrimaryColumnNullable = cp.is_nullable,
+    
+	ForeignColumnName = cc.name,
+    ForeignColumnType = type_name(cc.user_type_id),
+    ForeignColumnNullable = cc.is_nullable,
+
+	ConstraintName = o1.name
+
+    , IsSelfJoin = cast(case when fkc.parent_object_id = fkc.referenced_object_id then 1 else 0 end as bit )
+from sys.foreign_key_columns fkc
+
+join sys.objects o1 on o1.object_id = fkc.constraint_object_id
+join sys.objects r1 on r1.object_id = fkc.referenced_object_id
+join sys.objects p1 on p1.object_id = fkc.parent_object_id
+join sys.columns cc on fkc.parent_column_id = cc.column_id and cc.object_id = fkc.parent_object_id
+join sys.columns cp on fkc.referenced_column_id = cp.column_id and cp.object_id = fkc.referenced_object_id
+where fkc.referenced_object_id = OBJECT_ID(@entityName)
+	`
+
+	stmt, err := db.PrepareContext(ctx, query)
+
+	if err != nil {
+		return nil, err
+	}
+	// Execute query
+	rows, err := stmt.Query(query, sql.Named("entityName", entityName))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []Relation{}
+	var r Relation
+
+	for rows.Next() {
+
+		if err := rows.Scan(
+			&r.GroupIndex,
+			&r.Name,
+			&r.Schema,
+			&r.Type,
+			&r.OwnerColumnName,
+			&r.OwnerColumnType,
+			&r.OwnerColumnNullable,
+			&r.ColumnName,
+			&r.ColumnType,
+			&r.ColumnNullable,
+			&r.ContraintName,
+			&r.IsSelfJoin,
+		); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			} else {
+				return nil, err
+			}
+		} else {
+			list = append(list, r)
+		}
+	}
+	return &list, nil
 }
 
 func (server *MsSql) openConnection() (*sql.DB, error) {
