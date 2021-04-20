@@ -1,6 +1,19 @@
 package tpl
 
-// obsolete
-type TemplateExporter interface {
-	Export(b []byte) error
+import "fmt"
+
+type ScreenExporter struct{}
+
+func (e *ScreenExporter) Export(b []byte) error {
+	fmt.Println(string(b))
+	return nil
+}
+
+type DirectoryExporter struct {
+	Directory string
+}
+
+func (e *DirectoryExporter) Export(b []byte) error {
+	fmt.Println(string(b))
+	return nil
 }

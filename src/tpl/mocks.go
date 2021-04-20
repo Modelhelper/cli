@@ -14,7 +14,7 @@ func testBlockLvl1() *Template {
 	t := Template{}
 
 	t.Name = "classname"
-	t.Body = `{{ .Name }}`
+	t.Body = `{{ .Name | plural }}`
 
 	return &t
 }
