@@ -12,9 +12,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type Application struct {
+	Version       string
+	Configuration *config.Config
+}
+
 type Initializer interface {
 	Initialize() error
 }
+
+func SetConfig(config config.Config) {
+	Configuration = &config
+}
+
+var Configuration *config.Config
 
 // Version shows the current application version
 var Version = "3.0.0"
