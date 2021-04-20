@@ -10,7 +10,8 @@
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceFolder}/src",
-            "args": ["generate"]
+            // "args": ["generate", "--demo", "--screen", "-t", "cs-gql-hc-resolver", "-t", "cs-poco"]
+            "args": ["entity", "order"]
         }
     ]
 }
