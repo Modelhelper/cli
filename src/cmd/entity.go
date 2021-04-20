@@ -56,34 +56,61 @@ var entityCmd = &cobra.Command{
 
 			if e == nil {
 				fmt.Println("The entity could not be found")
+				return
 			}
+			fmt.Printf("\nEntity: %s.%s", e.Schema, e.Name)
+			fmt.Printf("\nCreated: %s\n", "Unknown")
 
+			if len(e.Description) > 0 {
+				fmt.Printf("\n\nDescription\n")
+				fmt.Printf("------------------\n")
+				fmt.Println(e.Description)
+				fmt.Println()
+			}
 			var tbl table.Table
 			if skipDescription {
-				tbl = table.New("Name", "Type")
-
-				for _, c := range e.Columns {
-					tbl.AddRow(c.Name, c.DataType)
-				}
-
+				tbl = table.New("Name", "Type", "Nullable", "IsIdentity", "PK", "FK")
 			} else {
-				tbl = table.New("Name", "Type", "Description")
-
-				for _, c := range e.Columns {
-					tbl.AddRow(c.Name, c.DataType, c.Description)
-				}
-
-				// fmt.Println(src, e.Name, e.Type, e.Schema, e.Description)
+				tbl = table.New("Name", "Type", "Nullable", "IsIdentity", "PK", "FK", "Description")
 			}
 
-			// sss := c.Green.String()
-			// fmt.Println(sss)
-			// headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
-			// columnFmt := color.New(color.FgYellow).SprintfFunc()
+			for _, c := range e.Columns {
+				null := "false"
+				if c.IsNullable {
+					null = "true"
+				}
+				id := ""
+				if c.IsIdentity {
+					id = "yes"
+				}
 
-			//tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+				pk := ""
+				if c.IsPrimaryKey {
+					pk = "PK"
+				}
 
+				fk := ""
+				if c.IsForeignKey {
+					fk = "FK"
+				}
+				if skipDescription {
+					tbl.AddRow(c.Name, c.DataType, null, id, pk, fk)
+				} else {
+					tbl.AddRow(c.Name, c.DataType, null, id, pk, fk, c.Description)
+
+				}
+			}
+
+			fmt.Printf("\n\nColumns\n")
+			fmt.Printf("-------------------------------------------\n\n")
 			tbl.Print()
+
+			fmt.Printf("\n\nONE TO MANY (.Children)\n")
+			fmt.Printf("-------------------------------------------\n\n")
+			printChildTable(e.Name, e.ChildRelations)
+			fmt.Printf("\n\nONE TO MANY (.Parents)\n")
+			fmt.Printf("-------------------------------------------\n\n")
+			printParentTable(e.Name, e.ParentRelations)
 		} else {
 			ents, _ := input.Entities("")
 
@@ -105,7 +132,6 @@ var entityCmd = &cobra.Command{
 				}
 
 			}
-			//tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 			tbl.Print()
 		}
@@ -117,6 +143,48 @@ func init() {
 	rootCmd.AddCommand(entityCmd)
 
 	entityCmd.Flags().BoolVarP(&skipDescription, "skip-description", "", false, "Does not show description")
+}
+
+func printChildTable(owner string, relations []input.Relation) {
+	var childTable table.Table
+	childTable = table.New("Schema", "Name", "FK", "PK", "Constraint")
+	for _, ct := range relations {
+		fn, pn := "", ""
+		if ct.ColumnNullable {
+			fn = "*"
+		}
+		ft := fmt.Sprintf("%s (%v%s)", ct.ColumnName, ct.ColumnType, fn)
+
+		if ct.OwnerColumnNullable {
+			pn = "*"
+		}
+
+		pt := fmt.Sprintf("%s (%v%s)", ct.OwnerColumnName, ct.OwnerColumnType, pn)
+		childTable.AddRow(ct.Schema, ct.Name, ft, pt, ct.ContraintName)
+	}
+
+	childTable.Print()
+}
+
+func printParentTable(owner string, relations []input.Relation) {
+	var tbl table.Table
+	tbl = table.New("Schema", "Name", "PK", "FK", "Constraint")
+	for _, ct := range relations {
+		fn, pn := "", ""
+		if ct.ColumnNullable {
+			fn = "*"
+		}
+		ft := fmt.Sprintf("%s (%v%s)", ct.ColumnName, ct.ColumnType, fn)
+
+		if ct.OwnerColumnNullable {
+			pn = "*"
+		}
+
+		pt := fmt.Sprintf("%s (%v%s)", ct.OwnerColumnName, ct.OwnerColumnType, pn)
+		tbl.AddRow(ct.Schema, ct.Name, ft, pt, ct.ContraintName)
+	}
+
+	tbl.Print()
 }
 
 func getSourceName() string {
