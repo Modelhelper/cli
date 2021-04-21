@@ -14,6 +14,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/pkg/browser"
+
 	"github.com/gorilla/mux"
 )
 
@@ -34,7 +36,7 @@ var sources [2]sourceApi = [2]sourceApi{
 	{Name: "raw", Connection: "source info for raw"},
 }
 
-func Serve(port int) {
+func Serve(port int, open bool) {
 	wait := time.Second * 15
 
 	r := mux.NewRouter()
@@ -69,6 +71,10 @@ func Serve(port int) {
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
 			log.Println(err)
+		}
+
+		if open {
+			browser.OpenURL(host)
 		}
 	}()
 
