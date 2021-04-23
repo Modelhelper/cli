@@ -43,6 +43,7 @@ func (c *Config) Initialize() error {
 func Location() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 
