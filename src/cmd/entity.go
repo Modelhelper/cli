@@ -51,7 +51,7 @@ var entityCmd = &cobra.Command{
 			en := args[0]
 			e, err := input.Entity(en)
 			if err != nil {
-
+				fmt.Println(err)
 			}
 
 			if e == nil {
@@ -112,8 +112,11 @@ var entityCmd = &cobra.Command{
 			fmt.Printf("-------------------------------------------\n\n")
 			printParentTable(e.Name, e.ParentRelations)
 		} else {
-			ents, _ := input.Entities("")
+			ents, err := input.Entities("")
 
+			if err != nil {
+				fmt.Println(err)
+			}
 			if ents == nil {
 				return
 			}
