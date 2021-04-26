@@ -37,6 +37,7 @@ var serveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		port, _ := cmd.Flags().GetInt("port")
+		open, _ := cmd.Flags().GetBool("open")
 		message := fmt.Sprintf(`
 
 %s		
@@ -50,11 +51,12 @@ To exit and stop the service, press ctrl + c`, app.Logo(), port, port, port)
 
 		fmt.Println(message)
 
-		server.Serve(port)
+		server.Serve(port, open)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
 	serveCmd.Flags().IntP("port", "p", 8080, "The port to serve")
+	serveCmd.Flags().BoolP("open", "o", false, "Opens a browser and the modelhelper website ")
 }

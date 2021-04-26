@@ -7,6 +7,7 @@ require (
 	github.com/gertd/go-pluralize v0.1.7
 	github.com/gookit/color v1.3.6
 	github.com/gorilla/mux v1.8.0
+	github.com/pkg/browser v0.0.0-20210115035449-ce105d075bb4
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.1
 	golang.org/x/sys v0.0.0-20210113181707-4bcb84eeeb78 // indirect

@@ -3,6 +3,7 @@ package main
 import (
 	// "fmt"
 
+	"fmt"
 	"modelhelper/cli/app"
 	"modelhelper/cli/cmd"
 	"modelhelper/cli/config"
@@ -22,6 +23,7 @@ func main() {
 		err := app.Initialize(cfg)
 
 		if err != nil {
+			fmt.Println(err)
 			panic(err)
 		}
 	} else {
