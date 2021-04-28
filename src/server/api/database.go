@@ -35,7 +35,7 @@ func sourcesHandler(responseWriter http.ResponseWriter, request *http.Request) {
 
 func entitiesHandler(responseWriter http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	source := vars["source"] // the book title slug
+	source := vars["source"]
 
 	input := input.GetSource(source, *app.Configuration)
 
@@ -51,8 +51,8 @@ func entitiesHandler(responseWriter http.ResponseWriter, r *http.Request) {
 }
 func entityHandler(responseWriter http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	source := vars["source"] // the book title slug
-	entity := vars["entity"] // the book title slug
+	source := vars["source"]
+	entity := vars["entity"]
 
 	input := input.GetSource(source, *app.Configuration)
 
