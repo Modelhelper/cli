@@ -6,38 +6,34 @@ canInject: true
 
 moduleLevelVariablePrefix: "_"
 
-defaultImports: [
-  "System;"
-]
+defaultImports: 
+  - "using System;"
 
-types:
-  -interface:
-    key: "interface"   
-    namePostfix: Repository
-    namePrefix: I
-  -models:
-    key: "model"      
-    namePostfix: Model
-  -repository:   
-    key: "repository"   
-    namePostfix: Repository
+
+keys:
+  interface:
+    postfix: Repository
+    prefix: I
+  models:
+    postfix: Model
+  repository:   
+    postfix: Repository
     imports: [
       "using {{ .Code.RootNamespace }}.Extensions"
     ]
-  -service:
-    key: "service"  
-    namePostfix: "Service"
-  -controller:
-    namePostfix: "Controller" 
+  service:
+    postfix: "Service"
+  controller:
+    postfix: "Controller" 
     imports: [
       "using {{ .Code.RootNamespace }}.Extensions"
     ]
-  -extension:
-    namePostfix: "Extension"      
+  extension:
+    postfix: "Extension"      
     namespace: "{{ .Code.RootNamespace }}.Extensions"
 
 inject:  
-  -logging:
+  logging:
     name: ILogger<{{ .Name }}>
     keys: [logging]
     language: cs      
@@ -46,62 +42,134 @@ inject:
       "using Microsoft.Logging"
     ]
 
-## only on init
-importCommands: [
-  "dotnet ...."
-]
-
-## only on init
-preferredPackages:
-  -mssql: ["Microsoft.Data"]
-  -postgres: ["<package>"]
-  -metrics: ["metrics"]
-  -logging: ["logging"]
-
-casing:
-  -Default: Pascal
-  -Method: Pascal
-  -Variable: Camel
-  -Property: Pascal
 ## maps datatype to language type
 ## can be a mix of mssql, postgres, mysql etc
-
-
-defaultDataTypes:
-  -strings: {notNull: string, Nullable: string, NullableAlternative: string}
-  -integers: {notNull: int, Nullable: int?, NullableAlternative: Nullable<int>}
-  -floats: {notNull: decimal, Nullable: decimal?, NullableAlternative: Nullable<decimal>}
-
-dataTypes: 
-  -string: {NotNull: string, Nullable: string, NullableAlternative: string}
-  -bigint: Int64
-  -binary: Byte[]
-  -bit: bool
-  -char: char
-  -date: DateTime
-  -datetime: DateTime
-  -datetime2: DateTime
-  -datetimeoffset: DateTime
-  -decimal: decimal
-  -float: decimal
-  -geography: string
-  -geometry: string
-  -image: string
-  -int: int
-  -money: decimal
-  -nchar: string
-  -ntext: string
-  -numeric: decimal
-  -nvarchar: string
-  -real: decimal
-  -smalldatetime: decimal
-  -smallint: decimal
-  -smallmoney: decimal
-  -text: string
-  -time: DateTime
-  -timestamp: string
-  -tinyint: number
-  -uniqueidentifier: Guid
-  -varbinary: Byte[]
-  -varchar: string
-  -xml: XElement
+datatypes: 
+  string: 
+    notNull: string
+    nullable: string
+    nullableAlternative: string    
+  bigint: 
+    notNull: Int64
+    nullable: Int64?
+    nullableAlternative: nullable<decimal> # Int64
+  binary: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # Byte[]
+  bit: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # bool
+  char: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # char
+  date: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # DateTime
+  datetime: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # DateTime
+  datetime2: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # DateTime
+  datetimeoffset: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # DateTime
+  decimal: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # decimal
+  float: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # decimal
+  geography: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  geometry: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  image: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  int: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # int
+  money: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # decimal
+  nchar: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  ntext: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  numeric: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # decimal
+  nvarchar: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  real: 
+    notNull: decimal
+    nullable: decimal?
+    nullableAlternative: nullable<decimal> # decimal
+  smalldatetime: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # decimal
+  smallint: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # decimal
+  smallmoney: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # decimal
+  text: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  time: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # DateTime
+  timestamp: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  tinyint: 
+    notNull: Int16
+    nullable: Int16?
+    nullableAlternative: nullable<Int16> # number
+  uniqueidentifier: 
+    notNull: Guid
+    nullable: Guid
+    nullableAlternative: nullable<Guid> # Guid
+  varbinary: 
+    notNull: Byte[]
+    nullable: Byte[]
+    nullableAlternative: Byte[] # Byte[]
+  varchar: 
+    notNull: string
+    nullable: string
+    nullableAlternative: string
+  xml: 
+    notNull: XElement
+    nullable: XElement?
+    nullableAlternative: nullable<XElement> 
