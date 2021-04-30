@@ -1,14 +1,8 @@
-package input
-
-import "modelhelper/cli/source"
+package source
 
 type Postgres struct {
-	Source source.Source
+	Connection Connection
 }
-
-// func (server *Postgres) Connect(source string) (*sql.DB, error) {
-// 	return nil, nil
-// }
 
 func (server *Postgres) Entity(name string) (*Entity, error) {
 	return nil, nil

@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"log"
 	"mime"
+	"modelhelper/cli/app"
 	"modelhelper/cli/server/api"
 	"net/http"
 	"os"
@@ -36,7 +37,7 @@ var sources [2]sourceApi = [2]sourceApi{
 	{Name: "raw", Connection: "source info for raw"},
 }
 
-func Serve(port int, open bool) {
+func Serve(port int, open bool, appCtx *app.Context) {
 	wait := time.Second * 15
 
 	r := mux.NewRouter()
@@ -49,7 +50,7 @@ func Serve(port int, open bool) {
 	getRouter := r.Methods(http.MethodGet).Subrouter()
 
 	api.LoadProjectRoutes(getRouter)
-	api.LoadDataSourceRoutes(getRouter)
+	api.LoadDataSourceRoutes(getRouter, appCtx)
 	mime.AddExtensionType(".mjs", "text/javascript")
 	mime.AddExtensionType(".js", "text/javascript")
 	mime.AddExtensionType(".css", "text/css")

@@ -2,7 +2,11 @@ package app
 
 import (
 	"fmt"
+	"log"
 	"modelhelper/cli/config"
+	"modelhelper/cli/project"
+	"modelhelper/cli/source"
+	"modelhelper/cli/tpl"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,6 +19,26 @@ import (
 type Application struct {
 	Version       string
 	Configuration *config.Config
+	ProjectPath   string
+}
+
+func (a *Application) Initialize(init ...Initializer) error {
+	for _, i := range init {
+		err := i.Initialize()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func New() *Application {
+	a := Application{}
+
+	a.Version = Version
+	a.Configuration = config.Load()
+	return &a
 }
 
 type Initializer interface {

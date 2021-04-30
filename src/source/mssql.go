@@ -1,16 +1,15 @@
-package input
+package source
 
 import (
 	"context"
 	"database/sql"
 	"log"
-	"modelhelper/cli/source"
 
 	_ "github.com/denisenkom/go-mssqldb"
 )
 
 type MsSql struct {
-	Source source.Source
+	Connection Connection
 }
 
 // type Database interface {
@@ -466,7 +465,7 @@ where fkc.referenced_object_id = OBJECT_ID(@entityName)
 
 func (server *MsSql) openConnection() (*sql.DB, error) {
 
-	cs := server.Source.ConnectionString
+	cs := server.Connection.ConnectionString
 	// fmt.Println("Connect with: " + cs)
 	// var err error
 	db, err := sql.Open("sqlserver", cs)

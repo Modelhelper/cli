@@ -23,7 +23,7 @@ package cmd
 
 import (
 	"fmt"
-	"modelhelper/cli/input"
+
 	table "modelhelper/cli/ui"
 
 	_ "github.com/gookit/color"
@@ -39,17 +39,16 @@ var entityCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// fmt.Println("entity called")
-		src := source
+		ctx := modelHelperApp.CreateContext()
+		conName := ctx.DefaultConnection
 
-		if len(source) == 0 {
-			src = getSourceName()
-		}
+		con := ctx.Connections[conName]
 
-		input := input.GetSource(src, mhConfig)
+		src := con.LoadSource()
 
 		if len(args) > 0 {
 			en := args[0]
-			e, err := input.Entity(en)
+			e, err := src.Entity(en)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -105,14 +104,14 @@ var entityCmd = &cobra.Command{
 			fmt.Printf("-------------------------------------------\n\n")
 			tbl.Print()
 
-			fmt.Printf("\n\nONE TO MANY (.Children)\n")
-			fmt.Printf("-------------------------------------------\n\n")
-			printChildTable(e.Name, e.ChildRelations)
-			fmt.Printf("\n\nONE TO MANY (.Parents)\n")
-			fmt.Printf("-------------------------------------------\n\n")
-			printParentTable(e.Name, e.ParentRelations)
+			// fmt.Printf("\n\nONE TO MANY (.Children)\n")
+			// fmt.Printf("-------------------------------------------\n\n")
+			// printChildTable(e.Name, e.ChildRelations)
+			// fmt.Printf("\n\nONE TO MANY (.Parents)\n")
+			// fmt.Printf("-------------------------------------------\n\n")
+			// printParentTable(e.Name, e.ParentRelations)
 		} else {
-			ents, err := input.Entities("")
+			ents, err := src.Entities("")
 
 			if err != nil {
 				fmt.Println(err)
@@ -148,63 +147,44 @@ func init() {
 	entityCmd.Flags().BoolVarP(&skipDescription, "skip-description", "", false, "Does not show description")
 }
 
-func printChildTable(owner string, relations []input.Relation) {
-	var childTable table.Table
-	childTable = table.New("Schema", "Name", "FK", "PK", "Constraint")
-	for _, ct := range relations {
-		fn, pn := "", ""
-		if ct.ColumnNullable {
-			fn = "*"
-		}
-		ft := fmt.Sprintf("%s (%v%s)", ct.ColumnName, ct.ColumnType, fn)
+// func printChildTable(owner string, relations []source.Relation) {
+// 	var childTable table.Table
+// 	childTable = table.New("Schema", "Name", "FK", "PK", "Constraint")
+// 	for _, ct := range relations {
+// 		fn, pn := "", ""
+// 		if ct.ColumnNullable {
+// 			fn = "*"
+// 		}
+// 		ft := fmt.Sprintf("%s (%v%s)", ct.ColumnName, ct.ColumnType, fn)
 
-		if ct.OwnerColumnNullable {
-			pn = "*"
-		}
+// 		if ct.OwnerColumnNullable {
+// 			pn = "*"
+// 		}
 
-		pt := fmt.Sprintf("%s (%v%s)", ct.OwnerColumnName, ct.OwnerColumnType, pn)
-		childTable.AddRow(ct.Schema, ct.Name, ft, pt, ct.ContraintName)
-	}
+// 		pt := fmt.Sprintf("%s (%v%s)", ct.OwnerColumnName, ct.OwnerColumnType, pn)
+// 		childTable.AddRow(ct.Schema, ct.Name, ft, pt, ct.ContraintName)
+// 	}
 
-	childTable.Print()
-}
+// 	childTable.Print()
+// }
 
-func printParentTable(owner string, relations []input.Relation) {
-	var tbl table.Table
-	tbl = table.New("Schema", "Name", "PK", "FK", "Constraint")
-	for _, ct := range relations {
-		fn, pn := "", ""
-		if ct.ColumnNullable {
-			fn = "*"
-		}
-		ft := fmt.Sprintf("%s (%v%s)", ct.ColumnName, ct.ColumnType, fn)
+// func printParentTable(owner string, relations []source.Relation) {
+// 	var tbl table.Table
+// 	tbl = table.New("Schema", "Name", "PK", "FK", "Constraint")
+// 	for _, ct := range relations {
+// 		fn, pn := "", ""
+// 		if ct.ColumnNullable {
+// 			fn = "*"
+// 		}
+// 		ft := fmt.Sprintf("%s (%v%s)", ct.ColumnName, ct.ColumnType, fn)
 
-		if ct.OwnerColumnNullable {
-			pn = "*"
-		}
+// 		if ct.OwnerColumnNullable {
+// 			pn = "*"
+// 		}
 
-		pt := fmt.Sprintf("%s (%v%s)", ct.OwnerColumnName, ct.OwnerColumnType, pn)
-		tbl.AddRow(ct.Schema, ct.Name, ft, pt, ct.ContraintName)
-	}
+// 		pt := fmt.Sprintf("%s (%v%s)", ct.OwnerColumnName, ct.OwnerColumnType, pn)
+// 		tbl.AddRow(ct.Schema, ct.Name, ft, pt, ct.ContraintName)
+// 	}
 
-	tbl.Print()
-}
-
-func getSourceName() string {
-	defaultSource := mhConfig.DefaultSource
-
-	if len(defaultSource) == 0 {
-		if len(mhConfig.Sources) == 0 {
-			defaultSource = ""
-		} else {
-			for _, s := range mhConfig.Sources {
-
-				defaultSource = s.Name
-				break
-			}
-		}
-
-	}
-
-	return defaultSource
-}
+// 	tbl.Print()
+// }

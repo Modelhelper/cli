@@ -26,9 +26,8 @@ import (
 	"time"
 
 	"modelhelper/cli/app"
-	"modelhelper/cli/input"
+
 	"modelhelper/cli/tpl"
-	"modelhelper/cli/types"
 
 	"github.com/spf13/cobra"
 )
@@ -121,11 +120,11 @@ func init() {
 	generateCmd.Flags().Bool("demo", false, "Uses a demo as input source, this will override any other input sources (entity, graphql) ")
 }
 
-func testTable() *types.EntityImportModel {
-	table := types.EntityImportModel{
-		Code: types.CodeImportModel{
+func testTable() *tpl.EntityImportModel {
+	table := tpl.EntityImportModel{
+		Code: tpl.CodeImportModel{
 			Language: "cs",
-			Creator:  types.CreatorImportModel{CompanyName: "Patogen", DeveloperName: "Hans-Petter Eitvet"},
+			Creator:  tpl.CreatorImportModel{CompanyName: "Patogen", DeveloperName: "Hans-Petter Eitvet"},
 			Types:    testTypes(),
 			Imports: []string{
 				"using Microsoft.Logging;",
@@ -135,7 +134,7 @@ func testTable() *types.EntityImportModel {
 		Name:           "Contact",
 		Description:    "This is a description provided from the table",
 		HasDescription: true,
-		Columns: []types.EntityColumnImportModel{
+		Columns: []tpl.EntityColumnImportModel{
 			{Name: "Id", DataType: "int", IsNullable: false, HasDescription: true, Description: "Description for this column"},
 			{Name: "FirstName", DataType: "varchar", IsNullable: false},
 			{Name: "LastName", DataType: "varchar", IsNullable: false},
@@ -146,22 +145,22 @@ func testTable() *types.EntityImportModel {
 			{Name: "ChildTest", DataType: "varchar", IsNullable: true, HasPrefix: true, NameWithoutPrefix: "Test"},
 		},
 	}
-	c1 := types.EntityRelation{
+	c1 := tpl.EntityRelation{
 		Name: "ContactAddress",
-		ReleatedColumn: types.EntityColumnProps{
+		ReleatedColumn: tpl.EntityColumnProps{
 			Name: "ContactId", DataType: "int", IsNullable: true,
 		},
-		OwnerColumn: types.EntityColumnProps{
+		OwnerColumn: tpl.EntityColumnProps{
 			Name: "Id", DataType: "int", IsNullable: false,
 		},
 	}
 
-	p1 := types.EntityRelation{
+	p1 := tpl.EntityRelation{
 		Name: "ContactType",
-		ReleatedColumn: types.EntityColumnProps{
+		ReleatedColumn: tpl.EntityColumnProps{
 			Name: "TypeId", DataType: "int", IsNullable: true,
 		},
-		OwnerColumn: types.EntityColumnProps{
+		OwnerColumn: tpl.EntityColumnProps{
 			Name: "Id", DataType: "int", IsNullable: false,
 		},
 	}
@@ -171,28 +170,28 @@ func testTable() *types.EntityImportModel {
 	return &table
 }
 
-func testTypes() map[string]types.CodeTypeImportModel {
-	tl := make(map[string]types.CodeTypeImportModel)
+func testTypes() map[string]tpl.CodeTypeImportModel {
+	tl := make(map[string]tpl.CodeTypeImportModel)
 
-	tl["model"] = types.CodeTypeImportModel{
+	tl["model"] = tpl.CodeTypeImportModel{
 		NamePostfix: "",
 		NameSpace:   "Testing.Models",
 		Key:         "key",
 		Imports:     []string{"using HotChocolate;"},
 		// Imports:     []string{},
 	}
-	tl["resolver"] = types.CodeTypeImportModel{
+	tl["resolver"] = tpl.CodeTypeImportModel{
 		NamePostfix: "Resolver",
 		NameSpace:   "Testing.Resolvers",
 		Key:         "key",
 	}
-	tl["inteface"] = types.CodeTypeImportModel{
+	tl["inteface"] = tpl.CodeTypeImportModel{
 		NamePostfix: "Repository",
 		NameSpace:   "Testing.Data",
 		NamePrefix:  "I",
 		Key:         "key",
 	}
-	tl["repository"] = types.CodeTypeImportModel{
+	tl["repository"] = tpl.CodeTypeImportModel{
 		NamePostfix: "Repository",
 		NameSpace:   "Testing.Data",
 		Key:         "key",
@@ -200,23 +199,23 @@ func testTypes() map[string]types.CodeTypeImportModel {
 	return tl
 }
 
-func getEntityModel(name string) interface{} {
-	src := source
+// func getEntityModel(name string) interface{} {
+// 	src := source
 
-	if len(source) == 0 {
-		src = getSourceName()
-	}
-	input := input.GetSource(src, mhConfig)
+// 	if len(source) == 0 {
+// 		src = getSourceName()
+// 	}
+// 	input := input.GetSource(src, mhConfig)
 
-	e, err := input.Entity(name)
-	if err == nil {
-		fmt.Println("The entity could not be found")
-	}
+// 	e, err := input.Entity(name)
+// 	if err == nil {
+// 		fmt.Println("The entity could not be found")
+// 	}
 
-	// em := tpl.EntityToModel{
-	// 	Entity: e,
-	// }
-	// m := em.Convert()
+// 	// em := tpl.EntityToModel{
+// 	// 	Entity: e,
+// 	// }
+// 	// m := em.Convert()
 
-	return e
-}
+// 	return e
+// }
