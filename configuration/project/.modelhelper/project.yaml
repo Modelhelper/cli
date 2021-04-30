@@ -3,6 +3,7 @@ version: 3.0
 defaultSource: lab
 defaultKey: api
 
+# should sources be defined here?
 sources:
   -lab:
     name: lab
@@ -112,7 +113,7 @@ code:
       ]
     -repository:   
       key: "repository"   
-      namePostfix: Repository
+      namePostfix: Repository      
     -service:
       key: "service"  
       namePostfix: "Service"
@@ -121,6 +122,14 @@ code:
     -apiModels:
       key: "api.models"      
       path: ".\\src\\PatoLab.Api.Core\\Models"       
+
+  
+  fileHeader: |
+    Text to place on the top of the file. This will create a template block, called fileheader-block.
+    Inside it's possible to use go template syntax
+    e.g Customer: {{ .Project.CustomerName }} and {{ .Developer.Name }}, {{ .Developer.Email }}
+
+    This file connects to {{ .Source.Name }} to retrive data from {{ .Name }}
 
 ## this section lets you provide 
 options:

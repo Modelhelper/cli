@@ -1,0 +1,15 @@
+# Shared for all models, reflects data from a combination of config and project
+Code:
+  Inject:
+
+
+Developer: # fetched from config
+  Name: Bob Coder
+  Email: boc@coder.com
+
+Source: 
+  Name: Server | path that the input data is fetching from
+
+Project:
+  Name: Name of the project
+  Customer: name of the customer
