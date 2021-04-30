@@ -5,8 +5,11 @@ go 1.16
 require (
 	github.com/denisenkom/go-mssqldb v0.9.0
 	github.com/gertd/go-pluralize v0.1.7
+	github.com/go-playground/universal-translator v0.17.0 // indirect
+	github.com/go-playground/validator v9.31.0+incompatible // indirect
 	github.com/gookit/color v1.3.6
 	github.com/gorilla/mux v1.8.0
+	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/pkg/browser v0.0.0-20210115035449-ce105d075bb4
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.1
