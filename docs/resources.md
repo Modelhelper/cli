@@ -17,6 +17,22 @@ Må finne ut av denne: https://pkg.go.dev/mod/golang.org/x/text?tab=overview
 
 StripPrefix
 
+CLI UI
+https://github.com/manifoldco/promptui
+https://github.com/rivo/tview
+https://github.com/gdamore/tcell
+https://github.com/gizak/termui
+https://github.com/wong2/pick
+https://manifold.co/blog/improve-your-command-line-go-application-with-promptui-6c4e6fb5a1bc
+https://github.com/asaskevich/govalidator
+https://appliedgo.net/tui/
+
+
+Progress
+https://github.com/cheggaaa/pb
+https://github.com/schollz/progressbar
+https://github.com/gosuri/uiprogress
+
 
 Use Io.Reader and Io.Writer when possible
 
