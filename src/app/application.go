@@ -67,7 +67,7 @@ func Logo() string {
 888       888  "Y88P"   "Y88888  "Y8888  888 888    888  "Y8888  888 88888P"   "Y8888  888     
                                                                      888                       
                                                                      888                       
-                                                                     888           CLI v%v             
+                                                                     888   CLI v%v             
 `
 	return fmt.Sprintf(logo, Version)
 }
