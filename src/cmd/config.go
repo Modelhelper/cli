@@ -22,7 +22,9 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
+	"modelhelper/cli/config"
+	"os/exec"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -31,18 +33,22 @@ import (
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "<not implemented>",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(mhConfig.AppVersion)
-		fmt.Println(mhConfig.ConfigVersion)
-		fmt.Println(mhConfig.Languages.Definitions)
-		fmt.Println(mhConfig.Templates.Location)
 
+		// cfg := modelHelperApp.Configuration
+		// fmt.Println(cfg.AppVersion)
+		// fmt.Println(cfg.ConfigVersion)
+		// fmt.Println(cfg.Languages.Definitions)
+		// fmt.Println(cfg.Templates.Location)
+
+		open, _ := cmd.Flags().GetBool("open")
+		if open {
+			loc := filepath.Join(config.Location(), "config.yaml")
+			exe := exec.Command("code", loc)
+			if exe.Run() != nil {
+				//vim didn't exit with status code 0
+			}
+		}
 		// for _, source := range mhConfig.Sources {
 		// 	fmt.Println(source.Name)
 
@@ -81,4 +87,6 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(configCmd)
+
+	configCmd.Flags().Bool("open", false, "Opens the config file in VS Code")
 }

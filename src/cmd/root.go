@@ -30,7 +30,8 @@ import (
 var modelHelperApp *app.Application
 
 var cfgFile string
-var mhConfig config.Config
+
+// var mhConfig config.Config
 var source string
 
 // rootCmd represents the base command when called without any subcommands
@@ -88,11 +89,11 @@ func Execute() {
 	}
 }
 
-func GetConfig() *config.Config {
-	return &mhConfig
-}
+// func GetConfig() *config.Config {
+// 	return &mhConfig
+// }
 func init() {
-	cobra.OnInitialize(initConfig)
+	// cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVarP(&source, "source", "s", "", "Sets the source")
 
 }
@@ -118,10 +119,10 @@ func initConfig() {
 		}
 	}
 
-	err = viper.Unmarshal(&mhConfig)
-	if err != nil {
-		// t.Fatalf("unable to decode into struct, %v", err)
-	}
+	// err = viper.Unmarshal(&mhConfig)
+	// if err != nil {
+	// 	// t.Fatalf("unable to decode into struct, %v", err)
+	// }
 	// if cfgFile != "" {
 	// 	// Use config file from the flag.
 	// 	viper.SetConfigFile(cfgFile)
@@ -160,6 +161,6 @@ func initConfig() {
 
 	// }
 
-	app.SetConfig(mhConfig)
+	//app.SetConfig(mhConfig)
 
 }

@@ -44,11 +44,15 @@ var generateCmd = &cobra.Command{
 		codeOnly, _ := cmd.Flags().GetBool("code-only")
 		isDemo, _ := cmd.Flags().GetBool("demo")
 		entities, _ := cmd.Flags().GetStringArray("entity")
+
+		cgf := modelHelperApp.Configuration
 		if isDemo == false && len(entities) == 0 {
 			return
 		}
 
-		templates, err := cmd.Flags().GetStringArray("template")
+		//ctx := modelHelperApp.CreateContext()
+
+		inputTemplates, err := cmd.Flags().GetStringArray("template")
 
 		if err != nil {
 			panic(err)
@@ -58,20 +62,24 @@ var generateCmd = &cobra.Command{
 		start := time.Now()
 
 		var generatedCode []string
-		if len(templates) > 0 {
+		if len(inputTemplates) > 0 {
 
 			tl := tpl.TemplateLoader{
-				Directory: app.TemplateFolder(mhConfig.Templates.Location),
+				Directory: app.TemplateFolder(cgf.Templates.Location),
 			}
 
-			for _, tname := range templates {
-				tt, _ := tl.LoadTemplate(tname)
+			allTemplates, _ := tl.LoadTemplates()
+			//blocks := tpl.ExtractBlocks(&allTemplates)
 
-				if tt != nil {
-					// var m = types.EntityImportModel{}
+			for _, tname := range inputTemplates {
+				// var tt *tpl.Template
+				fmt.Println(tname)
+				currentTemplate, found := allTemplates[tname]
+
+				if found {
 
 					if isDemo {
-						o, _ := tt.Generate(testTable())
+						o, _ := currentTemplate.Generate(testTable())
 
 						generatedCode = append(generatedCode, o)
 
@@ -79,7 +87,7 @@ var generateCmd = &cobra.Command{
 
 						for _, entity := range entities {
 							fmt.Println(entity)
-							o, _ := tt.Generate(testTable())
+							o, _ := currentTemplate.Generate(testTable())
 							generatedCode = append(generatedCode, o)
 						}
 					}

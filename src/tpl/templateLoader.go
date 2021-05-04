@@ -1,7 +1,6 @@
 package tpl
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -18,45 +17,90 @@ type TemplateLoader struct {
 type TemplateLoaderResult struct {
 }
 
-func (l *TemplateLoader) LoadBlock(path string, pattern string) (*[]Template, error) {
-	return nil, nil
-}
+type TemplateMap map[string]Template
 
-func (l *TemplateLoader) LoadSnippets(path string, pattern string) (*[]Template, error) {
-	return nil, nil
-}
+// type TemplateDirectory struct {
+// 	Directory
+// }
+func ExtractBlocks(templates *TemplateMap) TemplateMap {
+	blocks := make(TemplateMap)
 
-func (l *TemplateLoader) LoadTemplates(path string, pattern string) (*[]Template, error) {
-	templates := []Template{}
-	files := loadTemplateFiles(l.Directory, "*")
+	for k, t := range *templates {
 
-	for k, file := range files {
-		fmt.Println(k, file)
+		if (strings.ToLower(t.Type)) == "block" {
+			blocks[k] = t
+		}
 	}
 
-	return &templates, nil
+	return blocks
 }
+func (loader *TemplateLoader) LoadTemplates() (TemplateMap, error) {
+	templates := make(TemplateMap)
+	path := loader.Directory
 
-func (l *TemplateLoader) LoadTemplate(name string) (*Template, error) {
-	files := loadTemplateFiles(l.Directory, "*")
-
-	var f = files[name]
-	// var t Template
-
-	if len(f) > 0 {
-		t, err := loadTemplateFromFile(f)
-		t.Name = name
+	err := filepath.Walk(path, func(p string, info os.FileInfo, err error) error {
 		if err != nil {
-			log.Fatalf("cannot load file: %v", err)
-			return nil, err
+			return err
 		}
 
-		// t.Name = name
-		return t, nil
+		if info.IsDir() == false && strings.HasSuffix(p, "yaml") {
+			name := convertFileNameToTemplateName(path, p)
+			t, err := loadTemplateFromFile(p)
+			if err != nil {
+
+			}
+
+			templates[name] = *t
+		}
+
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
 	}
 
-	return nil, nil
+	return templates, nil
 }
+
+// func (l *TemplateLoader) LoadBlock(path string, pattern string) (*[]Template, error) {
+// 	return nil, nil
+// }
+
+// func (l *TemplateLoader) LoadSnippets(path string, pattern string) (*[]Template, error) {
+// 	return nil, nil
+// }
+
+// func (l *TemplateLoader) LoadTemplates(path string, pattern string) (*[]Template, error) {
+// 	templates := []Template{}
+// 	files := loadTemplateFiles(l.Directory, "*")
+
+// 	for k, file := range files {
+// 		fmt.Println(k, file)
+// 	}
+
+// 	return &templates, nil
+// }
+
+// func (l *TemplateLoader) LoadTemplate(name string) (*Template, error) {
+// 	files := loadTemplateFiles(l.Directory, "*")
+
+// 	var f = files[name]
+// 	// var t Template
+
+// 	if len(f) > 0 {
+// 		t, err := loadTemplateFromFile(f)
+// 		t.Name = name
+// 		if err != nil {
+// 			log.Fatalf("cannot load file: %v", err)
+// 			return nil, err
+// 		}
+
+// 		// t.Name = name
+// 		return t, nil
+// 	}
+
+// 	return nil, nil
+// }
 
 func loadTemplateFromFile(fileName string) (*Template, error) {
 	var t *Template

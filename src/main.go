@@ -2,33 +2,38 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"modelhelper/cli/app"
 	"modelhelper/cli/cmd"
 	"modelhelper/cli/config"
 	"modelhelper/cli/project"
 	"modelhelper/cli/source"
+	"modelhelper/cli/tpl"
 	"path/filepath"
+	"time"
+
+	"gopkg.in/yaml.v2"
 )
 
 // "fmt"
 
 func main() {
 
-	testContext()
-	//execute()
+	testTemplateLoader()
+	//testContext()
+	// execute()
 
 }
 
 func execute() {
 	a := app.Application{}
-	a.Configuration = config.Load()
 
 	rootExists := config.LocationExists()
 
 	if rootExists == false {
-		cfg := config.Load()
-		a.Configuration = cfg
+
+		a.Configuration = config.Load()
 
 		err := a.Initialize()
 
@@ -41,6 +46,67 @@ func execute() {
 		cmd.SetApplication(&a)
 		cmd.Execute()
 	}
+}
+func testTemplateLoader() {
+
+	st := time.Now()
+	fileName := "C:\\dev\\templates\\templates\\tutorial\\test.yaml"
+	fmt.Println("load")
+	dat, e := ioutil.ReadFile(fileName)
+	if e != nil {
+		log.Fatalf("cannot load file: %v", e)
+	}
+
+	fmt.Println("end")
+	dur := time.Since(st)
+
+	fmt.Printf("\nDur: %v ms", dur.Milliseconds())
+	it := 1000
+	loadFullTemplate(dat, it)
+	loadTypeTemplate(dat, it)
+	// startFull := time.Now()
+	// for i := 1; i < it; i++ {
+	// 	loadFullTemplate(dat)
+	// }
+	// durationFull := time.Since(startFull)
+	// fmt.Printf("\nFull template: %v iterations, time: %v ms", it, durationFull.Milliseconds())
+
+}
+
+func loadFullTemplate(dat []byte, iterations int) {
+	strt := time.Now()
+	for i := 1; i < iterations; i++ {
+		var p tpl.Template
+
+		err := yaml.Unmarshal(dat, &p)
+		if err != nil {
+			log.Fatalf("cannot unmarshal data: %v", err)
+
+		}
+	}
+	dur := time.Since(strt)
+	fmt.Printf("\nFull template: %v iterations, time: %v ms", iterations, dur.Milliseconds())
+
+}
+func loadTypeTemplate(dat []byte, iterations int) {
+
+	strt := time.Now()
+	for i := 1; i < iterations; i++ {
+		var p TypeTpl
+
+		err := yaml.Unmarshal(dat, &p)
+		if err != nil {
+			log.Fatalf("cannot unmarshal data: %v", err)
+
+		}
+	}
+	dur := time.Since(strt)
+	fmt.Printf("\nType template: %v iterations, time: %v ms", iterations, dur.Milliseconds())
+
+}
+
+type TypeTpl struct {
+	Type string `yaml:"type"`
 }
 
 func testConfig() {

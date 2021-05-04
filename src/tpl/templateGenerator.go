@@ -15,23 +15,26 @@ import (
 )
 
 type Template struct {
-	Name            string `yaml:"name"`
-	Version         string `yaml:"version"`
-	InjectKey       string
-	Language        string
-	LanguageVersion string
-	Scope           TemplateScope
-	Type            string
-	Description     string
-	Short           string
-	Tags            []string
-	Groups          []string
-	Import          string
-	LocationKey     string
-	ExportFileName  string
-	Body            string `yaml:"body"`
+	// InjectKey       string
+	// LanguageVersion string
+	// Scope           TemplateScope
+	Name        string         `yaml:"name"`
+	Version     string         `yaml:"version"`
+	Language    string         `yaml:"language"`
+	Type        string         `yaml:"type"`
+	Description string         `yaml:"description"`
+	Short       string         `yaml:"short"`
+	Tags        []string       `yaml:"tags"`
+	Groups      []string       `yaml:"groups"`
+	Export      TemplateExport `yaml:"export"`
+	Model       string         `yaml:"model"`
+	Body        string         `yaml:"body"`
 }
 
+type TemplateExport struct {
+	FileName string `yaml:"fileName"`
+	Key      string `yaml:"key"`
+}
 type TemplateType struct {
 	Name      string
 	CanExport bool
