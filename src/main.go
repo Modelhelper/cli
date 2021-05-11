@@ -13,16 +13,16 @@ import (
 	"path/filepath"
 	"time"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // "fmt"
 
 func main() {
 
-	testTemplateLoader()
+	// testTemplateLoader()
 	//testContext()
-	// execute()
+	execute()
 
 }
 
@@ -50,7 +50,7 @@ func execute() {
 func testTemplateLoader() {
 
 	st := time.Now()
-	fileName := "C:\\dev\\templates\\templates\\tutorial\\test.yaml"
+	fileName := "C:\\Users\\hans-petter\\.modelhelper\\templates\\tutorial\\strings.yaml"
 	fmt.Println("load")
 	dat, e := ioutil.ReadFile(fileName)
 	if e != nil {
@@ -61,7 +61,7 @@ func testTemplateLoader() {
 	dur := time.Since(st)
 
 	fmt.Printf("\nDur: %v ms", dur.Milliseconds())
-	it := 1000
+	it := 10000
 	loadFullTemplate(dat, it)
 	loadTypeTemplate(dat, it)
 	// startFull := time.Now()
