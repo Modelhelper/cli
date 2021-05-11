@@ -47,6 +47,10 @@ var entityCmd = &cobra.Command{
 
 		src := con.LoadSource()
 
+		if src == nil {
+			fmt.Println("Could not load the source, check configuration")
+			return
+		}
 		if len(args) > 0 {
 			en := args[0]
 			e, err := src.Entity(en)

@@ -2,20 +2,23 @@ package app
 
 import (
 	"log"
+	"modelhelper/cli/code"
+	"modelhelper/cli/config"
 	"modelhelper/cli/project"
 	"modelhelper/cli/source"
-	"modelhelper/cli/tpl"
 )
 
 type Context struct {
-	ProjectExists     bool
-	CurrentProject    *project.Project
-	Templates         *[]tpl.Template
-	Blocks            *[]tpl.Template
+	ProjectExists  bool
+	CurrentProject *project.Project
+	// Templates         *[]tpl.Template
+	// Blocks            *[]tpl.Template
 	Connections       map[string]source.Connection
 	DefaultConnection string
-	Languages         *map[string]interface{}
+	Languages         *map[string]code.LanguageDefinition
 	Options           *map[string]interface{}
+	CurrentLanguage   code.LanguageDefinition
+	CurrentConnection source.Connection
 }
 
 func (a *Application) CreateContext() *Context {
@@ -23,17 +26,18 @@ func (a *Application) CreateContext() *Context {
 
 	con := make(map[string]source.Connection)
 
-	if a.Configuration != nil {
+	if a.Configuration == nil {
+		a.Configuration = config.Load()
+	}
 
-		if len(a.Configuration.DefaultConnection) > 0 {
-			c.DefaultConnection = a.Configuration.DefaultConnection
-		}
+	if len(a.Configuration.DefaultConnection) > 0 {
+		c.DefaultConnection = a.Configuration.DefaultConnection
+	}
 
-		if a.Configuration.Connections != nil {
+	if a.Configuration.Connections != nil {
 
-			for ck, cv := range a.Configuration.Connections {
-				con[ck] = cv
-			}
+		for ck, cv := range a.Configuration.Connections {
+			con[ck] = cv
 		}
 	}
 

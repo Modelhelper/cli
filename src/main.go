@@ -10,6 +10,7 @@ import (
 	"modelhelper/cli/project"
 	"modelhelper/cli/source"
 	"modelhelper/cli/tpl"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -20,8 +21,6 @@ import (
 
 func main() {
 
-	// testTemplateLoader()
-	//testContext()
 	execute()
 
 }
@@ -45,6 +44,27 @@ func execute() {
 	} else {
 		cmd.SetApplication(&a)
 		cmd.Execute()
+	}
+}
+
+func testEnvVar() {
+
+	// (\%)(?:(?=(\\?))\2.)*?\1
+	// (\%.*?\%)
+	// (?<=\%)(.*?)(?=\%)
+	// %SECRET:CONN_DB%
+	// %ENV:CONN_DB%
+	key := "PWD_LAB"
+
+	connStr, exist := os.LookupEnv(key)
+	if exist {
+		fmt.Println(connStr)
+	} else {
+		fmt.Println("Set password " + key)
+		err := os.Setenv(key, "This is a password")
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
 }
 func testTemplateLoader() {

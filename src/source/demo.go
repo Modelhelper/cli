@@ -1,5 +1,10 @@
 package source
 
+import "embed"
+
+//go:embed entities/*
+var entities embed.FS
+
 type DemoSource struct{}
 
 func (server *DemoSource) Entity(name string) (*Entity, error) {

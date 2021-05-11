@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"modelhelper/cli/app"
+	"modelhelper/cli/code"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,6 +15,8 @@ import (
 
 	"github.com/gertd/go-pluralize"
 )
+
+var _ctx *app.Context
 
 type Template struct {
 	// InjectKey       string
@@ -51,7 +55,9 @@ var (
 	}
 )
 
-func (t *Template) Generate(model interface{}) (string, error) {
+func (t *Template) Generate(model interface{}, ctx *app.Context) (string, error) {
+	_ctx = ctx
+
 	blocks := []*Template{
 		testBlockLvl1(),
 		testBlockLvl2(),
@@ -152,14 +158,15 @@ func SingularForm(input string) string {
 }
 
 func dataTypeWithNullcheck(isNullable bool, input string) string {
+	return ""
 
-	dt := dataTypeConverter(input)
+	// dt := dataTypeConverter(input)
 
-	// if reflect.TypeOf(isNullable) == reflect.Typeof(bool)
-	if isNullable {
-		return nullableDatatype(dt)
-	}
-	return dt
+	// // if reflect.TypeOf(isNullable) == reflect.Typeof(bool)
+	// if isNullable {
+	// 	return nullableDatatype(dt)
+	// }
+	// return dt
 }
 func alternativeNullableDatatype(input string) string {
 	dict := make(map[string]string)
@@ -190,18 +197,24 @@ func nullableDatatype(input string) string {
 	return input
 }
 
-func dataTypeConverter(input string) string {
-	dict := make(map[string]string)
-	dict["varchar"] = "string"
-	dict["nvarchar"] = "string"
-	dict["int"] = "int"
-	dict["bigint"] = "long"
-	dict["bit"] = "bool"
+func dataTypeConverter(input string, nullable bool) string {
+	dict := make(map[string]code.LangDefDataType)
+	dict["varchar"] = code.LangDefDataType{Key: "varchar", NotNull: "string", Nullable: "string"}
+	dict["nvarchar"] = code.LangDefDataType{Key: "varchar", NotNull: "string", Nullable: "string"}
+	dict["int"] = code.LangDefDataType{Key: "varchar", NotNull: "string", Nullable: "string"}
+	dict["bigint"] = code.LangDefDataType{Key: "varchar", NotNull: "string", Nullable: "string"}
+	dict["bit"] = code.LangDefDataType{Key: "bool", NotNull: "string", Nullable: "string"}
 
-	output := dict[input]
+	output, found := dict[input]
 
-	if len(output) > 0 {
-		return output
+	if !found {
+		return input
+	}
+
+	if nullable {
+		return output.Nullable
+	} else {
+		return output.NotNull
 	}
 
 	return input

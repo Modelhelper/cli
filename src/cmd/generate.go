@@ -56,6 +56,8 @@ var generateCmd = &cobra.Command{
 			fmt.Println("Use this as configuration file")
 		}
 
+		ctx := modelHelperApp.CreateContext()
+
 		cgf := modelHelperApp.Configuration
 		if isDemo == false && len(entities) == 0 {
 			return
@@ -90,7 +92,7 @@ var generateCmd = &cobra.Command{
 				if found {
 
 					if isDemo {
-						o, _ := currentTemplate.Generate(testTable())
+						o, _ := currentTemplate.Generate(testTable(), ctx)
 
 						generatedCode = append(generatedCode, o)
 
@@ -98,7 +100,7 @@ var generateCmd = &cobra.Command{
 
 						for _, entity := range entities {
 							fmt.Println(entity)
-							o, _ := currentTemplate.Generate(testTable())
+							o, _ := currentTemplate.Generate(testTable(), ctx)
 							generatedCode = append(generatedCode, o)
 						}
 					}
