@@ -4,6 +4,11 @@ https://curtisvermeeren.github.io/2017/09/14/Golang-Templates-Cheatsheet
 https://gowebexamples.com/templates/
 https://blog.gopheracademy.com/advent-2017/using-go-templates/
 https://golang.org/pkg/text/template/
+https://pkg.go.dev/github.com/google/go-cmp/cmp#Diff
+
+Testing
+https://github.com/onsi/ginkgo
+https://github.com/onsi/gomega
 
 
 pluralisering etc
