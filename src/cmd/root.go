@@ -32,7 +32,7 @@ var modelHelperApp *app.Application
 var cfgFile string
 
 // var mhConfig config.Config
-var source string
+// var source string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -94,7 +94,7 @@ func Execute() {
 // }
 func init() {
 	// cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVarP(&source, "source", "s", "", "Sets the source")
+	//rootCmd.PersistentFlags().StringVarP(&source, "source", "s", "", "Sets the source")
 
 }
 

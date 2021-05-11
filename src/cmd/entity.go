@@ -24,7 +24,8 @@ package cmd
 import (
 	"fmt"
 
-	table "modelhelper/cli/ui"
+	"modelhelper/cli/source"
+	"modelhelper/cli/ui"
 
 	_ "github.com/gookit/color"
 	"github.com/spf13/cobra"
@@ -66,43 +67,8 @@ var entityCmd = &cobra.Command{
 				fmt.Println(e.Description)
 				fmt.Println()
 			}
-			var tbl table.Table
-			if skipDescription {
-				tbl = table.New("Name", "Type", "Nullable", "IsIdentity", "PK", "FK")
-			} else {
-				tbl = table.New("Name", "Type", "Nullable", "IsIdentity", "PK", "FK", "Description")
-			}
 
-			for _, c := range e.Columns {
-				null := "false"
-				if c.IsNullable {
-					null = "true"
-				}
-				id := ""
-				if c.IsIdentity {
-					id = "yes"
-				}
-
-				pk := ""
-				if c.IsPrimaryKey {
-					pk = "PK"
-				}
-
-				fk := ""
-				if c.IsForeignKey {
-					fk = "FK"
-				}
-				if skipDescription {
-					tbl.AddRow(c.Name, c.DataType, null, id, pk, fk)
-				} else {
-					tbl.AddRow(c.Name, c.DataType, null, id, pk, fk, c.Description)
-
-				}
-			}
-
-			fmt.Printf("\n\nColumns\n")
-			fmt.Printf("-------------------------------------------\n\n")
-			tbl.Print()
+			renderColumns(&e.Columns)
 
 			// fmt.Printf("\n\nONE TO MANY (.Children)\n")
 			// fmt.Printf("-------------------------------------------\n\n")
@@ -120,22 +86,8 @@ var entityCmd = &cobra.Command{
 				return
 			}
 
-			var tbl table.Table
+			ui.RenderTable(ents, ents)
 
-			if skipDescription {
-				tbl = table.New("Name", "Schema", "Alias", "Rows")
-				for _, c := range *ents {
-					tbl.AddRow(c.Name, c.Schema, c.Alias, c.RowCount)
-				}
-			} else {
-				tbl = table.New("Name", "Schema", "Alias", "Rows", "Description")
-				for _, c := range *ents {
-					tbl.AddRow(c.Name, c.Schema, c.Alias, c.RowCount, c.Description)
-				}
-
-			}
-
-			tbl.Print()
 		}
 
 	},
@@ -145,6 +97,18 @@ func init() {
 	rootCmd.AddCommand(entityCmd)
 
 	entityCmd.Flags().BoolVarP(&skipDescription, "skip-description", "", false, "Does not show description")
+}
+
+func renderColumns(cl *source.ColumnList) {
+
+	ui.PrintConsoleTitle("Columns")
+
+	colr := source.ColumnToTableRenderer{
+		IncludeDescription: !skipDescription,
+		Columns:            cl,
+	}
+
+	ui.RenderTable(&colr, &colr)
 }
 
 // func printChildTable(owner string, relations []source.Relation) {

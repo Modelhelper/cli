@@ -44,6 +44,17 @@ var generateCmd = &cobra.Command{
 		codeOnly, _ := cmd.Flags().GetBool("code-only")
 		isDemo, _ := cmd.Flags().GetBool("demo")
 		entities, _ := cmd.Flags().GetStringArray("entity")
+		tempPath, _ := cmd.Flags().GetString("template-path")
+
+		if len(tempPath) > 0 {
+			fmt.Println("Use this path to template")
+		}
+
+		configFile, _ := cmd.Flags().GetString("config")
+
+		if len(configFile) > 0 {
+			fmt.Println("Use this as configuration file")
+		}
 
 		cgf := modelHelperApp.Configuration
 		if isDemo == false && len(entities) == 0 {
@@ -126,6 +137,9 @@ func init() {
 	generateCmd.Flags().Bool("export-bykey", false, "Exports the code using the template keys")
 	generateCmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code")
 	generateCmd.Flags().Bool("demo", false, "Uses a demo as input source, this will override any other input sources (entity, graphql) ")
+
+	generateCmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
+	generateCmd.Flags().String("config", "", "Instructs the program to use this config as the config")
 }
 
 func testTable() *tpl.EntityImportModel {
