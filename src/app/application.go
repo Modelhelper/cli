@@ -238,17 +238,18 @@ func (a *Application) CreateContext() *Context {
 
 	con := make(map[string]source.Connection)
 
-	if a.Configuration != nil {
+	if a.Configuration == nil {
+		a.Configuration = config.Load()
+	}
 
-		if len(a.Configuration.DefaultConnection) > 0 {
-			c.DefaultConnection = a.Configuration.DefaultConnection
-		}
+	if len(a.Configuration.DefaultConnection) > 0 {
+		c.DefaultConnection = a.Configuration.DefaultConnection
+	}
 
-		if a.Configuration.Connections != nil {
+	if a.Configuration.Connections != nil {
 
-			for ck, cv := range a.Configuration.Connections {
-				con[ck] = cv
-			}
+		for ck, cv := range a.Configuration.Connections {
+			con[ck] = cv
 		}
 	}
 
