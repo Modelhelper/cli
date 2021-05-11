@@ -7,6 +7,6 @@ type Postgres struct {
 func (server *Postgres) Entity(name string) (*Entity, error) {
 	return nil, nil
 }
-func (server *Postgres) Entities(pattern string) (*[]Entity, error) {
+func (server *Postgres) Entities(pattern string) (*EntityList, error) {
 	return nil, nil
 }

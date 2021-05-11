@@ -13,25 +13,25 @@ type ConnectionProvider interface {
 
 type Source interface {
 	Entity(name string) (*Entity, error)
-	Entities(pattern string) (*[]Entity, error)
+	Entities(pattern string) (*EntityList, error)
 }
 
 // should be renamed
 type Connection struct {
-	Name             string
-	Description      string
-	ConnectionString string
-	Schema           string
-	Type             string
-	Groups           map[string]ConnectionGroup
-	Options          map[string]interface{}
+	Name             string                     `json:"name" yaml:"name"`
+	Description      string                     `json:"description" yaml:"description"`
+	ConnectionString string                     `json:"connectionString" yaml:"connectionString"`
+	Schema           string                     `json:"schema" yaml:"schema"`
+	Type             string                     `json:"type" yaml:"type"`
+	Groups           map[string]ConnectionGroup `json:"groups" yaml:"groups"`
+	Options          map[string]interface{}     `json:"options" yaml:"options"`
 }
 
 // should be renamed
 // should this be in the input source package, since it's shared among project, config and other input sources
 type ConnectionGroup struct {
-	Items   []string
-	Options map[string]interface{}
+	Items   []string               `yaml:"items" yaml:"items"`
+	Options map[string]interface{} `yaml:"options" yaml:"options"`
 }
 
 type DatabaseOptimizer interface {
