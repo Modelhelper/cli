@@ -22,7 +22,7 @@ defaultConnection: patest01
 connections: 
   patest01:
     type: mssql
-    connectionString: Data Source=patest01;Password=%**PWD_PATOLAB**%;User name=Test
+    connectionString: Data Source=patest01;Password={{ENV:PWD_PATOLAB}};User name=Test
     connection:
       userId: test
       pwd: "%**PWD_PATOLAB**%"
@@ -41,6 +41,8 @@ sources:
       dbo
       owner
     ]
+    entities:
+      - entity1
     type: database
     mapping: 
       IsActive:

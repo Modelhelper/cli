@@ -1,4 +1,4 @@
-language: <lang> # must be the same as template e.g cs, go, java
+language: cs # must be the same as template e.g cs, go, java
 version: 3.0
 
 usesNamespace: true
@@ -18,6 +18,8 @@ keys:
     postfix: Model
   repository:   
     postfix: Repository
+    inject:
+      - logging
     imports: [
       "using {{ .Code.RootNamespace }}.Extensions"
     ]
@@ -35,8 +37,6 @@ keys:
 inject:  
   logging:
     name: ILogger<{{ .Name }}>
-    keys: [logging]
-    language: cs      
     propertyName: logger
     imports: [
       "using Microsoft.Logging"
@@ -52,38 +52,38 @@ datatypes:
   bigint: 
     notNull: Int64
     nullable: Int64?
-    nullableAlternative: nullable<decimal> # Int64
+    nullableAlternative: nullable<Int64> # Int64
   binary: 
     notNull: string
     nullable: string
     nullableAlternative: nullable<decimal> # Byte[]
   bit: 
-    notNull: string
-    nullable: string
-    nullableAlternative: nullable<decimal> # bool
+    notNull: bool
+    nullable: bool?
+    nullableAlternative: nullable<bool> # bool
   char: 
     notNull: string
     nullable: string
     nullableAlternative: nullable<decimal> # char
   date: 
-    notNull: string
-    nullable: string
-    nullableAlternative: nullable<decimal> # DateTime
+    notNull: DateTimeOffset
+    nullable: DateTimeOffset?
+    nullableAlternative: nullable<DateTimeOffset> # DateTime
   datetime: 
-    notNull: string
-    nullable: string
-    nullableAlternative: nullable<decimal> # DateTime
+    notNull: DateTimeOffset
+    nullable: DateTimeOffset?
+    nullableAlternative: nullable<DateTimeOffset> # DateTime
   datetime2: 
-    notNull: string
-    nullable: string
-    nullableAlternative: nullable<decimal> # DateTime
+    notNull: DateTimeOffset
+    nullable: DateTimeOffset?
+    nullableAlternative: nullable<DateTimeOffset> # DateTime
   datetimeoffset: 
-    notNull: string
-    nullable: string
-    nullableAlternative: nullable<decimal> # DateTime
+    notNull: DateTimeOffset
+    nullable: DateTimeOffset?
+    nullableAlternative: nullable<DateTimeOffset> # DateTime
   decimal: 
-    notNull: string
-    nullable: string
+    notNull: decimal
+    nullable: decimal?
     nullableAlternative: nullable<decimal> # decimal
   float: 
     notNull: string
