@@ -36,9 +36,9 @@ type TemplateExport struct {
 	Key      string `yaml:"key"`
 }
 type TemplateType struct {
-	Name      string
-	CanExport bool
-	IsSnippet bool
+	Name      string `yaml:"name"`
+	CanExport bool   `yaml:"canExport"`
+	IsSnippet bool   `yaml:"isSnippet"`
 }
 
 var fileTemplateType = TemplateType{Name: "file", IsSnippet: true, CanExport: false}
