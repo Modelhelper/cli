@@ -5,7 +5,7 @@ defaultKey: api
 
 name: "The name of the project"
 language: cs
-customerName: "the customers name, if any"
+ownerName: "the customers name, if any"
 
 connections:
   lab:
@@ -91,19 +91,29 @@ code:
       
 
   keys:
-    models:
+    model:
       postfix: Model
-      namespace: "PatoLab.Api.Core.Models"      
-    interfaces:   
+      namespace: "MyProject.Core.Models"   
+      imports: 
+        - "MyProject.Core.Models"   
+    interface:   
       postfix: Repository
       prefix: I
       imports: 
-        - "PatoLab.Api.Core.Models"
+        - "MyProject.Core.Models"
       
     repository:   
       inject:
         - user
-      postfix: Repository      
+        - connectionFactory
+        - logging
+      postfix: Repository
+    resover:   
+      inject:
+        - user
+        - connectionFactory
+        - logging
+      postfix: Resolver           
     service:
       postfix: "Service"
   
@@ -114,11 +124,6 @@ code:
 options:
   option_1: value_1
 
-# target version 3.6
-custom:
-  customer:
-    name: PatoGen Analyse AS
-    id: 12400C
 
 header: |
   Text to place on the top of the file. This will create a template block, called fileheader-block.
