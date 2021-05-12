@@ -45,6 +45,14 @@ https://github.com/golang/go/wiki/CommonMistakes
 https://github.com/uber-go/guide/blob/master/style.md#introduction
 https://github.com/golang/go/wiki/CodeReviewComments
 
+Logging:
+
+- https://github.com/sirupsen/logrus
+
+Database:
+- Badger: https://github.com/dgraph-io/badger
+- BBolt: https://github.com/etcd-io/bbolt
+
 Use Io.Reader and Io.Writer when possible
 
 https://www.youtube.com/watch?v=29LLRKIL_TI
