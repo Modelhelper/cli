@@ -52,48 +52,56 @@ var generateCmd = &cobra.Command{
 		// if isDemo == false && len(entityFlagArray) == 0 {
 		// 	return
 		// }
-
-		var entities []source.Entity
-
 		ctx := modelHelperApp.CreateContext()
+		// var ctx *app.Context
 		var cfg *config.Config
 		var prj *project.Project
+		var entities []source.Entity
 
-		conName := ctx.DefaultConnection
-
-		con := ctx.Connections[conName]
-		src := con.LoadSource()
-
-		if len(entityFlagArray) > 0 {
-			for _, entityName := range entityFlagArray {
-				entity, err := src.Entity(entityName)
-				if err != nil {
-					log.Fatalln(err)
-				}
-
-				entities = append(entities, *entity)
-			}
-		}
 		charCount := 0
 
-		if len(tempPath) > 0 {
-			fmt.Println("Use this path to template")
-		}
-
-		configFile, _ := cmd.Flags().GetString("config")
-
-		if len(configFile) > 0 {
-			fmt.Println("Use this as configuration file")
-			cfg = config.LoadFromFile(configFile)
-		} else {
+		if isDemo {
 			cfg = config.Load()
-		}
+			// load demo project
 
-		// currentProject := *project.Project{}
-		if len(projectPath) > 0 {
-			prj, _ = project.Load(projectPath)
+			// load demo tables (2)
 		} else {
-			prj, _ = project.Load(project.DefaultLocation())
+
+			conName := ctx.DefaultConnection
+
+			con := ctx.Connections[conName]
+			src := con.LoadSource()
+
+			if len(entityFlagArray) > 0 {
+				for _, entityName := range entityFlagArray {
+					entity, err := src.Entity(entityName)
+					if err != nil {
+						log.Fatalln(err)
+					}
+
+					entities = append(entities, *entity)
+				}
+			}
+
+			if len(tempPath) > 0 {
+				fmt.Println("Use this path to template")
+			}
+
+			configFile, _ := cmd.Flags().GetString("config")
+
+			if len(configFile) > 0 {
+				fmt.Println("Use this as configuration file")
+				cfg = config.LoadFromFile(configFile)
+			} else {
+				cfg = config.Load()
+			}
+
+			// currentProject := *project.Project{}
+			if len(projectPath) > 0 {
+				prj, _ = project.Load(projectPath)
+			} else {
+				prj, _ = project.Load(project.DefaultLocation())
+			}
 		}
 
 		tl := tpl.TemplateLoader{
@@ -146,12 +154,8 @@ var generateCmd = &cobra.Command{
 						generatedCode = append(generatedCode, o)
 
 					}
-					if isDemo {
-						o, _ := generator.Generate(input)
 
-						generatedCode = append(generatedCode, o)
-
-					} else if currentTemplate.Model == "entity" && !isDemo && len(entities) > 0 {
+					if currentTemplate.Model == "entity" && len(entities) > 0 {
 						for _, entity := range entities {
 							entityModel := entityModel{
 								entity:  &entity,
@@ -233,7 +237,7 @@ func (input *entityModel) ToModel() interface{} {
 	}
 
 	if input.project != nil {
-
+		fmt.Println(input.project)
 		out.Project.Name = input.project.Name
 		out.Project.Owner = input.project.CustomerName
 
