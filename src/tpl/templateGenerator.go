@@ -1,11 +1,8 @@
 package tpl
 
 import (
-	"bytes"
-	"fmt"
 	"io/ioutil"
 	"log"
-	"modelhelper/cli/app"
 	"modelhelper/cli/code"
 	"os"
 	"path/filepath"
@@ -15,8 +12,6 @@ import (
 
 	"github.com/gertd/go-pluralize"
 )
-
-var _ctx *app.Context
 
 type Template struct {
 	// InjectKey       string
@@ -55,26 +50,26 @@ var (
 	}
 )
 
-func (t *Template) Generate(model interface{}, ctx *app.Context) (string, error) {
-	_ctx = ctx
+// func (t *Template) Generate(model interface{}, ctx *app.Context) (string, error) {
+// 	_ctx = ctx
 
-	blocks := []*Template{
-		testBlockLvl1(),
-		testBlockLvl2(),
-		t,
-	}
+// 	blocks := []*Template{
+// 		testBlockLvl1(),
+// 		testBlockLvl2(),
+// 		t,
+// 	}
 
-	t1 := useTempdir(t.Name, blocks)
+// 	t1 := useTempdir(t.Name, blocks)
 
-	buf := new(bytes.Buffer)
-	err := t1.ExecuteTemplate(buf, t.Name, model)
+// 	buf := new(bytes.Buffer)
+// 	err := t1.ExecuteTemplate(buf, t.Name, model)
 
-	if err != nil {
-		fmt.Println(err)
-	}
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
 
-	return buf.String(), nil
-}
+// 	return buf.String(), nil
+// }
 
 func withoutTempDir(name string, blocks []*Template) *template.Template {
 
