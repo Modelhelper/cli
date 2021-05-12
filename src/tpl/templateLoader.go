@@ -35,6 +35,10 @@ func ExtractBlocks(templates *TemplateMap) TemplateMap {
 	return blocks
 }
 func (loader *TemplateLoader) LoadTemplates() (TemplateMap, error) {
+	if len(loader.Directory) == 0 {
+		return nil, nil
+	}
+
 	templates := make(TemplateMap)
 	path := loader.Directory
 
@@ -47,10 +51,12 @@ func (loader *TemplateLoader) LoadTemplates() (TemplateMap, error) {
 			name := convertFileNameToTemplateName(path, p)
 			t, err := loadTemplateFromFile(p)
 			if err != nil {
-
+				log.Fatalln(err)
 			}
 
-			templates[name] = *t
+			if t != nil {
+				templates[name] = *t
+			}
 		}
 
 		return nil

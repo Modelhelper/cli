@@ -21,7 +21,7 @@ type Config struct {
 	DefaultConnection string                       `json:"defaultConnection" yaml:"defaultConnection"`
 
 	Templates struct {
-		Location string `json:"configVersion" yaml:"configVersion"`
+		Location string `json:"location" yaml:"location"`
 	} `json:"templates" yaml:"templates"`
 	Languages struct {
 		Definitions string `json:"definitions" yaml:"definitions"`

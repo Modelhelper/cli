@@ -11,17 +11,17 @@ import (
 )
 
 type Project struct {
-	Version           string                       `yaml:"version"`
-	Name              string                       `yaml:"name"`
-	Language          string                       `yaml:"language"`
-	DefaultConnection string                       `yaml:"defaultSource"`
-	DefaultKey        string                       `yaml:"defaultKey"`
-	Connections       map[string]source.Connection `yaml:"connections"`
-	Code              ProjectCode                  `yaml:"code"`
-	CustomerName      string                       `yaml:"customerName"`
-	Header            string                       `yaml:"header"`
-	Options           map[string]string            `yaml:"options"`
-	Custom            interface{}                  `yaml:"custom"`
+	Version       string                       `yaml:"version"`
+	Name          string                       `yaml:"name"`
+	Language      string                       `yaml:"language"`
+	DefaultSource string                       `yaml:"defaultSource"`
+	DefaultKey    string                       `yaml:"defaultKey"`
+	Connections   map[string]source.Connection `yaml:"connections"`
+	Code          ProjectCode                  `yaml:"code"`
+	CustomerName  string                       `yaml:"customerName"`
+	Header        string                       `yaml:"header"`
+	Options       map[string]string            `yaml:"options"`
+	Custom        interface{}                  `yaml:"custom"`
 }
 
 func DefaultLocation() string {
@@ -47,7 +47,7 @@ func Load(path string) (*Project, error) {
 	if len(path) > 0 {
 		pathInfo, err := os.Stat(path)
 		if os.IsNotExist(err) || pathInfo.IsDir() {
-			log.Fatal("Project does not exits")
+			// log.Fatal("Project does not exits")
 			return nil, err
 		}
 

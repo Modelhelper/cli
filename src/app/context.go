@@ -58,8 +58,8 @@ func (a *Application) CreateContext() *Context {
 			con[pk] = pv
 		}
 
-		if len(pr.DefaultConnection) > 0 {
-			c.DefaultConnection = pr.DefaultConnection
+		if len(pr.DefaultSource) > 0 {
+			c.DefaultConnection = pr.DefaultSource
 		}
 	}
 

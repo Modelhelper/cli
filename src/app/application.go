@@ -118,10 +118,10 @@ func UsageInfo() string {
 }
 
 func TemplateFolder(templateLocation string) string {
-	var tl = ""
 	if len(templateLocation) > 2 && templateLocation[0] == '.' {
-		tl = filepath.Join(config.Location(), templateLocation[2:])
+		return filepath.Join(config.Location(), templateLocation[2:])
+	} else {
+		return templateLocation
 	}
 
-	return tl
 }
