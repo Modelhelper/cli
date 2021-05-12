@@ -38,6 +38,12 @@ https://github.com/cheggaaa/pb
 https://github.com/schollz/progressbar
 https://github.com/gosuri/uiprogress
 
+Guidelines and comments:
+https://golang.org/doc/effective_go.html
+https://github.com/bahlo/go-styleguide
+https://github.com/golang/go/wiki/CommonMistakes
+https://github.com/uber-go/guide/blob/master/style.md#introduction
+https://github.com/golang/go/wiki/CodeReviewComments
 
 Use Io.Reader and Io.Writer when possible
 
