@@ -22,11 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-	"time"
-
-	"modelhelper/cli/app"
-
 	"modelhelper/cli/tpl"
 
 	"github.com/spf13/cobra"
@@ -39,93 +34,93 @@ var generateCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		charCount := 0
+		// charCount := 0
 
-		codeOnly, _ := cmd.Flags().GetBool("code-only")
-		isDemo, _ := cmd.Flags().GetBool("demo")
-		entities, _ := cmd.Flags().GetStringArray("entity")
-		tempPath, _ := cmd.Flags().GetString("template-path")
+		// codeOnly, _ := cmd.Flags().GetBool("code-only")
+		// isDemo, _ := cmd.Flags().GetBool("demo")
+		// entities, _ := cmd.Flags().GetStringArray("entity")
+		// tempPath, _ := cmd.Flags().GetString("template-path")
 
-		if len(tempPath) > 0 {
-			fmt.Println("Use this path to template")
-		}
+		// if len(tempPath) > 0 {
+		// 	fmt.Println("Use this path to template")
+		// }
 
-		configFile, _ := cmd.Flags().GetString("config")
+		// configFile, _ := cmd.Flags().GetString("config")
 
-		if len(configFile) > 0 {
-			fmt.Println("Use this as configuration file")
-		}
+		// if len(configFile) > 0 {
+		// 	fmt.Println("Use this as configuration file")
+		// }
 
-		ctx := modelHelperApp.CreateContext()
+		// ctx := modelHelperApp.CreateContext()
 
-		cgf := modelHelperApp.Configuration
-		if isDemo == false && len(entities) == 0 {
-			return
-		}
+		// cgf := modelHelperApp.Configuration
+		// if isDemo == false && len(entities) == 0 {
+		// 	return
+		// }
 
-		//ctx := modelHelperApp.CreateContext()
+		// //ctx := modelHelperApp.CreateContext()
 
-		inputTemplates, err := cmd.Flags().GetStringArray("template")
+		// inputTemplates, err := cmd.Flags().GetStringArray("template")
 
-		if err != nil {
-			panic(err)
-		}
+		// if err != nil {
+		// 	panic(err)
+		// }
 
-		printScreen, _ := cmd.Flags().GetBool("screen")
-		start := time.Now()
+		// printScreen, _ := cmd.Flags().GetBool("screen")
+		// start := time.Now()
 
-		var generatedCode []string
-		if len(inputTemplates) > 0 {
+		// var generatedCode []string
+		// if len(inputTemplates) > 0 {
 
-			tl := tpl.TemplateLoader{
-				Directory: app.TemplateFolder(cgf.Templates.Location),
-			}
+		// 	// tl := tpl.TemplateLoader{
+		// 	// 	Directory: app.TemplateFolder(cgf.Templates.Location),
+		// 	// }
 
-			allTemplates, _ := tl.LoadTemplates()
-			//blocks := tpl.ExtractBlocks(&allTemplates)
+		// 	// allTemplates, _ := tl.LoadTemplates()
+		// 	//blocks := tpl.ExtractBlocks(&allTemplates)
 
-			for _, tname := range inputTemplates {
-				// var tt *tpl.Template
-				fmt.Println(tname)
-				currentTemplate, found := allTemplates[tname]
+		// 	for _, tname := range inputTemplates {
+		// 		// var tt *tpl.Template
+		// 		fmt.Println(tname)
+		// 		// currentTemplate, found := allTemplates[tname]
 
-				if found {
+		// 		if 1 == 1 {
 
-					if isDemo {
-						o, _ := currentTemplate.Generate(testTable(), ctx)
+		// 			if isDemo {
+		// 				o, _ := codegen.Generate(testTable(), ctx)
 
-						generatedCode = append(generatedCode, o)
+		// 				generatedCode = append(generatedCode, o)
 
-					} else {
+		// 			} else {
 
-						for _, entity := range entities {
-							fmt.Println(entity)
-							o, _ := currentTemplate.Generate(testTable(), ctx)
-							generatedCode = append(generatedCode, o)
-						}
-					}
+		// 				for _, entity := range entities {
+		// 					fmt.Println(entity)
+		// 					o, _ := codegen.Generate(testTable(), ctx)
+		// 					generatedCode = append(generatedCode, o)
+		// 				}
+		// 			}
 
-				}
+		// 		}
 
-			}
+		// 	}
 
-			if printScreen && len(generatedCode) > 0 {
-				screenWriter := tpl.ScreenExporter{}
-				for _, s := range generatedCode {
-					charCount += len(s)
-					screenWriter.Export([]byte(s))
-				}
-			}
+		// 	if printScreen && len(generatedCode) > 0 {
+		// 		screenWriter := tpl.ScreenExporter{}
+		// 		for _, s := range generatedCode {
+		// 			charCount += len(s)
+		// 			screenWriter.Export([]byte(s))
+		// 		}
+		// 	}
 
-		}
+		// }
 
-		duration := time.Since(start)
+		// duration := time.Since(start)
 
-		if !codeOnly {
-			con := 1.2
-			min := float64(charCount) * con / 60
-			fmt.Printf("\nIt took %vms to generate this code. You saved around %v minutes not typing it youreself", duration.Milliseconds(), min)
-		}
+		// if !codeOnly {
+		// 	con := 1.2
+		// 	min := float64(charCount) * con / 60
+		// 	fmt.Printf("\nIt took %vms to generate this code. You saved around %v minutes not typing it youreself", duration.Milliseconds(), min)
+		// }
 	},
 }
 
