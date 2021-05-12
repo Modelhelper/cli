@@ -92,20 +92,20 @@ type ProjectCode struct {
 	Global           GlobalCode            `yaml:"global"`
 	Groups           []string              `yaml:"groups"`
 	Options          map[string]string     `yaml:"options"`
-	Keys             map[string]CodeKey    `yaml:"keys"`
-	Inject           map[string]CodeInject `yaml:"inject"`
+	Keys             map[string]CodeKey    `yaml:"keys,omitempty"`
+	Inject           map[string]CodeInject `yaml:"inject,omitempty"`
 	Locations        map[string]string     `yaml:"exportLocations"`
 	FileHeader       string                `yaml:"fileHeader"`
 }
 
 type CodeInject struct {
-	Name         string   `yaml:"name"`
-	Language     string   `yaml:"language"`
-	PropertyName string   `yaml:"propertyName"`
-	Interface    string   `yaml:"interface"`
-	Namespace    string   `yaml:"namespace"`
-	Method       string   `yaml:"method"`
-	Imports      []string `yaml:"imports"`
+	Name         string   `yaml:"name,omitempty"`
+	Language     string   `yaml:"language,omitempty"`
+	PropertyName string   `yaml:"propertyName,omitempty"`
+	Interface    string   `yaml:"interface,omitempty"`
+	Namespace    string   `yaml:"namespace,omitempty"`
+	Method       string   `yaml:"method,omitempty"`
+	Imports      []string `yaml:"imports,omitempty"`
 }
 
 type GlobalCode struct {
@@ -114,10 +114,10 @@ type GlobalCode struct {
 }
 type CodeKey struct {
 	// Name      string `yaml:"name"`
-	Path      string   `yaml:"path"`
-	NameSpace string   `yaml:"namespace"`
-	Postfix   string   `yaml:"postfix"`
-	Prefix    string   `yaml:"prefix"`
-	Imports   []string `yaml:"imports"`
-	Inject    []string `yaml:"inject"`
+	Path      string   `yaml:"path,omitempty"`
+	NameSpace string   `yaml:"namespace,omitempty"`
+	Postfix   string   `yaml:"postfix,omitempty"`
+	Prefix    string   `yaml:"prefix,omitempty"`
+	Imports   []string `yaml:"imports,omitempty"`
+	Inject    []string `yaml:"inject,omitempty"`
 }
