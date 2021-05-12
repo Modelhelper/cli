@@ -14,15 +14,14 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/olekukonko/ts"
 	"gopkg.in/yaml.v3"
 )
 
 // "fmt"
 
 func main() {
-
 	execute()
-
 }
 
 func execute() {
@@ -45,6 +44,15 @@ func execute() {
 		cmd.SetApplication(&a)
 		cmd.Execute()
 	}
+}
+
+func printTerminalSizes() {
+	size, _ := ts.GetSize()
+	fmt.Println(size.Col())  // Get Width
+	fmt.Println(size.Row())  // Get Height
+	fmt.Println(size.PosX()) // Get X position
+	fmt.Println(size.PosY()) // Get Y position
+	//
 }
 
 func testEnvVar() {
