@@ -68,9 +68,6 @@ code:
     variablePrefix: "_"
     variablePostfix: ""
 
-  # what to inject when using %inject.key% ~ %inject.user%
-  # uses the injectKey in the template to create a set of injects
-  # inject:property | inject:namespace
   inject:
     user:
       name: IUserContext
@@ -91,31 +88,32 @@ code:
       
 
   keys:
-    model:
+    model: 
       postfix: Model
-      namespace: "MyProject.Core.Models"   
+      namespace: MyProject.Core.Models
       imports: 
-        - "MyProject.Core.Models"   
-    interface:   
-      postfix: Repository
-      prefix: I
-      imports: 
-        - "MyProject.Core.Models"
+        - MyProject.Core.Models
+          
+    # interface:   
+    #   postfix: Repository
+    #   prefix: I
+    #   imports: 
+    #     - "MyProject.Core.Models"
       
-    repository:   
-      inject:
-        - user
-        - connectionFactory
-        - logging
-      postfix: Repository
-    resover:   
-      inject:
-        - user
-        - connectionFactory
-        - logging
-      postfix: Resolver           
-    service:
-      postfix: "Service"
+    # repository:   
+    #   inject:
+    #     - user
+    #     - connectionFactory
+    #     - logging
+    #   postfix: Repository
+    # resover:   
+    #   inject:
+    #     - user
+    #     - connectionFactory
+    #     - logging
+    #   postfix: Resolver           
+    # service:
+    #   postfix: "Service"
   
   exportLocations:
     models: "./en/plass/bak/d..."
