@@ -19,6 +19,8 @@ type TemplateLoaderResult struct {
 
 type TemplateMap map[string]Template
 
+type TplMap map[string]map[string]Template
+
 // type TemplateDirectory struct {
 // 	Directory
 // }
