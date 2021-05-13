@@ -10,7 +10,8 @@
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceFolder}/src",
-            "args": ["generate", "--screen", "-t", "cs-poco", "-e", "order", "--project", "C:\\dev\\projects\\mh\\cli\\configuration\\project\\.modelhelper\\project.yaml"]
+            // "args": ["generate", "--screen", "-t", "cs-poco", "--demo", "--project", "C:\\dev\\projects\\mh\\cli\\configuration\\project\\.modelhelper\\project.yaml"]
+            "args": ["template", "--group", "group"]
             // "args": ["e", "order"]"-t", "cs-gql-hc-resolver", 
         }
     ]

@@ -89,18 +89,28 @@ code:
 
   keys:
     model: 
-      postfix: Model
-      namespace: MyProject.Core.Models
-      imports: 
-        - MyProject.Core.Models
+      postfix: ModelHelper
+      namespace: MyProject.Core.Modeling
+      whaat: whaat
+      # imports: 
+      #   - MyProject.Core.Models
           
-    # interface:   
-    #   postfix: Repository
-    #   prefix: I
-    #   imports: 
-    #     - "MyProject.Core.Models"
+    interface:   
+      postfix: Repository
+      namespace: MyProject.Core.Modeling
+      prefix: I
+      imports: 
+        - "MyProject.Core.Models"
       
-    # repository:   
+    
+  exportLocations:
+    models: "./en/plass/bak/d..."
+    interface: "path"
+## this section lets you provide 
+options:
+  option_1: value_1
+
+# repository:   
     #   inject:
     #     - user
     #     - connectionFactory
@@ -115,14 +125,6 @@ code:
     # service:
     #   postfix: "Service"
   
-  exportLocations:
-    models: "./en/plass/bak/d..."
-    interface: "path"
-## this section lets you provide 
-options:
-  option_1: value_1
-
-
 header: |
   Text to place on the top of the file. This will create a template block, called fileheader-block.
   Inside it's possible to use go template syntax
