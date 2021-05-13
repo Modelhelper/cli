@@ -91,7 +91,7 @@ Filter the template by using on or more of the following options
 
 		if len(group) > 0 {
 			ui.PrintConsoleTitle("ModelHelper Templates grouped by " + group)
-			fmt.Println(`In the list below you will find all available templates in ModelHelper`)
+			fmt.Println("In the list below you will find all available templates in ModelHelper\n")
 			grouper := getGrouper(strings.ToLower(group))
 			mg := grouper.group(allTemplates)
 
@@ -104,12 +104,13 @@ Filter the template by using on or more of the following options
 			}
 		} else {
 			ui.PrintConsoleTitle("ModelHelper Templates")
-			fmt.Println(`In the list below you will find all available templates in ModelHelper`)
+			fmt.Println("In the list below you will find all available templates in ModelHelper\n")
 
 			tp.templates = allTemplates
 			ui.RenderTable(&tp, &tp)
 		}
 
+		fmt.Println()
 	},
 }
 
