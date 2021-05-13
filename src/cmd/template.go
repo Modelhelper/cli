@@ -57,15 +57,12 @@ Filter the template by using on or more of the following options
 	
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("template called")
 		cfg := config.Load()
 
 		tl := tpl.TemplateLoader{
 			Directory: app.TemplateFolder(cfg.Templates.Location),
 		}
 		allTemplates, _ := tl.LoadTemplates()
-
-		//var templates []tpl.Template
 
 		group, _ := cmd.Flags().GetString("by")
 		typeFiler, _ := cmd.Flags().GetStringArray("type")
@@ -93,18 +90,22 @@ Filter the template by using on or more of the following options
 		}
 
 		if len(group) > 0 {
-
+			ui.PrintConsoleTitle("ModelHelper Templates grouped by " + group)
+			fmt.Println(`In the list below you will find all available templates in ModelHelper`)
 			grouper := getGrouper(strings.ToLower(group))
 			mg := grouper.group(allTemplates)
 
 			for typ, tv := range mg {
-				fmt.Printf("\n\n%s\n\n", typ)
+				ui.ConsoleTitle(typ)
 
 				tp.templates = tv
 				ui.RenderTable(&tp, &tp)
 
 			}
 		} else {
+			ui.PrintConsoleTitle("ModelHelper Templates")
+			fmt.Println(`In the list below you will find all available templates in ModelHelper`)
+
 			tp.templates = allTemplates
 			ui.RenderTable(&tp, &tp)
 		}
@@ -120,9 +121,6 @@ func init() {
 	templateCmd.Flags().StringArray("lang", []string{}, "Filter the templates by language")
 	templateCmd.Flags().StringArray("model", []string{}, "Filter the templates by model")
 	templateCmd.Flags().StringArray("key", []string{}, "Filter the templates by model")
-	// templateCmd.Flags().Bool("by-type", false, "Groups the templates type (file, snippet or block")
-	// templateCmd.Flags().Bool("by-tag", false, "Groups the templates by the tag they are in")
-	// templateCmd.Flags().Bool("by-lang", false, "Groups the templates by the language they are written for")
 
 }
 
