@@ -21,6 +21,7 @@ import (
 // "fmt"
 
 func main() {
+	// openProject()
 	execute()
 }
 
@@ -46,6 +47,52 @@ func execute() {
 	}
 }
 
+type Some struct {
+	Version string `yaml: "version"`
+	Code    Code   `yaml: "code"`
+}
+
+type Code struct {
+	Keys map[string]Thing `yaml: "keys"`
+}
+type Thing struct {
+	Postfix   string   `yaml: "postfix"`
+	Namespace string   `yaml: "namespace"`
+	Imports   []string `yaml: "imports,omitempty"`
+}
+
+func openProject() {
+	path := "C:\\dev\\projects\\mh\\cli\\configuration\\project\\.modelhelper\\project.yaml"
+
+	p, err := project.Load(path)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("ProjectLoader")
+	for k, v := range p.Code.Keys {
+		fmt.Println(k, v.NameSpace, v.Postfix)
+	}
+
+	dat, e := ioutil.ReadFile(path)
+	if e != nil {
+		log.Fatalf("cannot load file: %v", e)
+	}
+
+	var p2 *Some
+	err = yaml.Unmarshal(dat, &p2)
+	if err != nil {
+		log.Fatalf("cannot unmarshal data: %v", err)
+
+	}
+
+	fmt.Println("Unmarshal ")
+	for k, v := range p2.Code.Keys {
+		fmt.Println(k, v.Namespace, v.Postfix)
+	}
+	// x := viper.ReadConfig()
+
+	// fmt.Println(*p2)
+}
 func printTerminalSizes() {
 	size, _ := ts.GetSize()
 	fmt.Println(size.Col())  // Get Width

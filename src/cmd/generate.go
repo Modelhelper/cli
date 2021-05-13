@@ -63,6 +63,12 @@ var generateCmd = &cobra.Command{
 		if isDemo {
 			cfg = config.Load()
 			// load demo project
+			var ds *source.DemoSource
+			el, _ := ds.Entities("*")
+
+			for _, eitem := range *el {
+				entities = append(entities, eitem)
+			}
 
 			// load demo tables (2)
 		} else {

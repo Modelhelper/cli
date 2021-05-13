@@ -24,8 +24,8 @@ type TplMap map[string]map[string]Template
 // type TemplateDirectory struct {
 // 	Directory
 // }
-func ExtractBlocks(templates *TemplateMap) TemplateMap {
-	blocks := make(TemplateMap)
+func ExtractBlocks(templates *map[string]Template) map[string]Template {
+	blocks := make(map[string]Template)
 
 	for k, t := range *templates {
 
@@ -36,12 +36,12 @@ func ExtractBlocks(templates *TemplateMap) TemplateMap {
 
 	return blocks
 }
-func (loader *TemplateLoader) LoadTemplates() (TemplateMap, error) {
+func (loader *TemplateLoader) LoadTemplates() (map[string]Template, error) {
 	if len(loader.Directory) == 0 {
 		return nil, nil
 	}
 
-	templates := make(TemplateMap)
+	templates := make(map[string]Template)
 	path := loader.Directory
 
 	err := filepath.Walk(path, func(p string, info os.FileInfo, err error) error {
