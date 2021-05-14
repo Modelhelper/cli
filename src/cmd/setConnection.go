@@ -59,7 +59,7 @@ var setConnectionCmd = &cobra.Command{
 
 			color.Red.Println("NB !!")
 
-			fmt.Printf("\nThe --connectionString option is empty. Consider to use a valid connection string for %s\n", conType)
+			fmt.Printf("\nThe --constr | -c option is empty. Consider to use a valid connection string for %s\n", conType)
 			fmt.Printf("Use mh build constr %s to build a valid ConnectionString for a %[1]s\n", conType)
 			// fmt.Println("Copy the generated connection string and copy and paste in this")
 			fmt.Println("\nUse the option --key <keynam> to update the connection with the new connection string")
@@ -88,7 +88,7 @@ func init() {
 	setCmd.AddCommand(setConnectionCmd)
 
 	setConnectionCmd.Flags().StringP("type", "t", "mssql", "The type of connection to add, default mssql")
-	setConnectionCmd.Flags().StringP("connectionString", "c", "", "Sets the connection string for the type.")
+	setConnectionCmd.Flags().StringP("constr", "c", "", "Sets the connection string for the type.")
 	setConnectionCmd.Flags().StringP("description", "d", "", "Sets a description")
 	setConnectionCmd.Flags().String("schema", "", "Sets the schema or owner for the collection of entities")
 	// setConnectionCmd.Flags().BoolP("groups", "d", false, "If true, the cli will ask for groups to be added")
