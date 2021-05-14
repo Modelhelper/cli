@@ -29,15 +29,6 @@ func SetDefaultConnection(key string) error {
 func SetDefaultEditor(editor string) error {
 	cfg := Load()
 
-	editors := make(map[string]string)
-	editors["vscode"] = "code"
-
-	e, f := editors[strings.ToLower(editor)]
-
-	if f {
-		editor = e
-	}
-
 	cfg.DefaultEditor = strings.ToLower(editor)
 
 	return update(cfg)
