@@ -18,13 +18,9 @@ package cmd
 import (
 	"fmt"
 	"modelhelper/cli/app"
-	"modelhelper/cli/config"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
-
-	"github.com/spf13/viper"
 )
 
 var modelHelperApp *app.Application
@@ -44,35 +40,35 @@ var rootCmd = &cobra.Command{
 		printLogoInfo()
 		// rootExists := config.LocationExists()
 
-		if rootExists == false {
-			ex, err := os.Executable()
-			if err != nil {
-				panic(err)
-			}
+		// if rootExists == false {
+		// 	ex, err := os.Executable()
+		// 	if err != nil {
+		// 		panic(err)
+		// 	}
 
-			// Path to executable file
-			fmt.Println(ex)
+		// 	// Path to executable file
+		// 	fmt.Println(ex)
 
-			// Resolve the direcotry
-			// of the executable
-			exPath := filepath.Dir(ex)
-			fmt.Println("Executable path :" + exPath)
+		// 	// Resolve the direcotry
+		// 	// of the executable
+		// 	exPath := filepath.Dir(ex)
+		// 	fmt.Println("Executable path :" + exPath)
 
-			// Use EvalSymlinks to get
-			// the real path.
-			realPath, err := filepath.EvalSymlinks(exPath)
-			if err != nil {
-				panic(err)
-			}
-			fmt.Println("Symlink evaluated:" + realPath)
+		// 	// Use EvalSymlinks to get
+		// 	// the real path.
+		// 	realPath, err := filepath.EvalSymlinks(exPath)
+		// 	if err != nil {
+		// 		panic(err)
+		// 	}
+		// 	fmt.Println("Symlink evaluated:" + realPath)
 
-			dir, err := os.UserHomeDir()
-			if err != nil {
-				panic(err)
-			}
+		// 	dir, err := os.UserHomeDir()
+		// 	if err != nil {
+		// 		panic(err)
+		// 	}
 
-			fmt.Println(dir)
-		}
+		// 	fmt.Println(dir)
+		// }
 	},
 }
 
@@ -106,19 +102,19 @@ func initConfig() {
 	// viper.SetConfigName("config")
 	// viper.SetConfigType("yaml")
 
-	viper.AddConfigPath(configPath) // optionally look for config in the working directory
-	err := viper.ReadInConfig()     // Find and read the config file
-	if err != nil {                 // Handle errors reading the config file
-		panic(fmt.Errorf("Fatal error config file: %s \n", err))
-	}
+	// viper.AddConfigPath(configPath) // optionally look for config in the working directory
+	// err := viper.ReadInConfig()     // Find and read the config file
+	// if err != nil {                 // Handle errors reading the config file
+	// 	panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	// }
 
-	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			// Config file not found; ignore error if desired
-		} else {
-			// Config file was found but another error was produced
-		}
-	}
+	// if err := viper.ReadInConfig(); err != nil {
+	// 	if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+	// 		// Config file not found; ignore error if desired
+	// 	} else {
+	// 		// Config file was found but another error was produced
+	// 	}
+	// }
 
 	// err = viper.Unmarshal(&mhConfig)
 	// if err != nil {
