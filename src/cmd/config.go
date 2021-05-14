@@ -36,11 +36,18 @@ var configCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		open, _ := cmd.Flags().GetBool("open")
-		if open {
-			var editor string
-			cfg := config.Load()
+		ed, _ := cmd.Flags().GetString("editor")
 
-			editor = getEditor(cfg)
+		if open {
+
+			var editor string
+			if len(ed) > 0 {
+				editor = ed
+			} else {
+
+				cfg := config.Load()
+				editor = getEditor(cfg)
+			}
 
 			loc := filepath.Join(config.Location(), "config.yaml")
 			openPathInEditor(editor, loc)
@@ -53,6 +60,7 @@ func init() {
 	rootCmd.AddCommand(configCmd)
 
 	configCmd.Flags().Bool("open", false, "Opens the config file in VS Code")
+	configCmd.Flags().String("editor", "", "Opens the config file in this application")
 }
 
 func openPathInEditor(editor string, loc string) {
