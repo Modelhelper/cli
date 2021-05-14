@@ -42,7 +42,7 @@ commands:
       remove:
       list:
   
-  # target 3.3
+  # target 3.1
   serve: 
     desc: serves a webserver located at localhost port 4500 (port is specified in config file). Opens a web
     api: "starts a server with a api for the current modelhelper project"
@@ -75,3 +75,9 @@ commands:
 # misc
 
 # need a command to generate a "input" file for the generate command
+
+set:
+  templatelocation: if argument is empty, then use current work dir, else, use argument
+  developername: sets the developer name
+  dev: --name <name> --email <email>
+  add: ask => list of what to add
