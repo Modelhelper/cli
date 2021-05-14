@@ -23,8 +23,9 @@ package cmd
 
 import (
 	"fmt"
-	"modelhelper/cli/input"
-	table "modelhelper/cli/ui"
+
+	"modelhelper/cli/source"
+	"modelhelper/cli/ui"
 
 	_ "github.com/gookit/color"
 	"github.com/spf13/cobra"
@@ -39,17 +40,20 @@ var entityCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// fmt.Println("entity called")
-		src := source
+		ctx := modelHelperApp.CreateContext()
+		conName := ctx.DefaultConnection
 
-		if len(source) == 0 {
-			src = getSourceName()
+		con := ctx.Connections[conName]
+
+		src := con.LoadSource()
+
+		if src == nil {
+			fmt.Println("Could not load the source, check configuration")
+			return
 		}
-
-		input := input.GetSource(src, mhConfig)
-
 		if len(args) > 0 {
 			en := args[0]
-			e, err := input.Entity(en)
+			e, err := src.Entity(en)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -67,52 +71,17 @@ var entityCmd = &cobra.Command{
 				fmt.Println(e.Description)
 				fmt.Println()
 			}
-			var tbl table.Table
-			if skipDescription {
-				tbl = table.New("Name", "Type", "Nullable", "IsIdentity", "PK", "FK")
-			} else {
-				tbl = table.New("Name", "Type", "Nullable", "IsIdentity", "PK", "FK", "Description")
-			}
 
-			for _, c := range e.Columns {
-				null := "false"
-				if c.IsNullable {
-					null = "true"
-				}
-				id := ""
-				if c.IsIdentity {
-					id = "yes"
-				}
+			renderColumns(&e.Columns)
 
-				pk := ""
-				if c.IsPrimaryKey {
-					pk = "PK"
-				}
-
-				fk := ""
-				if c.IsForeignKey {
-					fk = "FK"
-				}
-				if skipDescription {
-					tbl.AddRow(c.Name, c.DataType, null, id, pk, fk)
-				} else {
-					tbl.AddRow(c.Name, c.DataType, null, id, pk, fk, c.Description)
-
-				}
-			}
-
-			fmt.Printf("\n\nColumns\n")
-			fmt.Printf("-------------------------------------------\n\n")
-			tbl.Print()
-
-			fmt.Printf("\n\nONE TO MANY (.Children)\n")
-			fmt.Printf("-------------------------------------------\n\n")
-			printChildTable(e.Name, e.ChildRelations)
-			fmt.Printf("\n\nONE TO MANY (.Parents)\n")
-			fmt.Printf("-------------------------------------------\n\n")
-			printParentTable(e.Name, e.ParentRelations)
+			// fmt.Printf("\n\nONE TO MANY (.Children)\n")
+			// fmt.Printf("-------------------------------------------\n\n")
+			// printChildTable(e.Name, e.ChildRelations)
+			// fmt.Printf("\n\nONE TO MANY (.Parents)\n")
+			// fmt.Printf("-------------------------------------------\n\n")
+			// printParentTable(e.Name, e.ParentRelations)
 		} else {
-			ents, err := input.Entities("")
+			ents, err := src.Entities("")
 
 			if err != nil {
 				fmt.Println(err)
@@ -121,22 +90,8 @@ var entityCmd = &cobra.Command{
 				return
 			}
 
-			var tbl table.Table
+			ui.RenderTable(ents, ents)
 
-			if skipDescription {
-				tbl = table.New("Name", "Schema", "Alias", "Rows")
-				for _, c := range *ents {
-					tbl.AddRow(c.Name, c.Schema, c.Alias, c.RowCount)
-				}
-			} else {
-				tbl = table.New("Name", "Schema", "Alias", "Rows", "Description")
-				for _, c := range *ents {
-					tbl.AddRow(c.Name, c.Schema, c.Alias, c.RowCount, c.Description)
-				}
-
-			}
-
-			tbl.Print()
 		}
 
 	},
@@ -148,63 +103,56 @@ func init() {
 	entityCmd.Flags().BoolVarP(&skipDescription, "skip-description", "", false, "Does not show description")
 }
 
-func printChildTable(owner string, relations []input.Relation) {
-	var childTable table.Table
-	childTable = table.New("Schema", "Name", "FK", "PK", "Constraint")
-	for _, ct := range relations {
-		fn, pn := "", ""
-		if ct.ColumnNullable {
-			fn = "*"
-		}
-		ft := fmt.Sprintf("%s (%v%s)", ct.ColumnName, ct.ColumnType, fn)
+func renderColumns(cl *source.ColumnList) {
 
-		if ct.OwnerColumnNullable {
-			pn = "*"
-		}
+	ui.PrintConsoleTitle("Columns")
 
-		pt := fmt.Sprintf("%s (%v%s)", ct.OwnerColumnName, ct.OwnerColumnType, pn)
-		childTable.AddRow(ct.Schema, ct.Name, ft, pt, ct.ContraintName)
+	colr := source.ColumnToTableRenderer{
+		IncludeDescription: !skipDescription,
+		Columns:            cl,
 	}
 
-	childTable.Print()
+	ui.RenderTable(&colr, &colr)
 }
 
-func printParentTable(owner string, relations []input.Relation) {
-	var tbl table.Table
-	tbl = table.New("Schema", "Name", "PK", "FK", "Constraint")
-	for _, ct := range relations {
-		fn, pn := "", ""
-		if ct.ColumnNullable {
-			fn = "*"
-		}
-		ft := fmt.Sprintf("%s (%v%s)", ct.ColumnName, ct.ColumnType, fn)
+// func printChildTable(owner string, relations []source.Relation) {
+// 	var childTable table.Table
+// 	childTable = table.New("Schema", "Name", "FK", "PK", "Constraint")
+// 	for _, ct := range relations {
+// 		fn, pn := "", ""
+// 		if ct.ColumnNullable {
+// 			fn = "*"
+// 		}
+// 		ft := fmt.Sprintf("%s (%v%s)", ct.ColumnName, ct.ColumnType, fn)
 
-		if ct.OwnerColumnNullable {
-			pn = "*"
-		}
+// 		if ct.OwnerColumnNullable {
+// 			pn = "*"
+// 		}
 
-		pt := fmt.Sprintf("%s (%v%s)", ct.OwnerColumnName, ct.OwnerColumnType, pn)
-		tbl.AddRow(ct.Schema, ct.Name, ft, pt, ct.ContraintName)
-	}
+// 		pt := fmt.Sprintf("%s (%v%s)", ct.OwnerColumnName, ct.OwnerColumnType, pn)
+// 		childTable.AddRow(ct.Schema, ct.Name, ft, pt, ct.ContraintName)
+// 	}
 
-	tbl.Print()
-}
+// 	childTable.Print()
+// }
 
-func getSourceName() string {
-	defaultSource := mhConfig.DefaultSource
+// func printParentTable(owner string, relations []source.Relation) {
+// 	var tbl table.Table
+// 	tbl = table.New("Schema", "Name", "PK", "FK", "Constraint")
+// 	for _, ct := range relations {
+// 		fn, pn := "", ""
+// 		if ct.ColumnNullable {
+// 			fn = "*"
+// 		}
+// 		ft := fmt.Sprintf("%s (%v%s)", ct.ColumnName, ct.ColumnType, fn)
 
-	if len(defaultSource) == 0 {
-		if len(mhConfig.Sources) == 0 {
-			defaultSource = ""
-		} else {
-			for _, s := range mhConfig.Sources {
+// 		if ct.OwnerColumnNullable {
+// 			pn = "*"
+// 		}
 
-				defaultSource = s.Name
-				break
-			}
-		}
+// 		pt := fmt.Sprintf("%s (%v%s)", ct.OwnerColumnName, ct.OwnerColumnType, pn)
+// 		tbl.AddRow(ct.Schema, ct.Name, ft, pt, ct.ContraintName)
+// 	}
 
-	}
-
-	return defaultSource
-}
+// 	tbl.Print()
+// }

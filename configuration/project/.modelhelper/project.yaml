@@ -1,27 +1,32 @@
 version: 3.0
 
-defaultSource: lab
+defaultConnection: lab
 defaultKey: api
 
-sources:
-  -lab:
+name: "The name of the project"
+language: cs
+ownerName: "the customers name, if any"
+
+connections:
+  lab:
     name: lab
-    connection: Data Source=patest01;Password=%**PWD_PATOLAB**%;User name=Test
+    description: This connection is defined in project.yaml
+    connectionString: Data Source=patest01;Password=%**PWD_PATOLAB**%;User name=Test
     schema: dbo
     type: mssql
     mapping: 
-      -IsActive:
+      IsActive:
         Name: "IsActive"
         isIgnored: true
         trueValue: 1 | true | yes
         falseValue: 0 | false | no
         deletedMarker: true
-      -CreatedOn:
+      CreatedOn:
         name: "CreatedOn"  
         isIgnored: true        
         isCreationDate: true    
     groups:
-      -histology:
+      histology:
         items: [
           entity_1
           entity_2
@@ -29,28 +34,28 @@ sources:
         ]
 
         options:
-          -option_1: value_1
-  -hist:
+          option_1: value_1
+  hist:
     name: hist
-    desc: This is a short description about this source
-    connection: Data Source=patest01;Password=%**PWD_PATOLAB**%;User name=Test
+    description: This is a short description about this source
+    connectionString: Data Source=patest01;Password=%**PWD_PATOLAB**%;User name=Test
     schema: dbo
     type: mssql
     mapping: []
     code:
       connection: CreateForHistology()
-  -api:
+  api:
     name: api
-    desc: this is a source that uses a graphql connection
-    connection: "https://localhost:5000/graphql"
+    description: this is a source that uses a graphql connection
+    connectionString: "https://localhost:5000/graphql"
     type: graphql
     options:
-      -option_1: value_1
-      -option_2: value_2
-  -sys:
+      option_1: value_1
+      option_2: value_2
+  sys:
     name: sys
-    desc: setup for user defined input, based on the table => column model
-    connection: ./models/* 
+    description: setup for user defined input, based on the table => column model
+    connectionString: ./models/* 
     type: file.yaml
 
 ## this section specifies how to generate code for this project
@@ -63,71 +68,66 @@ code:
     variablePrefix: "_"
     variablePostfix: ""
 
-
-  ## groups lets you group code in sections. This can be used to specify where code should be generated, language etc
-  # use the group name 
-  groups: [
-    "db",
-    "api"
-  ]
-
-  # what to inject when using %inject.key% ~ %inject.user%
-  # uses the injectKey in the template to create a set of injects
-  # inject:property | inject:namespace
   inject:
-    -user:
+    user:
       name: IUserContext
-      keys: [repo]
       language: cs
       propertyName: user            
-      imports: [
-        "using PatoLab.BlaBla"
-      ]
-    -connectionFactory:
-      keys: [repo]
+      imports: 
+        - "using PatoLab.BlaBla"      
+    connectionFactory:
       language: cs
       propertyName: connectionFactory
       name: IConnectionFactory      
-    -logging:
+    logging:
       name: ILogger<{{ .Name }}>
-      keys: [logging]
       language: cs      
       propertyName: logger
-      imports: [
-        "using Microsoft.Logging"
-      ]
+      imports: 
+        - "using Microsoft.Logging"
+      
 
-  types:
-    -models:
-      key: "model"      
-      namePostfix: Model
-      namespace: "PatoLab.Api.Core.Models"      
-
-    -interfaces:   
-      key: "interface"   
-      namePostfix: Repository
-      namePrefix: I
-      imports: [
-        "PatoLab.Api.Core.Models"
-      ]
-    -repository:   
-      key: "repository"   
-      namePostfix: Repository
-    -service:
-      key: "service"  
-      namePostfix: "Service"
-  
-  locations:
-    -apiModels:
-      key: "api.models"      
-      path: ".\\src\\PatoLab.Api.Core\\Models"       
-
+  keys:
+    model: 
+      postfix: ModelHelper
+      namespace: MyProject.Core.Modeling
+      whaat: whaat
+      # imports: 
+      #   - MyProject.Core.Models
+          
+    interface:   
+      postfix: Repository
+      namespace: MyProject.Core.Modeling
+      prefix: I
+      imports: 
+        - "MyProject.Core.Models"
+      
+    
+  exportLocations:
+    models: "./en/plass/bak/d..."
+    interface: "path"
 ## this section lets you provide 
 options:
-  -option_1: value_1
+  option_1: value_1
 
-# target version 3.6
-custom:
-  customer:
-    name: PatoGen Analyse AS
-    id: 12400C
+# repository:   
+    #   inject:
+    #     - user
+    #     - connectionFactory
+    #     - logging
+    #   postfix: Repository
+    # resover:   
+    #   inject:
+    #     - user
+    #     - connectionFactory
+    #     - logging
+    #   postfix: Resolver           
+    # service:
+    #   postfix: "Service"
+  
+header: |
+  Text to place on the top of the file. This will create a template block, called fileheader-block.
+  Inside it's possible to use go template syntax
+  e.g Customer: {{ .Project.CustomerName }} and {{ .Developer.Name }}, {{ .Developer.Email }}
+
+  This file connects to {{ .Source.Name }} to retrive data from {{ .Name }}

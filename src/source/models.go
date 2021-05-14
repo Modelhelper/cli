@@ -1,22 +1,68 @@
-package input
+package source
+
+import (
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
+)
+
+type EntityList []Entity
+type ColumnList []Column
+type RelationList []Relation
+type IndexList []Index
 
 // Entity represents an object in the relational database. Either a Table or a view
 type Entity struct {
-	Name               string
-	ModelName          string
-	ContextualName     string
-	Type               string
-	Schema             string
-	Alias              string
+	Name               string `json:"name" yaml:"name"`
+	ModelName          string `json:"modelName" yaml:"modelName"`
+	ContextualName     string `json:"contextualName" yaml:"contextualName"`
+	Type               string `json:"type" yaml:"type"`
+	Schema             string `json:"schema" yaml:"schema"`
+	Alias              string `json:"alias" yaml:"alias"`
 	RowCount           int
 	UsesIdentityColumn bool
 	UsesDeletedColumn  bool
 	DeletedColumnName  string
-	Columns            []Column
-	ParentRelations    []Relation
-	ChildRelations     []Relation
-	Indexes            []Index
+	Columns            ColumnList
+	ParentRelations    RelationList
+	ChildRelations     RelationList
+	Indexes            IndexList
 	Description        string
+}
+
+func (d *EntityList) ToRows() [][]string {
+	var rows [][]string
+
+	for _, e := range *d {
+		p := message.NewPrinter(language.English)
+
+		r := []string{
+			e.Name,
+			e.Schema,
+			e.Alias,
+			p.Sprintf("%d", e.RowCount),
+			// strconv.Itoa(len(e.ChildRelations)),
+			// strconv.Itoa(len(e.ParentRelations)),
+		}
+
+		// if withDesc {
+		// 	r = append(r, e.Description)
+		// }
+
+		rows = append(rows, r)
+	}
+
+	return rows
+
+}
+
+func (d *EntityList) BuildHeader() []string {
+	h := []string{"Name", "Schema", "Alias", "Rows"}
+
+	// if withDesc {
+	// 	h = append(h, "Description"), "Children", "Parents"
+	// }
+
+	return h
 }
 
 type EntityStat struct {

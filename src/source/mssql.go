@@ -1,16 +1,15 @@
-package input
+package source
 
 import (
 	"context"
 	"database/sql"
 	"log"
-	"modelhelper/cli/source"
 
 	_ "github.com/denisenkom/go-mssqldb"
 )
 
 type MsSql struct {
-	Source source.Source
+	Connection Connection
 }
 
 // type Database interface {
@@ -57,7 +56,7 @@ func (server *MsSql) Entity(name string) (*Entity, error) {
 
 	return e, nil
 }
-func (server *MsSql) Entities(pattern string) (*[]Entity, error) {
+func (server *MsSql) Entities(pattern string) (*EntityList, error) {
 	sql := `
 	with rowcnt (object_id, rowcnt) as (
 		SELECT p.object_id, SUM(CASE WHEN (p.index_id < 2) AND (a.type = 1) THEN p.rows ELSE 0 END) 
@@ -106,7 +105,7 @@ func (server *MsSql) Entities(pattern string) (*[]Entity, error) {
 
 	defer rows.Close()
 
-	list := []Entity{}
+	list := EntityList{}
 
 	var e Entity
 
@@ -178,7 +177,7 @@ where o.object_id = object_id(@entityName)
 	return &e, nil
 }
 
-func (server *MsSql) getColumns(schema string, entityName string) (*[]Column, error) {
+func (server *MsSql) getColumns(schema string, entityName string) (*ColumnList, error) {
 	db, err := server.openConnection()
 	if err != nil {
 		return nil, err
@@ -271,7 +270,7 @@ func (server *MsSql) getColumns(schema string, entityName string) (*[]Column, er
 	}
 	defer rows.Close()
 
-	cl := []Column{}
+	cl := ColumnList{}
 	var c Column
 
 	for rows.Next() {
@@ -466,7 +465,7 @@ where fkc.referenced_object_id = OBJECT_ID(@entityName)
 
 func (server *MsSql) openConnection() (*sql.DB, error) {
 
-	cs := server.Source.ConnectionString
+	cs := server.Connection.ConnectionString
 	// fmt.Println("Connect with: " + cs)
 	// var err error
 	db, err := sql.Open("sqlserver", cs)

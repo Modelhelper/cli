@@ -1,26 +1,55 @@
-Key: api.interface # former ExportType
-Version: 3
-Language: cs # mandatory field. connects with correct language definition
-Description: |
+
+# mandatory, this is the template version
+version: 3.0 
+
+# mandatory field. connects with correct language definition
+language: cs 
+
+# mandatory, default: file 
+type: file | snippet | block
+
+# optional
+description: |
     Long description if needed. Will show when 'mh template <template>'
 
-# Should show then the user enter
-# mh template
-ShortDescription: This should be short an consice
-Tags: [tag1, tag2, tag3]
-Groups: [group1, group2, group3]
+# optional
+short: This should be short and to the point
 
-# If false the user do not need to input an entity to generate content
-EntityIsMandatory: true
+# optional, default is null
+tags: [tag1, tag2, tag3] 
 
-CanExport: true
-ExportFileName: file-to-export {{fileName}}
+# what groups this template is included in
+# is used to fetch templates within a group when using -tg in generate command
+# optional, default is null
+groups: [group1, group2, group3]
 
-# use for snippets only. If one need to insert som code
-# the InsertIdentifier should be found in the code file
-IsInsertableSnippet: true,
-InsertIdentifier: // MH-TRANSIENT-PLACEHOLDER,
+# optional, default is none
+model: table # values entity | database | project | options | template | none | graphql | json
 
-# the body of the template
-Body: |
-    This is the template body
+# optional, settings here will only be used if --export or --export-file has been used as option argument in the cli
+export:
+
+  # if snippet is used, this will be the filename to inject the snippets to
+  # optional 
+  fileName: filename to be used in the export
+
+  # optional. A key cannot contain . (dot)
+  key: the key to be used to find correct path
+
+# mandatory, the body of the template
+body: |
+    This is the template body written with golang text/template specification
+    the {{ . }} notation corresponds to the import type.
+
+    the . inside a {{ . }} provides the context of the given import
+
+    e.g if the template import entities you can loop through all entities like so:
+    the context of . in the range is a list of entities
+        {{ range . }}
+            inside the loop, the context of . is each entity
+            {{ .Schema }} // the schema of the current entity
+            {{ .Name }} // entity name
+            {{ .RowCount }}
+            {{ .Type }} // table | view | stored procedure | function...
+            {{ .Created }} // date for creation
+        {{ end }} // end of loop

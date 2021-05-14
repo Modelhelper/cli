@@ -1,31 +1,30 @@
 package tpl
 
 import (
-	"modelhelper/cli/input"
-	"modelhelper/cli/types"
+	"modelhelper/cli/source"
 	"strings"
 )
 
 type EntityToModel struct {
-	Entity *input.Entity
+	Entity *source.Entity
 }
 
 func (e *EntityToModel) Convert() interface{} {
-	model := types.EntityImportModel{
+	model := EntityImportModel{
 		Name:              e.Entity.Name,
 		Schema:            e.Entity.Schema,
-		Parents:           []types.EntityRelation{},
-		Children:          []types.EntityRelation{},
-		Columns:           []types.EntityColumnImportModel{},
-		IgnoredColumns:    []types.EntityColumnImportModel{},
-		NonIgnoredColumns: []types.EntityColumnImportModel{},
-		PrimaryKeys:       []types.EntityColumnImportModel{},
-		ForeignKeys:       []types.EntityColumnImportModel{},
+		Parents:           []EntityRelation{},
+		Children:          []EntityRelation{},
+		Columns:           []EntityColumnImportModel{},
+		IgnoredColumns:    []EntityColumnImportModel{},
+		NonIgnoredColumns: []EntityColumnImportModel{},
+		PrimaryKeys:       []EntityColumnImportModel{},
+		ForeignKeys:       []EntityColumnImportModel{},
 	}
 
 	for _, c := range e.Entity.Columns {
 
-		col := types.EntityColumnImportModel{
+		col := EntityColumnImportModel{
 			Name:           c.Name,
 			Description:    c.Description,
 			DataType:       c.DataType,
@@ -53,9 +52,9 @@ func (e *EntityToModel) Convert() interface{} {
 
 	if len(e.Entity.ChildRelations) > 0 {
 		for _, rel := range e.Entity.ChildRelations {
-			c := types.EntityRelation{
+			c := EntityRelation{
 				Name: "",
-				OwnerColumn: types.EntityColumnProps{
+				OwnerColumn: EntityColumnProps{
 					Name:       rel.OwnerColumnName,
 					DataType:   rel.OwnerColumnType,
 					IsNullable: false,
@@ -69,7 +68,7 @@ func (e *EntityToModel) Convert() interface{} {
 }
 
 type EntitiesToModel struct {
-	Entities []*types.EntityImportModel
+	Entities []*EntityImportModel
 }
 
 type ProjectToModel struct {

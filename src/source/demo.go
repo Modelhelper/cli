@@ -1,10 +1,15 @@
-package input
+package source
 
-type DemoInput struct{}
+import "embed"
 
-func (server *DemoInput) Entity(name string) (*Entity, error) {
+//go:embed entities/*
+var entities embed.FS
 
-	entities := getEntities()
+type DemoSource struct{}
+
+func (server *DemoSource) Entity(name string) (*Entity, error) {
+
+	entities := server.getEntities()
 	//var entity Entity
 
 	for _, e := range entities {
@@ -15,21 +20,21 @@ func (server *DemoInput) Entity(name string) (*Entity, error) {
 
 	return nil, nil
 }
-func (server *DemoInput) Entities(pattern string) (*[]Entity, error) {
-	e := getEntities()
+func (server *DemoSource) Entities(pattern string) (*EntityList, error) {
+	e := server.getEntities()
 	return &e, nil
 }
 
-func getEntities() []Entity {
+func (server *DemoSource) getEntities() EntityList {
 	e := []Entity{
 
-		getOrderHeadTable(),
-		getCustomerTable(),
+		server.getOrderHeadTable(),
+		server.getCustomerTable(),
 	}
 	return e
 }
 
-func getOrderHeadTable() Entity {
+func (server *DemoSource) getOrderHeadTable() Entity {
 	return Entity{
 		Name: "order", Schema: "dbo", Description: "This is the order table", RowCount: 1000, Alias: "o", UsesIdentityColumn: true,
 		Columns: []Column{
@@ -38,7 +43,7 @@ func getOrderHeadTable() Entity {
 		},
 	}
 }
-func getCustomerTable() Entity {
+func (server *DemoSource) getCustomerTable() Entity {
 	var e = Entity{
 		Name: "customer", Schema: "dbo",
 		Description: "This is the customer table", RowCount: 1000, Alias: "c", UsesIdentityColumn: true,

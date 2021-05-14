@@ -1,0 +1,17 @@
+# This is the structure of a multiselected source for input to a template
+# usage will be to iterate over the selection and create code for more than one source in the same file
+
+Sources: [
+  {
+    Name: Source name - table name..,
+    Alias: the alias for the entity,
+    Type: table | view | other,
+    Fields: [
+      {
+        Name: name, Datatype: varchar
+      }
+    ]
+  }
+]
+
+# Shared model

@@ -1,6 +1,11 @@
 configVersion: 3.0
 appVersion: 3.0
 
+developer:
+  name: Hans-Petter Eitvet
+  email: nothing
+  githubAccountName: hp-e
+
 templates:
   shared:
   global:
@@ -15,9 +20,9 @@ logging:
 
 defaultConnection: patest01
 connections: 
-  -patest01:
+  patest01:
     type: mssql
-    connectionString: Data Source=patest01;Password=%**PWD_PATOLAB**%;User name=Test
+    connectionString: Data Source=patest01;Password={{ENV:PWD_PATOLAB}};User name=Test
     connection:
       userId: test
       pwd: "%**PWD_PATOLAB**%"
@@ -26,7 +31,7 @@ connections:
 
 defaultSource: patolab
 sources:
-  -patolab:
+  patolab:
     connection: lab
     connectionString: lab
     name: patolab_test
@@ -36,20 +41,22 @@ sources:
       dbo
       owner
     ]
+    entities:
+      - entity1
     type: database
     mapping: 
-      -IsActive:
+      IsActive:
         Name: "IsActive"
         isIgnored: true
         trueValue: 1 | true | yes
         falseValue: 0 | false | no
         deletedMarker: true
-      -CreatedOn:
+      CreatedOn:
         name: "CreatedOn"  
         isIgnored: true        
         isCreationDate: true    
     groups:
-      -histology:
+      histology:
         items: [
           entity_1
           entity_2
@@ -60,20 +67,20 @@ sources:
           -option_1: value_1
 
 defaults:
-  code:
-    -cs:
-      globalVariablePrefix: "_"          
-  types:
-    -interface:
+  # code:
+  #   -cs:
+  #     globalVariablePrefix: "_"          
+  keys:
+    interface:
       key: "interface"   
-      namePostfix: Repository
-      namePrefix: I
-    -models:
+      postfix: Repository
+      prefix: I
+    models:
       key: "model"      
-      namePostfix: Model
-    -repository:   
+      postfix: Model
+    repository:   
       key: "repository"   
-      namePostfix: Repository
-    -service:
+      postfix: Repository
+    service:
       key: "service"  
-      namePostfix: "Service"
+      postfix: "Service"

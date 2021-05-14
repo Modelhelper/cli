@@ -4,6 +4,11 @@ https://curtisvermeeren.github.io/2017/09/14/Golang-Templates-Cheatsheet
 https://gowebexamples.com/templates/
 https://blog.gopheracademy.com/advent-2017/using-go-templates/
 https://golang.org/pkg/text/template/
+https://pkg.go.dev/github.com/google/go-cmp/cmp#Diff
+
+Testing
+https://github.com/onsi/ginkgo
+https://github.com/onsi/gomega
 
 
 pluralisering etc
@@ -33,6 +38,20 @@ https://github.com/cheggaaa/pb
 https://github.com/schollz/progressbar
 https://github.com/gosuri/uiprogress
 
+Guidelines and comments:
+https://golang.org/doc/effective_go.html
+https://github.com/bahlo/go-styleguide
+https://github.com/golang/go/wiki/CommonMistakes
+https://github.com/uber-go/guide/blob/master/style.md#introduction
+https://github.com/golang/go/wiki/CodeReviewComments
+
+Logging:
+
+- https://github.com/sirupsen/logrus
+
+Database:
+- Badger: https://github.com/dgraph-io/badger
+- BBolt: https://github.com/etcd-io/bbolt
 
 Use Io.Reader and Io.Writer when possible
 

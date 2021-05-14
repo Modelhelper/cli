@@ -14,6 +14,9 @@ type LoadHandler interface {
 	LoadTemplates(path string, pattern string) (*[]Template, error)
 	LoadTemplate(name string) (*Template, error)
 }
+type Loader interface {
+	LoadTemplates(path string) (*[]Template, error)
+}
 
 // obsolete
 type Generator interface {

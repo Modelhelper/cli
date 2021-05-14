@@ -1,0 +1,34 @@
+# Shared for all models, reflects data from a combination of config and project
+
+# code is based on template key - if provided
+code:
+  postfix: Repository
+  prefix: I
+  namespace: MyProject.Core.Models
+  inject:
+    user:
+      name: IUserContext
+      propertyName: user                  
+    connectionFactory:
+      propertyName: connectionFactory
+      name: IConnectionFactory      
+    logging:
+      name: ILogger<{{ .Name }}>
+      propertyName: logger
+
+  imports:
+    - "using Root.Data;"
+    - "using Microsoft.Logging;"
+    - "using MyProject.Core.Models;"
+
+developer: # fetched from config
+  Name: Bob Coder
+  Email: boc@coder.com
+
+project:
+  Name: Name of the project
+  owner: name of the customer
+
+options:
+  option_1: value_1
+  option_2: value_2
