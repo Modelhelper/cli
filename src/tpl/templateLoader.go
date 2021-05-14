@@ -52,6 +52,7 @@ func (loader *TemplateLoader) LoadTemplates() (map[string]Template, error) {
 		if info.IsDir() == false && strings.HasSuffix(p, "yaml") {
 			name := convertFileNameToTemplateName(path, p)
 			t, err := loadTemplateFromFile(p)
+
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -125,6 +126,9 @@ func loadTemplateFromFile(fileName string) (*Template, error) {
 		return nil, err
 	}
 
+	if t != nil {
+		t.TemplateFilePath = fileName
+	}
 	return t, nil
 }
 
