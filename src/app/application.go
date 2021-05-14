@@ -79,15 +79,6 @@ func Info() string {
   Compiler:       %v
   Language:       go (version: %v)
   
-  Drivers
-  ------------
-  MS SQL:         github.com/denisenkom/go-mssqldb
-  RabbitMQ:       https://github.com/streadway/amqp		
-  
-  Environments
-  ------------
-  
-
   Config
   ------------
   Location:       %v
@@ -103,7 +94,7 @@ func Info() string {
 	gv := runtime.Version()
 	gc := runtime.Compiler
 
-	cl := "USER/.modelhelper"
+	cl := config.Location()
 
 	return fmt.Sprintf(infoElement, Version, exPath, gos, gar, gc, gv, cl)
 }
