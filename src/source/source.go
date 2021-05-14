@@ -1,6 +1,9 @@
 package source
 
-import "log"
+import (
+	"log"
+	"strings"
+)
 
 type LanguageDef struct {
 	Definitions string
@@ -36,6 +39,14 @@ type ConnectionGroup struct {
 
 type DatabaseOptimizer interface {
 	RebuildIndexes()
+}
+
+func IsConnectionTypeValid(t string) bool {
+	valid := make(map[string]string)
+	valid["mssql"] = "Connects to a Microsoft SQL Server"
+
+	_, f := valid[strings.ToLower(t)]
+	return f
 }
 
 func MergeConnections(providers ...ConnectionProvider) (*map[string]Connection, error) {
