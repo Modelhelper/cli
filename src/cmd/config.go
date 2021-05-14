@@ -40,17 +40,10 @@ var configCmd = &cobra.Command{
 			var editor string
 			cfg := config.Load()
 
-			if len(cfg.DefaultEditor) > 0 {
-				editor = cfg.DefaultEditor
-			} else {
-				editor = promptForEditorKey("Please select editor to open the config")
-			}
+			editor = getEditor(cfg)
 
 			loc := filepath.Join(config.Location(), "config.yaml")
-			exe := exec.Command(editor, loc)
-			if exe.Run() != nil {
-				//vim didn't exit with status code 0
-			}
+			openPathInEditor(editor, loc)
 		}
 
 	},
@@ -60,4 +53,19 @@ func init() {
 	rootCmd.AddCommand(configCmd)
 
 	configCmd.Flags().Bool("open", false, "Opens the config file in VS Code")
+}
+
+func openPathInEditor(editor string, loc string) {
+	exe := exec.Command(editor, loc)
+	if exe.Run() != nil {
+		//vim didn't exit with status code 0
+	}
+}
+
+func getEditor(cfg *config.Config) string {
+	if len(cfg.DefaultEditor) > 0 {
+		return cfg.DefaultEditor
+	} else {
+		return promptForEditorKey("Please select editor to open the config")
+	}
 }
