@@ -41,7 +41,8 @@ var rootCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		rootExists := config.LocationExists()
+		printLogoInfo()
+		// rootExists := config.LocationExists()
 
 		if rootExists == false {
 			ex, err := os.Executable()
