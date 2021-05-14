@@ -71,7 +71,7 @@ func Info() string {
   
   Application
   ------------
-  Name:           ModelHelper 
+  Name:           mh 
   Version:        %v
   Location:       %v
   Environment:    %v
