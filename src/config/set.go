@@ -1,12 +1,29 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"modelhelper/cli/source"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
+
+func SetDefaultConnection(key string) error {
+	cfg := Load()
+
+	_, f := cfg.Connections[key]
+
+	if !f {
+		m := fmt.Sprintf("The connection: %s does not exists and cannot be a default connection", key)
+		return errors.New(m)
+	}
+
+	cfg.DefaultConnection = key
+
+	return update(cfg)
+}
 
 func SetConnection(key string, c *source.Connection, isDefault bool, merge bool) error {
 	cfg := Load()
