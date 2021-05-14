@@ -39,8 +39,9 @@ import (
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
-	Use:   "generate",
-	Short: "Generates code based on language, template and source",
+	Use:     "generate",
+	Aliases: []string{"g", "gen"},
+	Short:   "Generates code based on language, template and source",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		codeOnly, _ := cmd.Flags().GetBool("code-only")
@@ -169,7 +170,7 @@ var generateCmd = &cobra.Command{
 								key:     currentTemplate.Key,
 							}
 							input = entityModel.ToModel()
-							fmt.Println(input)
+							// fmt.Println(input)
 							o, _ := generator.Generate(input)
 							generatedCode = append(generatedCode, o)
 						}
