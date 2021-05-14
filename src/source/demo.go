@@ -50,6 +50,9 @@ func (server *DemoSource) getCustomerTable() Entity {
 		Columns: []Column{
 			{Name: "Id", DataType: "int", IsPrimaryKey: true, IsNullable: false, IsIdentity: true, Description: "The identifier"},
 			{Name: "Name", DataType: "varchar", IsPrimaryKey: false, IsNullable: false, IsIdentity: false, Description: "Name of the customer"},
+			{Name: "Address", DataType: "varchar", IsPrimaryKey: false, IsNullable: true, IsIdentity: false, Description: "Name of the customer"},
+			{Name: "ZipCode", DataType: "varchar", IsPrimaryKey: false, IsNullable: true, IsIdentity: false, Description: "Name of the customer"},
+			{Name: "Budget", DataType: "decimal", IsPrimaryKey: false, IsNullable: true, IsIdentity: false, Description: "Name of the customer"},
 		},
 	}
 
