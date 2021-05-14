@@ -34,8 +34,10 @@ import (
 
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{
-	Use:   "template",
-	Short: "List all templates or view content of a single template",
+	Use:     "template",
+	Aliases: []string{"t", "tpl"},
+	Args:    cobra.MaximumNArgs(1),
+	Short:   "List all templates or view content of a single template",
 	Long: `With this command you can list all available templates, snippet and blocks
 
 with the use of --by option you can group the various templates either by type, language
@@ -58,6 +60,8 @@ Filter the template by using on or more of the following options
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		open, _ := cmd.Flags().GetBool("open")
+
 		cfg := config.Load()
 
 		tl := tpl.TemplateLoader{
@@ -68,7 +72,13 @@ Filter the template by using on or more of the following options
 		if len(args) > 0 {
 			current, found := allTemplates[args[0]]
 			if found {
-				fmt.Print(current.ToString(args[0]))
+				if open {
+					editor := getEditor(cfg)
+					openPathInEditor(editor, current.TemplateFilePath)
+				} else {
+
+					fmt.Print(current.ToString(args[0]))
+				}
 			}
 
 			return
@@ -146,6 +156,8 @@ func init() {
 	templateCmd.Flags().StringArray("model", []string{}, "Filter the templates by model")
 	templateCmd.Flags().StringArray("key", []string{}, "Filter the templates by key")
 	templateCmd.Flags().StringArray("group", []string{}, "Filter the templates by group")
+
+	templateCmd.Flags().Bool("open", false, "Opens the template file in default editor or a selection of editors")
 
 }
 
