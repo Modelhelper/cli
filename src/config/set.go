@@ -14,6 +14,14 @@ func SetDeveloper(name string, email string) error {
 	cfg.Developer = dev
 	return update(cfg)
 }
+func SetPort(api int, web int) error {
+	cfg := Load()
+
+	cfg.ApiPort = api
+	cfg.WebPort = web
+
+	return update(cfg)
+}
 
 func SetTemplateLocation(loc string) error {
 	cfg := Load()
