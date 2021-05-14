@@ -39,7 +39,7 @@ var setDefaultConnectionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		key := ""
 		if len(args) == 0 {
-			key = promptForKey()
+			key = promptForConnectionKey()
 		} else {
 			key = args[0]
 		}
@@ -60,7 +60,7 @@ func init() {
 
 }
 
-func promptForKey() string {
+func promptForConnectionKey() string {
 	cfg := config.Load()
 	items := []string{}
 
