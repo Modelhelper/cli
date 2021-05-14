@@ -16,6 +16,8 @@ type Template struct {
 	FileName    string   `yaml:"fileName"`
 	Model       string   `yaml:"model"`
 	Body        string   `yaml:"body"`
+
+	TemplateFilePath string
 	// Export      TemplateExport `yaml:"export"`
 }
 
