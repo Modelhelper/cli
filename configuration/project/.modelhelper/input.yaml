@@ -26,3 +26,11 @@ export:
 
 options: 
   -option_1: value_1
+
+steps:
+  step1:
+    templates:
+      - cs-poco
+    entities:
+      - dbo.order
+    includeRelations: true

@@ -43,9 +43,9 @@ func Logo() string {
 888  Y8P  888 888  888 888  888 88888888 888 888    888 88888888 888 888  888 88888888 888     
 888   "   888 Y88..88P Y88b 888 Y8b.     888 888    888 Y8b.     888 888 d88P Y8b.     888     
 888       888  "Y88P"   "Y88888  "Y8888  888 888    888  "Y8888  888 88888P"   "Y8888  888     
-																	 888                       
-																	 888                       
-																	 888   CLI v%v             
+                                                                     888                       
+                                                                     888                       
+                                                                     888   CLI v%v             
 `
 	return fmt.Sprintf(logo, Version)
 }
@@ -53,12 +53,12 @@ func Logo() string {
 // Info returns information about this application
 func Info() string {
 	infoElement := `
-	Code
-	ModelHelper CLI is a Command Line Interface tool to generate code based on an input source
-	like a database table, REST api endpoint, a GraphQL endpoint or a proto file.
-	
-	Templates
-	You can create your own templates based on Golang template ... each template is specified in a
+  Code
+  ModelHelper CLI is a Command Line Interface tool to generate code based on an input source
+  like a database table, REST api endpoint, a GraphQL endpoint or a proto file.
+
+  Templates
+  You can create your own templates based on Golang template ... each template is specified in a
   yaml- file and placed in a folder structure.
 
   Data
