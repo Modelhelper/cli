@@ -19,8 +19,8 @@ type Config struct {
 	AppVersion        string                       `json:"appVersion" yaml:"appVersion"`
 	Connections       map[string]source.Connection `json:"connections" yaml:"connections"`
 	DefaultConnection string                       `json:"defaultConnection" yaml:"defaultConnection"`
-
-	Templates struct {
+	Developer         Developer                    `json:"developer" yaml:"developer"`
+	Templates         struct {
 		Location string `json:"location" yaml:"location"`
 	} `json:"templates" yaml:"templates"`
 	Languages struct {
@@ -31,6 +31,10 @@ type Config struct {
 	} `json:"logging" yaml:"logging"`
 }
 
+type Developer struct {
+	Name  string `json:"name" yaml:"name"`
+	Email string `json:"email" yaml:"email"`
+}
 type LanguageDef struct {
 	Version        string                     `json:"version" yaml:"version"`
 	Language       string                     `json:"language" yaml:"language"`
