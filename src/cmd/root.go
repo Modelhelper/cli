@@ -101,9 +101,9 @@ func init() {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 
-	configPath := config.Location()
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
+	// configPath := config.Location()
+	// viper.SetConfigName("config")
+	// viper.SetConfigType("yaml")
 
 	viper.AddConfigPath(configPath) // optionally look for config in the working directory
 	err := viper.ReadInConfig()     // Find and read the config file
