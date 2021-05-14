@@ -19,10 +19,12 @@ type Config struct {
 	AppVersion        string                       `json:"appVersion" yaml:"appVersion"`
 	Connections       map[string]source.Connection `json:"connections" yaml:"connections"`
 	DefaultConnection string                       `json:"defaultConnection" yaml:"defaultConnection"`
+	DefaultEditor     string                       `json:"editor" yaml:"editor"`
 	Developer         Developer                    `json:"developer" yaml:"developer"`
 	ApiPort           int                          `json:"apiport" yaml:"apiport"`
 	WebPort           int                          `json:"webPort" yaml:"webPort"`
-	Templates         struct {
+
+	Templates struct {
 		Location string `json:"location" yaml:"location"`
 	} `json:"templates" yaml:"templates"`
 	Languages struct {

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"modelhelper/cli/source"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -21,6 +22,23 @@ func SetDefaultConnection(key string) error {
 	}
 
 	cfg.DefaultConnection = key
+
+	return update(cfg)
+}
+
+func SetDefaultEditor(editor string) error {
+	cfg := Load()
+
+	editors := make(map[string]string)
+	editors["vscode"] = "code"
+
+	e, f := editors[strings.ToLower(editor)]
+
+	if f {
+		editor = e
+	}
+
+	cfg.DefaultEditor = strings.ToLower(editor)
 
 	return update(cfg)
 }
