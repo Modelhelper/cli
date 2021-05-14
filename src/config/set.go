@@ -56,11 +56,27 @@ func SetConnection(key string, c *source.Connection, isDefault bool, merge bool)
 	}
 	return update(cfg)
 }
-func SetDeveloper(name string, email string) error {
+func SetDeveloper(name string, email string, github string, merge bool) error {
 	cfg := Load()
-	dev := Developer{name, email}
 
-	cfg.Developer = dev
+	if merge {
+		if len(name) > 0 {
+			cfg.Developer.Name = name
+		}
+
+		if len(email) > 0 {
+			cfg.Developer.Email = email
+		}
+
+		if len(github) > 0 {
+			cfg.Developer.GitHubAccount = github
+		}
+	} else {
+
+		dev := Developer{name, email, github}
+		cfg.Developer = dev
+	}
+
 	return update(cfg)
 }
 func SetPort(api int, web int) error {

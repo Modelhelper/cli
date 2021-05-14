@@ -34,8 +34,9 @@ type Config struct {
 }
 
 type Developer struct {
-	Name  string `json:"name" yaml:"name"`
-	Email string `json:"email" yaml:"email"`
+	Name          string `json:"name" yaml:"name"`
+	Email         string `json:"email" yaml:"email"`
+	GitHubAccount string `json:"github" yaml:"github"`
 }
 type LanguageDef struct {
 	Version        string                     `json:"version" yaml:"version"`

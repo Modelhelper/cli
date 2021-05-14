@@ -37,8 +37,10 @@ var setDeveloperCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		devName, _ := cmd.Flags().GetString("name")
 		devEMail, _ := cmd.Flags().GetString("email")
+		github, _ := cmd.Flags().GetString("github")
+		merge, _ := cmd.Flags().GetBool("merge")
 
-		err := config.SetDeveloper(devName, devEMail)
+		err := config.SetDeveloper(devName, devEMail, github, merge)
 
 		if err != nil {
 			log.Fatalln("Could not set developer params in config", err)
@@ -53,5 +55,7 @@ func init() {
 
 	setDeveloperCmd.Flags().String("name", "", "Sets the developer name in config.")
 	setDeveloperCmd.Flags().String("email", "", "Sets the developer email in config.")
+	setDeveloperCmd.Flags().String("github", "", "Sets the github account.")
+	setDeveloperCmd.Flags().Bool("merge", false, "If true merges and updates existing fields but only if they are passed in as option here.")
 
 }
