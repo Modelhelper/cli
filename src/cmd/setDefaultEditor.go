@@ -46,7 +46,7 @@ e.g code for VSCode...
 
 		editor := ""
 		if len(args) == 0 {
-			editor = promptForEditorKey()
+			editor = promptForEditorKey("Select your editor or enter a correct on")
 		} else {
 			editor = args[0]
 		}
@@ -68,15 +68,28 @@ func init() {
 
 }
 
-func promptForEditorKey() string {
-	items := []string{"Vim", "Emacs", "Sublime", "VSCode", "Atom"}
+func promptForEditorKey(prompt string) string {
+	editors := make(map[string]string)
+	editors["VSCode"] = "code"
+	editors["Vim"] = "vim"
+	editors["Atom"] = "atom"
+	editors["Sublime"] = "sublime"
+	editors["Emacs"] = "emacs"
+	editors["Notepad"] = "notepad"
+
+	items := []string{}
+
+	for k, _ := range editors {
+		items = append(items, k)
+	}
+
 	index := -1
 	var result string
 	var err error
 
 	for index < 0 {
 		prompt := promptui.SelectWithAdd{
-			Label:    "What's your editor",
+			Label:    prompt,
 			Items:    items,
 			AddLabel: "Other",
 		}
@@ -91,6 +104,11 @@ func promptForEditorKey() string {
 	if err != nil {
 		// fmt.Printf("Prompt failed %v\n", err)
 		return ""
+	}
+
+	selected, found := editors[result]
+	if found {
+		return selected
 	}
 
 	return result
