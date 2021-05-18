@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"modelhelper/cli/ctx"
@@ -47,10 +46,18 @@ func (g *GoLangGenerator) Generate(c ctx.Context, model interface{}) (string, er
 func (g *SimpleGenerator) Generate(c ctx.Context, model interface{}) (string, error) {
 	codeCtx = c
 
-	if len(g.Template) > 0 {
-		fmt.Println(g.Template)
+	if len(c.Templates) > 0 {
+		// ts := c.Templates
+		tmpl, err := template.New(c.TemplateName).Funcs(funcMap()).Parse(g.Template)
+		if err != nil {
+			return "", err
+		}
+
+		buf := new(bytes.Buffer)
+
+		tmpl.Execute(buf, model)
+		return buf.String(), nil
 	}
-	fmt.Println("Generate code based on simple one line template")
 
 	return "", nil
 }
