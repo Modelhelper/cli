@@ -27,6 +27,7 @@ import (
 	"modelhelper/cli/app"
 	"modelhelper/cli/codegen"
 	"modelhelper/cli/config"
+	"modelhelper/cli/ctx"
 	"modelhelper/cli/model"
 	"modelhelper/cli/project"
 	"modelhelper/cli/source"
@@ -53,7 +54,7 @@ var generateCmd = &cobra.Command{
 		// if isDemo == false && len(entityFlagArray) == 0 {
 		// 	return
 		// }
-		ctx := modelHelperApp.CreateContext()
+		appCtx := modelHelperApp.CreateContext()
 		// var ctx *app.Context
 		var cfg *config.Config
 		var prj *project.Project
@@ -65,7 +66,7 @@ var generateCmd = &cobra.Command{
 			cfg = config.Load()
 			// load demo project
 			var ds *source.DemoSource
-			el, _ := ds.Entities("*")
+			el, _ := ds.Entities("")
 
 			for _, eitem := range *el {
 				entities = append(entities, eitem)
@@ -74,9 +75,9 @@ var generateCmd = &cobra.Command{
 			// load demo tables (2)
 		} else {
 
-			conName := ctx.DefaultConnection
+			conName := appCtx.DefaultConnection
 
-			con := ctx.Connections[conName]
+			con := appCtx.Connections[conName]
 			src := con.LoadSource()
 
 			if len(entityFlagArray) > 0 {
@@ -97,18 +98,17 @@ var generateCmd = &cobra.Command{
 			configFile, _ := cmd.Flags().GetString("config")
 
 			if len(configFile) > 0 {
-				fmt.Println("Use this as configuration file")
 				cfg = config.LoadFromFile(configFile)
 			} else {
 				cfg = config.Load()
 			}
 
-			// currentProject := *project.Project{}
-			if len(projectPath) > 0 {
-				prj, _ = project.Load(projectPath)
-			} else {
-				prj, _ = project.Load(project.DefaultLocation())
-			}
+		}
+		// currentProject := *project.Project{}
+		if len(projectPath) > 0 {
+			prj, _ = project.Load(projectPath)
+		} else {
+			prj, _ = project.Load(project.DefaultLocation())
 		}
 
 		tl := tpl.TemplateLoader{
@@ -137,6 +137,7 @@ var generateCmd = &cobra.Command{
 				currentTemplate, found := allTemplates[tname]
 
 				if found {
+
 					var input interface{}
 
 					tplMap := make(map[string]string)
@@ -145,6 +146,10 @@ var generateCmd = &cobra.Command{
 						tplMap[k] = b.Body
 					}
 					tplMap[tname] = currentTemplate.Body
+
+					codeCtx := ctx.Context{}
+					codeCtx.TemplateName = tname
+					codeCtx.Templates = tplMap
 
 					generator := codegen.GoLangGenerator{
 						Templates:    tplMap,
@@ -156,8 +161,8 @@ var generateCmd = &cobra.Command{
 							project: prj,
 							key:     currentTemplate.Key,
 						}
-						input = basicModel.ToModel()
-						o, _ := generator.Generate(input)
+						input = basicModel.ToModel(codeCtx)
+						o, _ := generator.Generate(codeCtx, input)
 						generatedCode = append(generatedCode, o)
 
 					}
@@ -169,9 +174,8 @@ var generateCmd = &cobra.Command{
 								project: prj,
 								key:     currentTemplate.Key,
 							}
-							input = entityModel.ToModel()
-							// fmt.Println(input)
-							o, _ := generator.Generate(input)
+							input = entityModel.ToModel(codeCtx)
+							o, _ := generator.Generate(codeCtx, input)
 							generatedCode = append(generatedCode, o)
 						}
 					}
@@ -219,64 +223,83 @@ func init() {
 }
 
 type basicModel struct {
-	project *project.Project
-	key     string
+	project   *project.Project
+	generator *codegen.SimpleGenerator
+	key       string
 }
 
 type entityModel struct {
-	entity  *source.Entity
-	project *project.Project
-	key     string
+	entity    *source.Entity
+	project   *project.Project
+	generator *codegen.SimpleGenerator
+	key       string
 }
 
 type entitiesModel struct {
-	entity  *[]source.Entity
-	project *project.Project
-	key     string
+	entity    *[]source.Entity
+	project   *project.Project
+	generator *codegen.SimpleGenerator
+	key       string
 }
 
-func (input *entityModel) ToModel() interface{} {
+func (input *entityModel) ToModel(codeCtx ctx.Context) interface{} {
+
 	imports := []string{}
 
 	out := model.EntityModel{}
+
 	if input.entity != nil {
 		out = toEntitySection(input.entity)
 	}
 
 	if input.project != nil {
-		fmt.Println(input.project)
+		if len(input.project.Options) > 0 {
+			out.Options = input.project.Options
+		}
 		out.Project.Name = input.project.Name
 		out.Project.Owner = input.project.CustomerName
 
 		out.PageHeader = input.project.Header
-
 		if len(input.key) > 0 {
 			val, found := input.project.Code.Keys[input.key]
 			if found {
-				imports = append(imports, val.Imports...)
+				out.Namespace = val.NameSpace
+				out.Postfix = val.Postfix
+				out.Prefix = val.Prefix
 
-				out.Inject = make(map[string]model.InjectSection)
+				for _, imp := range val.Imports {
+					imports = append(imports, imp)
+				}
+				out.Imports = imports
+				out.Inject = []model.InjectSection{}
 				for _, injectKey := range val.Inject {
 					injItem, foundInj := input.project.Code.Inject[injectKey]
 					if foundInj {
-						out.Inject[injectKey] = toInjectSection(injItem)
+						for _, injImport := range injItem.Imports {
+							out.Imports = append(out.Imports, injImport)
+						}
+						out.Inject = append(out.Inject, toInjectSection(injItem, out, codeCtx))
+
 					}
 				}
 			}
 		}
-		if len(input.project.Options) > 0 {
-			out.Options = input.project.Options
-		}
+
 	}
 
 	return out
 }
 
-func (input *basicModel) ToModel() interface{} {
+func (input *basicModel) ToModel(codeCtx ctx.Context) interface{} {
 	b := model.BasicModel{}
 	imports := []string{}
 	// inject := map[]
 	if input.project != nil {
+
+		if len(input.project.Options) > 0 {
+			fmt.Println("has options")
+			b.Options = input.project.Options
+		}
 
 		b.Project.Name = input.project.Name
 		b.Project.Owner = input.project.CustomerName
@@ -288,18 +311,16 @@ func (input *basicModel) ToModel() interface{} {
 			if found {
 				imports = append(imports, val.Imports...)
 
-				b.Inject = make(map[string]model.InjectSection)
+				b.Inject = []model.InjectSection{}
 				for _, injectKey := range val.Inject {
 					injItem, foundInj := input.project.Code.Inject[injectKey]
 					if foundInj {
-						b.Inject[injectKey] = toInjectSection(injItem)
+						b.Inject = append(b.Inject, toInjectSection(injItem, b, codeCtx))
 					}
 				}
 			}
 		}
-		if len(input.project.Options) > 0 {
-			b.Options = input.project.Options
-		}
+
 	}
 
 	return b
@@ -398,9 +419,11 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 
 	return out
 }
-func toInjectSection(from project.CodeInject) model.InjectSection {
+func toInjectSection(from project.CodeInject, m interface{}, codeCtx ctx.Context) model.InjectSection {
+	g := codegen.SimpleGenerator{from.Name}
+	name, _ := g.Generate(codeCtx, m)
 	code := model.InjectSection{
-		Name:         from.Name,
+		Name:         name,
 		PropertyName: from.PropertyName,
 	}
 

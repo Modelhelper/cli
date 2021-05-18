@@ -74,13 +74,13 @@ code:
       language: cs
       propertyName: user            
       imports: 
-        - "using SomePlace.BlaBla"      
+        - "using PatoLab.BlaBla"      
     connectionFactory:
       language: cs
       propertyName: connectionFactory
       name: IConnectionFactory      
     logging:
-      name: ILogger<{{ .Name | pascal | singular }}>[opt]{{ index .Options "p"}}
+      name: ILogger<{{ .Name }}>
       language: cs      
       propertyName: logger
       imports: 
@@ -89,17 +89,17 @@ code:
 
   keys:
     model: 
-      namespace: MyProject.Core.Models
+      postfix: ModelHelper
+      namespace: MyProject.Core.Modeling
       imports: 
-        - using MyProject.Core.Models;
-      inject:
-        - logging
+        - MyProject.Core.Models
+          
     interface:   
       postfix: Repository
       namespace: MyProject.Core.Modeling
       prefix: I
       imports: 
-        - using MyProject.Core.Models;
+        - "MyProject.Core.Models"
       
     
   exportLocations:
@@ -107,7 +107,7 @@ code:
     interface: "path"
 ## this section lets you provide 
 options:
-  p: value_1
+  option_1: value_1
 
 # repository:   
     #   inject:

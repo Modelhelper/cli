@@ -9,7 +9,7 @@ type BasicModel struct {
 	Postfix                   string
 	Prefix                    string
 	ModuleLevelVariablePrefix string
-	Inject                    map[string]InjectSection
+	Inject                    []InjectSection
 	Imports                   []string
 	Project                   ProjectSection
 	Developer                 DeveloperSection
@@ -21,7 +21,7 @@ type EntityModel struct {
 	Postfix                   string
 	Prefix                    string
 	ModuleLevelVariablePrefix string
-	Inject                    map[string]InjectSection
+	Inject                    []InjectSection
 	Imports                   []string
 	Project                   ProjectSection
 	Developer                 DeveloperSection
@@ -52,7 +52,7 @@ type EntityListModel struct {
 	Postfix                   string
 	Prefix                    string
 	ModuleLevelVariablePrefix string
-	Inject                    map[string]InjectSection
+	Inject                    []InjectSection
 	Imports                   []string
 	Project                   ProjectSection
 	Developer                 DeveloperSection

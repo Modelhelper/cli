@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"modelhelper/cli/source"
 	"modelhelper/cli/ui"
@@ -47,11 +48,22 @@ var entityCmd = &cobra.Command{
 
 		src := con.LoadSource()
 
+		pattern := ""
+
 		if src == nil {
 			fmt.Println("Could not load the source, check configuration")
 			return
 		}
+		isSearch := false
+
 		if len(args) > 0 {
+			isSearch = isSearchPattern(args[0])
+
+			if isSearch {
+				pattern = args[0]
+			}
+		}
+		if len(args) > 0 && !isSearch {
 			en := args[0]
 			e, err := src.Entity(en)
 			if err != nil {
@@ -81,7 +93,7 @@ var entityCmd = &cobra.Command{
 			// fmt.Printf("-------------------------------------------\n\n")
 			// printParentTable(e.Name, e.ParentRelations)
 		} else {
-			ents, err := src.Entities("")
+			ents, err := src.Entities(pattern)
 
 			if err != nil {
 				fmt.Println(err)
@@ -97,6 +109,9 @@ var entityCmd = &cobra.Command{
 	},
 }
 
+func isSearchPattern(input string) bool {
+	return strings.ContainsAny(input, "*%")
+}
 func init() {
 	rootCmd.AddCommand(entityCmd)
 

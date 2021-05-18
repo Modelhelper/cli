@@ -3,7 +3,9 @@ package source
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
+	"strings"
 
 	_ "github.com/denisenkom/go-mssqldb"
 )
@@ -57,7 +59,13 @@ func (server *MsSql) Entity(name string) (*Entity, error) {
 	return e, nil
 }
 func (server *MsSql) Entities(pattern string) (*EntityList, error) {
-	sql := `
+	search := ""
+
+	if len(pattern) > 0 {
+		pattern = strings.Replace(pattern, "*", "%", -1)
+		search = fmt.Sprintf("And o.Name like '%s'", pattern)
+	}
+	sql := fmt.Sprintf(`
 	with rowcnt (object_id, rowcnt) as (
 		SELECT p.object_id, SUM(CASE WHEN (p.index_id < 2) AND (a.type = 1) THEN p.rows ELSE 0 END) 
 		FROM sys.partitions p 
@@ -77,10 +85,10 @@ func (server *MsSql) Entities(pattern string) (*EntityList, error) {
 		join sys.schemas s on s.schema_id = o.schema_id
 		left join rowcnt rc on rc.object_id = o.object_id    
 		left join sys.extended_properties ep on o.object_id = ep.major_id and minor_id = 0 and ep.name = 'MS_description'
-		where o.name not in ('sysdiagrams') 
+		where o.name not in ('sysdiagrams') %s
 		and [type] in ('V', 'U')
 		order by s.name, o.[type], o.name		
-	`
+	`, search)
 
 	// --and type in {entityFilter}
 	// {tableFilter}

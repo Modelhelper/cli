@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"modelhelper/cli/code"
+	"modelhelper/cli/ctx"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,6 +14,8 @@ import (
 
 	"github.com/gertd/go-pluralize"
 )
+
+var codeCtx ctx.Context
 
 type GoLangGenerator struct {
 	TemplateName  string
@@ -26,11 +28,8 @@ type SimpleGenerator struct {
 	Template string
 }
 
-func NewGolanGenerator(t map[string]string, dt map[string]string, ndt map[string]string) {
-
-}
-
-func (g *GoLangGenerator) Generate(model interface{}) (string, error) {
+func (g *GoLangGenerator) Generate(c ctx.Context, model interface{}) (string, error) {
+	codeCtx = c
 
 	template := fromFiles(g.TemplateName, g.Templates)
 
@@ -45,7 +44,9 @@ func (g *GoLangGenerator) Generate(model interface{}) (string, error) {
 	return buf.String(), nil
 
 }
-func (g *SimpleGenerator) Generate(model interface{}) (string, error) {
+func (g *SimpleGenerator) Generate(c ctx.Context, model interface{}) (string, error) {
+	codeCtx = c
+
 	if len(g.Template) > 0 {
 		fmt.Println(g.Template)
 	}
@@ -149,12 +150,7 @@ func dataTypeWithNullcheck(isNullable bool, input string) string {
 	return dt
 }
 func alternativeNullableDatatype(input string) string {
-	dict := make(map[string]string)
-	dict["int"] = "Nullable<int>"
-	dict["long"] = "Nullable<long>"
-	dict["bool"] = "Nullable<bool>"
-
-	output := dict[input]
+	output := codeCtx.AlternativeNullableTypes[input]
 
 	if len(output) > 0 {
 		return output
@@ -163,13 +159,7 @@ func alternativeNullableDatatype(input string) string {
 	return input
 }
 func nullableDatatype(input string) string {
-	dict := make(map[string]string)
-	dict["int"] = "int?"
-	dict["long"] = "long?"
-	dict["bool"] = "bool?"
-	dict["string"] = "string"
-
-	output, found := dict[input]
+	output, found := codeCtx.NullableTypes[input]
 
 	if found {
 		return output
@@ -179,17 +169,11 @@ func nullableDatatype(input string) string {
 }
 
 func dataTypeConverter(input string) string {
-	dict := make(map[string]code.LangDefDataType)
-	dict["varchar"] = code.LangDefDataType{Key: "varchar", NotNull: "string", Nullable: "string"}
-	dict["nvarchar"] = code.LangDefDataType{Key: "varchar", NotNull: "string", Nullable: "string"}
-	dict["int"] = code.LangDefDataType{Key: "int", NotNull: "int", Nullable: "int"}
-	dict["bigint"] = code.LangDefDataType{Key: "bigint", NotNull: "long", Nullable: "long?"}
-	dict["bit"] = code.LangDefDataType{Key: "bool", NotNull: "bool", Nullable: "bool?"}
 
-	output, found := dict[input]
+	output, found := codeCtx.Datatypes[input]
 
 	if found {
-		return output.NotNull
+		return output
 	}
 
 	return input
