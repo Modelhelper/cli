@@ -10,26 +10,73 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const dirname string = ".modelhelper"
+
 type Project struct {
 	Version       string                       `yaml:"version"`
 	Name          string                       `yaml:"name"`
 	Language      string                       `yaml:"language"`
-	DefaultSource string                       `yaml:"defaultSource"`
-	DefaultKey    string                       `yaml:"defaultKey"`
-	Connections   map[string]source.Connection `yaml:"connections"`
-	Code          ProjectCode                  `yaml:"code"`
-	CustomerName  string                       `yaml:"customerName"`
-	Header        string                       `yaml:"header"`
-	Options       map[string]string            `yaml:"options"`
-	Custom        interface{}                  `yaml:"custom"`
+	DefaultSource string                       `yaml:"defaultSource,omitempty"`
+	DefaultKey    string                       `yaml:"defaultKey,omitempty"`
+	Connections   map[string]source.Connection `yaml:"connections,omitempty"`
+	Code          ProjectCode                  `yaml:"code,omitempty"`
+	OwnerName     string                       `yaml:"customerName,omitempty"`
+	Header        string                       `yaml:"header,omitempty"`
+	Options       map[string]string            `yaml:"options,omitempty"`
+	Custom        interface{}                  `yaml:"custom,omitempty"`
 }
 
-func DefaultLocation() string {
+func (p *Project) Save() error {
+
+	d, err := yaml.Marshal(&p)
+
+	if err != nil {
+
+		return err
+	}
+
+	// path := filepath.Join(DefaultLocation(), "config.yaml")
+	path := DefaultLocation()
+
+	if !Exists(path) {
+		CreateDir(dirname)
+	}
+
+	err = ioutil.WriteFile(path, d, 0777)
+
+	return err
+}
+
+func CreateDir(name string) {
+	err := os.Mkdir(name, 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+func DefaultDir() string {
 	p, err := os.Getwd()
 	if err != nil {
 		log.Println(err)
 	}
-	return filepath.Join(p, ".modelhelper", "project.yaml")
+	return filepath.Join(p, dirname)
+}
+func DefaultLocation() string {
+	// p, err := os.Getwd()
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	return filepath.Join(DefaultDir(), "project.yaml")
+}
+
+func (P *Project) Exists(path string) bool {
+
+	pathInfo, err := os.Stat(path)
+
+	if os.IsNotExist(err) || pathInfo.IsDir() {
+		return false
+	}
+
+	return true
 }
 
 func Exists(path string) bool {
@@ -56,7 +103,7 @@ func Load(path string) (*Project, error) {
 		if err != nil {
 			log.Println(err)
 		}
-		path = filepath.Join(p, ".modelhelper", "project.yaml")
+		path = filepath.Join(p, dirname, "project.yaml")
 	}
 
 	f, err := loadProjectFromFile(path)
