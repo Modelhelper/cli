@@ -59,7 +59,7 @@ var configCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(configCmd)
 
-	configCmd.Flags().Bool("open", false, "Opens the config file in VS Code")
+	configCmd.Flags().Bool("open", false, "Opens the config file in default editor")
 	configCmd.Flags().String("editor", "", "Opens the config file in this application")
 }
 
