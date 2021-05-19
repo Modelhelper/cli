@@ -27,6 +27,19 @@ type SimpleGenerator struct {
 	Template string
 }
 
+func Generate(name string, body string, model interface{}) (string, error) {
+	tmpl, err := template.New(name).Funcs(funcMap()).Parse(body)
+	if err != nil {
+		return "", err
+	}
+
+	buf := new(bytes.Buffer)
+
+	tmpl.Execute(buf, model)
+	return buf.String(), nil
+
+}
+
 func (g *GoLangGenerator) Generate(c ctx.Context, model interface{}) (string, error) {
 	codeCtx = c
 
@@ -47,30 +60,11 @@ func (g *SimpleGenerator) Generate(c ctx.Context, model interface{}) (string, er
 	codeCtx = c
 
 	if len(c.Templates) > 0 {
-		// ts := c.Templates
-		tmpl, err := template.New(c.TemplateName).Funcs(funcMap()).Parse(g.Template)
-		if err != nil {
-			return "", err
-		}
-
-		buf := new(bytes.Buffer)
-
-		tmpl.Execute(buf, model)
-		return buf.String(), nil
+		return Generate(c.TemplateName, g.Template, model)
 	}
 
 	return "", nil
 }
-
-// func withoutTempDir(name string, templates map[string]string) *template.Template {
-
-// 	t := template.New(name)
-
-// 	for _, body := range templates {
-// 		t = template.Must(t.Parse(body))
-// 	}
-// 	return t
-// }
 
 func funcMap() template.FuncMap {
 	return template.FuncMap{
