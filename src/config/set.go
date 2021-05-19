@@ -91,8 +91,7 @@ func SetDeveloper(name string, email string, github string, merge bool) error {
 func SetPort(api int, web int) error {
 	cfg := Load()
 
-	cfg.ApiPort = api
-	cfg.WebPort = web
+	cfg.Port = api
 
 	return update(cfg)
 }
