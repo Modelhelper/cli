@@ -308,6 +308,18 @@ func (server *MsSql) getColumns(schema string, entityName string) (*ColumnList, 
 				return nil, err
 			}
 		} else {
+
+			if c.UseLength {
+				len := strconv.Itoa(c.Length)
+				if c.Length < 0 {
+					len = "max"
+				}
+				c.DbType = fmt.Sprintf("%s (%s)", c.DataType, len)
+
+			}
+			if c.UsePrecision {
+				c.DbType = fmt.Sprintf("%s (%v, %v)", c.DataType, c.Precision, c.Scale)
+			}
 			cl = append(cl, c)
 		}
 	}
