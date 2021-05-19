@@ -41,6 +41,47 @@ type DatabaseOptimizer interface {
 	RebuildIndexes()
 }
 
+func SplitConnectionString(connectionString string) map[string]string {
+	items := make(map[string]string)
+
+	if len(connectionString) > 0 {
+		parts := strings.Split(connectionString, ";")
+
+		for _, part := range parts {
+			kv := strings.Split(part, "=")
+
+			if len(kv) > 0 {
+				k, v := strings.ToLower(kv[0]), ""
+				if len(kv) == 2 {
+					v = kv[1]
+				}
+				items[k] = v
+			}
+		}
+	}
+
+	return items
+}
+
+func (c *Connection) ParseConnectionString() {
+	items := SplitConnectionString(c.ConnectionString)
+
+	c.Server = items["server"]
+	c.Database = items["database"]
+
+}
+
+func (c *Connection) ConnectionStringPart(part string) string {
+	items := SplitConnectionString(c.ConnectionString)
+
+	// if out, found := items[part]; f {
+	if out, found := items[part]; found {
+		return out
+	}
+
+	return ""
+}
+
 func IsConnectionTypeValid(t string) bool {
 	valid := make(map[string]string)
 	valid["mssql"] = "Connects to a Microsoft SQL Server"
