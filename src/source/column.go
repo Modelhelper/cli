@@ -10,28 +10,28 @@ func (d *ColumnToTableRenderer) ToRows() [][]string {
 
 	for _, c := range *d.Columns {
 
-		null := "false"
+		null := "No"
 		if c.IsNullable {
-			null = "true"
+			null = "Yes"
 		}
 		id := ""
 		if c.IsIdentity {
-			id = "yes"
+			id = "Yes"
 		}
 
 		pk := ""
 		if c.IsPrimaryKey {
-			pk = "PK"
+			pk = "Yes"
 		}
 
 		fk := ""
 		if c.IsForeignKey {
-			fk = "FK"
+			fk = "Yes"
 		}
 
 		r := []string{
 			c.Name,
-			c.DataType,
+			c.DbType,
 			null,
 			id,
 			pk,
@@ -49,7 +49,7 @@ func (d *ColumnToTableRenderer) ToRows() [][]string {
 }
 
 func (d *ColumnToTableRenderer) BuildHeader() []string {
-	h := []string{"Name", "Type", "Nullable", "IsIdentity", "PK", "FK"}
+	h := []string{"Name", "Type", "Nullable", "Identity", "PK", "FK"}
 
 	if d.IncludeDescription {
 		h = append(h, "Description") //"Children", "Parents"
