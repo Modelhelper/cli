@@ -116,16 +116,3 @@ func TemplateFolder(templateLocation string) string {
 	}
 
 }
-
-/*
-
-Drivers
-  ------------
-  MS SQL:         github.com/denisenkom/go-mssqldb
-  RabbitMQ:       https://github.com/streadway/amqp
-
-  Environments
-  ------------
-
-
-*/
