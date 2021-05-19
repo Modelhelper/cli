@@ -21,10 +21,9 @@ type Config struct {
 	DefaultConnection string                       `json:"defaultConnection" yaml:"defaultConnection"`
 	DefaultEditor     string                       `json:"editor" yaml:"editor"`
 	Developer         Developer                    `json:"developer" yaml:"developer"`
-	ApiPort           int                          `json:"apiport" yaml:"apiport"`
-	WebPort           int                          `json:"webPort" yaml:"webPort"`
-
-	Templates struct {
+	Port              int                          `json:"port" yaml:"portport"`
+	Code              project.ProjectCode          `json:"code" yaml:"code"`
+	Templates         struct {
 		Location string `json:"location" yaml:"location"`
 	} `json:"templates" yaml:"templates"`
 	Languages struct {
