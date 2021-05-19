@@ -483,3 +483,135 @@ func (server *MsSql) openConnection() (*sql.DB, error) {
 
 	return db, nil
 }
+
+func fromJson(blob []byte) (*[]Index, error) {
+	list := []Index{}
+
+	if len(blob) > 0 {
+
+		if err := json.Unmarshal(blob, &list); err != nil {
+			return nil, err
+		}
+	}
+
+	return &list, nil
+}
+
+type RelationTreeItem struct {
+	KeyName           string
+	ParentID          int
+	ID                int
+	RelatedTable      string
+	RelatedColumnName string
+	TableName         string
+	ColumnName        string
+}
+
+func (server *MsSql) GetParentRelationTree(schema string, entityName string) (*[]RelationTreeItem, error) {
+	db, err := server.openConnection()
+	if err != nil {
+		return nil, err
+	}
+
+	defer db.Close()
+	ctx := context.Background()
+
+	query := `
+	;with track_parent as (
+
+		-- select lvl = 1, p.name, p.parent_object_id, referenced_object_id, family = p.parent_object_id, path = cast(object_name(referenced_object_id) + ' > ' + object_name(parent_object_id) as nvarchar(1000) )
+		select 
+			--  direction = -1
+			-- , lvl = 1, 
+			p.name
+			, p.parent_object_id
+			, p.referenced_object_id
+			, ParentTable = object_name(p.parent_object_id)
+			, ParentColumn = cp.name
+			, ReferencedTable = object_name(p.referenced_object_id)
+			, ReferencedColumn = cc.name
+			-- , family = p.referenced_object_id
+			-- , path = cast(object_name(p.parent_object_id) + ' > ' + object_name(p.referenced_object_id) as nvarchar(1000) )
+		from sys.foreign_keys p
+		join sys.foreign_key_columns fkc on p.parent_object_id = fkc.parent_object_id and fkc.referenced_object_id = p.referenced_object_id
+		join sys.columns cp on cp.column_id = fkc.parent_column_id and cp.object_id = fkc.parent_object_id
+		join sys.columns cc on cc.column_id = fkc.referenced_column_id and cc.object_id = fkc.referenced_object_id
+		where p.parent_object_id = object_id(@tablename)
+		union all
+		select
+			--   direction
+			-- , lvl = lvl + 1, 
+			  fk.name
+			  , fk.parent_object_id
+			  , fk.referenced_object_id
+			, ParentTable = object_name(fk.parent_object_id)
+			, ParentColumn = cp.name
+			, ReferencedTable = object_name(fk.referenced_object_id)
+			, ReferencedColumn = cc.name
+			-- , t.family
+			-- , path = cast(path  + ' > ' + object_name(fk.referenced_object_id) as nvarchar(1000))
+		from sys.foreign_keys fk
+		join sys.foreign_key_columns fkc on fk.parent_object_id = fkc.parent_object_id and fkc.referenced_object_id = fk.referenced_object_id
+		join sys.columns cp on cp.column_id = fkc.parent_column_id and cp.object_id = fkc.parent_object_id
+		join sys.columns cc on cc.column_id = fkc.referenced_column_id and cc.object_id = fkc.referenced_object_id
+		--join sys.objects o on o.object_id = fk.parent_object_id
+		join track_parent t on t.referenced_object_id = fk.parent_object_id
+		
+		)
+			select 
+					-- direction = 0
+					-- , lvl = 0
+					  KeyName = ''
+					, parentId = -1
+					, Id = p.object_id
+					, ParentTable = ''
+					, ParentColumn = ''
+					, Name =  p.name
+					, ColumnName = ''
+					-- , family =p.object_id
+					-- , path = p.name
+				from sys.tables p
+				where p.object_id = object_id(@tablename)
+			union all
+			select * from track_parent
+			-- order by lvl, family
+		;
+	`
+
+	stmt, err := db.PrepareContext(ctx, query)
+
+	if err != nil {
+		return nil, err
+	}
+	// Execute query
+	rows, err := stmt.Query(query, sql.Named("tablename", entityName))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []RelationTreeItem{}
+	var r RelationTreeItem
+
+	for rows.Next() {
+
+		if err := rows.Scan(
+			&r.KeyName,
+			&r.ParentID,
+			&r.ID,
+			&r.RelatedTable,
+			&r.RelatedColumnName,
+			&r.TableName,
+			&r.ColumnName,
+		); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			} else {
+				return nil, err
+			}
+		} else {
+			list = append(list, r)
+		}
+	}
+	return &list, nil
+}
