@@ -104,12 +104,39 @@ var generateCmd = &cobra.Command{
 			}
 
 		}
-		// currentProject := *project.Project{}
-		if len(projectPath) > 0 {
-			prj, _ = project.Load(projectPath)
-		} else {
-			prj, _ = project.Load(project.DefaultLocation())
+
+		if len(projectPath) == 0 {
+			if project.Exists(project.DefaultLocation()) {
+				projectPath = project.DefaultLocation()
+			} else {
+				fp, foundProject := project.FindNearestProjectDir()
+				if foundProject && project.Exists(fp) {
+					projectPath = fp
+
+				}
+			}
 		}
+
+		if len(projectPath) > 0 {
+
+			fmt.Println("Project found here: ", projectPath)
+			prj, _ = project.Load(projectPath)
+		}
+		// currentProject := *project.Project{}
+
+		// if len(projectPath) > 0 {
+		// 	prj, _ = project.Load(projectPath)
+		// } else {
+		// 	if project.Exists(project.DefaultLocation()) {
+
+		// 		prj, _ = project.Load(project.DefaultLocation())
+		// 	} else {
+		// 		fp, p :=project.FindNearestProjectDir() {
+		// 			if project.Exists(fp) {
+		// 			prj, _ = project.Load(fp)}
+		// 		}
+		// 	}
+		// }
 
 		tl := tpl.TemplateLoader{
 			Directory: app.TemplateFolder(cfg.Templates.Location),
@@ -257,7 +284,7 @@ func (input *entityModel) ToModel(codeCtx ctx.Context) interface{} {
 			out.Options = input.project.Options
 		}
 		out.Project.Name = input.project.Name
-		out.Project.Owner = input.project.CustomerName
+		out.Project.Owner = input.project.OwnerName
 
 		out.PageHeader = input.project.Header
 		if len(input.key) > 0 {
@@ -278,7 +305,7 @@ func (input *entityModel) ToModel(codeCtx ctx.Context) interface{} {
 						for _, injImport := range injItem.Imports {
 							out.Imports = append(out.Imports, injImport)
 						}
-						out.Inject = append(out.Inject, toInjectSection(injItem, out, codeCtx))
+						out.Inject = append(out.Inject, toInjectSection(injItem, out))
 
 					}
 				}
@@ -302,7 +329,7 @@ func (input *basicModel) ToModel(codeCtx ctx.Context) interface{} {
 		}
 
 		b.Project.Name = input.project.Name
-		b.Project.Owner = input.project.CustomerName
+		b.Project.Owner = input.project.OwnerName
 
 		b.PageHeader = input.project.Header
 
@@ -315,7 +342,7 @@ func (input *basicModel) ToModel(codeCtx ctx.Context) interface{} {
 				for _, injectKey := range val.Inject {
 					injItem, foundInj := input.project.Code.Inject[injectKey]
 					if foundInj {
-						b.Inject = append(b.Inject, toInjectSection(injItem, b, codeCtx))
+						b.Inject = append(b.Inject, toInjectSection(injItem, b))
 					}
 				}
 			}
@@ -419,9 +446,8 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 
 	return out
 }
-func toInjectSection(from project.CodeInject, m interface{}, codeCtx ctx.Context) model.InjectSection {
-	g := codegen.SimpleGenerator{from.Name}
-	name, _ := g.Generate(codeCtx, m)
+func toInjectSection(from project.CodeInject, m interface{}) model.InjectSection {
+	name, _ := codegen.Generate("fileName", from.Name, m)
 	code := model.InjectSection{
 		Name:         name,
 		PropertyName: from.PropertyName,
