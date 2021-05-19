@@ -20,12 +20,12 @@ func (server *DemoSource) Entity(name string) (*Entity, error) {
 
 	return nil, nil
 }
-func (server *DemoSource) Entities(pattern string) (*EntityList, error) {
+func (server *DemoSource) Entities(pattern string) (*[]Entity, error) {
 	e := server.getEntities()
 	return &e, nil
 }
 
-func (server *DemoSource) getEntities() EntityList {
+func (server *DemoSource) getEntities() []Entity {
 	e := []Entity{
 
 		server.getOrderHeadTable(),
