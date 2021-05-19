@@ -10,12 +10,12 @@
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceFolder}/src",
-            "args": ["generate", "--screen", "-t", "cs-poco", "--demo", "--project", "C:\\dev\\projects\\mh\\cli\\configuration\\project\\.modelhelper\\project.yaml"]
+            // "args": ["generate", "--screen", "-t", "cs-poco", "--demo", "--project", "C:\\dev\\projects\\mh\\cli\\configuration\\project\\.modelhelper\\project.yaml"]
             // "args": ["template"]
             // "args": ["set", "defcon"]
             // "args": ["t", "cs-gql-hc-resolver", "--open"]
             // "args": ["set", "dev", "--name", "Hans-Petter Eitvet", "--email", "hpe@hpe.no"]
-            // "args": ["e", "order"]"-t", "cs-gql-hc-resolver", 
+            "args": ["e", "order"], 
         }
     ]
 }
