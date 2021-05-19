@@ -84,6 +84,24 @@ func (c *Connection) LoadSource() Source {
 	return src
 }
 
+func (c *Connection) LoadRelationTree() RelationTree {
+
+	var src RelationTree
+	switch c.Type {
+	case "mssql":
+		src = &MsSql{Connection: *c}
+	case "postgres":
+		src = nil
+
+	case "demo":
+		src = nil
+	default:
+		src = nil
+	}
+
+	return src
+}
+
 func LoadSource(name string, connections map[string]Connection) Source {
 
 	if name == "demo" {
