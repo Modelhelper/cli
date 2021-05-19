@@ -3,8 +3,10 @@ package source
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	_ "github.com/denisenkom/go-mssqldb"
@@ -56,9 +58,12 @@ func (server *MsSql) Entity(name string) (*Entity, error) {
 
 	e.ChildRelations = *cr
 
+	idx, err := server.getIndexes(e.Schema, e.Name)
+	e.Indexes = *idx
+
 	return e, nil
 }
-func (server *MsSql) Entities(pattern string) (*EntityList, error) {
+func (server *MsSql) Entities(pattern string) (*[]Entity, error) {
 	search := ""
 
 	if len(pattern) > 0 {
@@ -73,20 +78,51 @@ func (server *MsSql) Entities(pattern string) (*EntityList, error) {
 		join sys.objects o on p.object_id = o.object_id and o.type = 'U'
 		--where p.object_id = object_id('Add')
 		group by p.object_id
-		)
+	), colCnt(id, cnt, nullcnt, idcnt) as (
+		select object_id, cnt = count(*), sum(cast(is_nullable as int)), sum(cast(is_identity as int))--, sum(cast(is_computed as int))
+		from sys.columns 
+		group by object_id
+	), ParentRelCnt(id, cnt) as (
+		select 
+			id = parent_object_id, cnt = count(*) 
+		from sys.foreign_key_columns
+		group by parent_object_id
+	), ChildrenRelCnt(id, cnt) as (
+		select 
+			id = referenced_object_id, cnt = count(*) 
+		from sys.foreign_key_columns
+		group by referenced_object_id
+	)
 		select 
 			o.name
-			,type = CASE when o.type = 'U' then 'Table' when o.type = 'V' then 'View' end  
+			,type = CASE 
+				when o.type = 'U' then 'Table' 
+				when o.type = 'V' then 'View' 
+				when o.type = 'SN' then 'Synonym'
+				when o.type = 'P' then 'Proc'
+				end  
 			,[Schema] = s.name
 			, Alias = Left(o.name, 1)
 			, [RowCount] = isnull(rc.RowCnt, 0)
 			, Description = isnull(ep.value, '')
+			, ColumnCount = isnull(cc.cnt, 0)
+			, NullableCount = isnull(cc.nullcnt, 0)
+			, IdentityCount = isnull(cc.idcnt, 0)
+			, ChildrenCount = isnull(crc.cnt, 0)
+			, ParentCount = isnull(prc.cnt, 0)
+			, IsVersioned = case when t.temporal_type = 2 then 1 else 0 end
+			, IsHistory = case when t.temporal_type = 1 then 1 else 0 end
+			, HistoryTable = isnull(object_name(t.history_table_id), '')
 		from sys.objects o
 		join sys.schemas s on s.schema_id = o.schema_id
+		left join sys.tables t on t.object_id = o.object_id
 		left join rowcnt rc on rc.object_id = o.object_id    
 		left join sys.extended_properties ep on o.object_id = ep.major_id and minor_id = 0 and ep.name = 'MS_description'
+		left join colCnt cc on cc.id = o.object_id
+		left join ChildrenRelCnt crc on crc.id = o.object_id
+		left join ParentRelCnt prc on prc.id = o.object_id
 		where o.name not in ('sysdiagrams') %s
-		and [type] in ('V', 'U')
+		and o.[type] in ('V', 'U', 'SN', 'P')
 		order by s.name, o.[type], o.name		
 	`, search)
 
@@ -113,7 +149,7 @@ func (server *MsSql) Entities(pattern string) (*EntityList, error) {
 
 	defer rows.Close()
 
-	list := EntityList{}
+	list := []Entity{}
 
 	var e Entity
 
@@ -126,13 +162,21 @@ func (server *MsSql) Entities(pattern string) (*EntityList, error) {
 			&e.Alias,
 			&e.RowCount,
 			&e.Description,
+			&e.ColumnCount,
+			&e.NullableColumnCount,
+			&e.IdentityColumnCount,
+			&e.ChildRelationCount,
+			&e.ParentRelationCount,
+			&e.IsVersioned,
+			&e.IsHistory,
+			&e.HistoryTable,
 		); err != nil {
 			return nil, err
 		} else {
+			e.Alias = strings.ToLower(Abbreviate(e.Name))
 			list = append(list, e)
 
 		}
-
 	}
 	// fmt.Println(sql)
 	return &list, nil
@@ -149,14 +193,34 @@ func (server *MsSql) getEntity(entityName string) (*Entity, error) {
 	ctx := context.Background()
 
 	query := `
-	select 
+	;with rowcnt (object_id, cnt) as (
+		SELECT p.object_id, SUM(CASE WHEN (p.index_id < 2) AND (a.type = 1) THEN p.rows ELSE 0 END) 
+		FROM sys.partitions p 
+		INNER JOIN sys.allocation_units a ON p.partition_id = a.container_id
+		join sys.objects o on p.object_id = o.object_id and o.type = 'U'
+		where p.object_id = object_id(@entityName)
+		group by p.object_id
+	)
+select 
 	o.name
-	,type = CASE when o.type = 'U' then 'Table' when o.type = 'V' then 'View' end  
+	,type = CASE 
+				when o.type = 'U' then 'Table' 
+				when o.type = 'V' then 'View' 
+				when o.type = 'SN' then 'Synonym'
+				when o.type = 'P' then 'Proc'
+				end  
 	,[Schema] = s.name
     , description =  isnull(ep.value, '')
+    -- , RowCount = rowcnt
+    , [RowCount] = rcnt.cnt
+    , IsVersioned = case when t.temporal_type = 2 then 1 else 0 end
+	, IsHistory = case when t.temporal_type = 1 then 1 else 0 end
+    , HistoryTable = isnull(object_name(t.history_table_id), '')
 from sys.objects o
 join sys.schemas s on s.schema_id = o.schema_id
 left join sys.extended_properties ep on o.object_id = ep.major_id and minor_id = 0 and ep.name = 'MS_description'
+left join sys.tables t on t.object_id = o.object_id
+left join rowcnt rcnt on rcnt.object_id = o.object_id
 where o.object_id = object_id(@entityName)	
 	`
 
@@ -175,6 +239,10 @@ where o.object_id = object_id(@entityName)
 		&e.Type,
 		&e.Schema,
 		&e.Description,
+		&e.RowCount,
+		&e.IsVersioned,
+		&e.IsHistory,
+		&e.HistoryTable,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -182,6 +250,9 @@ where o.object_id = object_id(@entityName)
 			return nil, err
 		}
 	}
+
+	e.Alias = Abbreviate(e.Name)
+
 	return &e, nil
 }
 
@@ -480,6 +551,87 @@ where fkc.referenced_object_id = OBJECT_ID(@entityName)
 			list = append(list, r)
 		}
 	}
+	return &list, nil
+}
+
+func (server *MsSql) getIndexes(schema string, entityName string) (*[]Index, error) {
+	db, err := server.openConnection()
+	if err != nil {
+		return nil, err
+	}
+
+	defer db.Close()
+	ctx := context.Background()
+
+	query := `
+	SELECT 
+    a.index_id as 'id'
+    , b.name
+    , isnull(avg_fragmentation_in_percent, 0) as 'avgFragmentationPercent'
+    , b.is_unique as 'isUnique', is_primary_key as 'IsPrimaryKey'
+    , isnull(a.avg_page_space_used_in_percent, 0) as 'AvgPageSpacePercent'
+    , isnull(a.avg_record_size_in_bytes, 0) as 'AvgRecordSize'
+    , isnull(a.record_count, 0) as 'Rows'
+    
+FROM sys.dm_db_index_physical_stats (DB_ID(@database), OBJECT_ID(@table), NULL, NULL, NULL) AS a  
+JOIN sys.indexes AS b ON a.object_id = b.object_id AND a.index_id = b.index_id
+
+--left join sys.columns c on ic.column_id = c.column_id and c.object_id = ic.object_id
+--for json path, INCLUDE_NULL_VALUES
+;
+	`
+
+	stmt, err := db.PrepareContext(ctx, query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	database := server.Connection.ConnectionStringPart("database")
+	// Execute query
+	rows, err := stmt.Query(
+		query,
+		sql.Named("database", database),
+		sql.Named("table", entityName),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []Index{}
+	var r Index
+
+	for rows.Next() {
+
+		if err := rows.Scan(
+			// &r,
+			&r.ID,
+			&r.Name,
+			&r.AvgFragmentationPercent,
+			&r.IsUnique,
+			&r.IsPrimaryKey,
+			&r.AvgPageSpacePercent,
+			&r.AvgRecordSize,
+			&r.Rows,
+		); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			} else {
+				return nil, err
+			}
+		} else {
+			list = append(list, r)
+
+			// _, err := list.WriteString(r)
+			// if err != nil {
+			// 	return nil, err
+			// }
+
+			// return fromJson([]byte(list.String()))
+		}
+	}
+
 	return &list, nil
 }
 
