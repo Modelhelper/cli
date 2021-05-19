@@ -14,17 +14,9 @@ connections:
     connectionString: Data Source=patest01;Password=%**PWD_PATOLAB**%;User name=Test
     schema: dbo
     type: mssql
-    mapping: 
-      IsActive:
-        Name: "IsActive"
-        isIgnored: true
-        trueValue: 1 | true | yes
-        falseValue: 0 | false | no
-        deletedMarker: true
-      CreatedOn:
-        name: "CreatedOn"  
-        isIgnored: true        
-        isCreationDate: true    
+    entities:
+      - entity_1
+    
     groups:
       histology:
         items: [
