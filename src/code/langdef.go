@@ -1,17 +1,13 @@
 package code
 
-type DefinitionLoader interface {
-	LoadDefinitions() (*map[string]LanguageDefinition, error)
-}
-
 type LanguageDefinition struct {
-	Version                   string                     `json:"version" yaml:"version"`
-	Language                  string                     `json:"language" yaml:"language"`
-	DataTypes                 map[string]LangDefDataType `json:"datatypes" yaml:"datatypes"`
-	DefaultImports            []string                   `json:"defaultImports" yaml:"defaultImports"`
-	CanInject                 bool                       `json:"canInject" yaml:"canInject"`
-	UsesNamespace             bool                       `json:"usesNamespace" yaml:"usesNamespace"`
-	ModuleLevelVariablePrefix string                     `json:"moduleLevelVariablePrefix" yaml:"moduleLevelVariablePrefix"`
+	Version        string                     `json:"version" yaml:"version"`
+	Language       string                     `json:"language" yaml:"language"`
+	DataTypes      map[string]LangDefDataType `json:"datatypes" yaml:"datatypes"`
+	DefaultImports []string                   `json:"defaultImports" yaml:"defaultImports"`
+	// CanInject                 bool                       `json:"canInject" yaml:"canInject"`
+	// UsesNamespace             bool                       `json:"usesNamespace" yaml:"usesNamespace"`
+	// ModuleLevelVariablePrefix string                     `json:"moduleLevelVariablePrefix" yaml:"moduleLevelVariablePrefix"`
 }
 
 type LangDefDataType struct {
@@ -35,28 +31,6 @@ type LangDefKey struct {
 	Namespace string   `json:"namespace" yaml:"namespace"`
 }
 
-//NewOOType return a language def for Object Oriented languages like C#, Java
-func NewOOType() *LanguageDefinition {
-	var l *LanguageDefinition
-
-	l.CanInject = true
-	l.UsesNamespace = true
-	l.ModuleLevelVariablePrefix = "_"
-	l.Version = "3.0"
-	return l
-}
-
-//NewSimpleType creates a simple definition for no OO languages like C, Go
-func NewSimpleType() *LanguageDefinition {
-	var l *LanguageDefinition
-
-	l.CanInject = false
-	l.UsesNamespace = false
-	l.ModuleLevelVariablePrefix = ""
-	l.Version = "3.0"
-	return l
-}
-
-func LoadDefFromPath(path string) (*LanguageDefinition, error) {
+func LoadFromPath(path string) (*LanguageDefinition, error) {
 	return nil, nil
 }
