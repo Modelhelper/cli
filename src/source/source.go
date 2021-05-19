@@ -117,3 +117,14 @@ func LoadSource(name string, connections map[string]Connection) Source {
 	return s.LoadSource()
 
 }
+
+func Abbreviate(s string) string {
+	abr := ""
+	for _, c := range s {
+		if unicode.IsUpper(c) {
+			abr = abr + string(c)
+		}
+	}
+
+	return abr
+}
