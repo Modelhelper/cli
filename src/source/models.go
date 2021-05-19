@@ -12,21 +12,29 @@ type IndexList []Index
 
 // Entity represents an object in the relational database. Either a Table or a view
 type Entity struct {
-	Name               string `json:"name" yaml:"name"`
-	ModelName          string `json:"modelName" yaml:"modelName"`
-	ContextualName     string `json:"contextualName" yaml:"contextualName"`
-	Type               string `json:"type" yaml:"type"`
-	Schema             string `json:"schema" yaml:"schema"`
-	Alias              string `json:"alias" yaml:"alias"`
-	RowCount           int
-	UsesIdentityColumn bool
-	UsesDeletedColumn  bool
-	DeletedColumnName  string
-	Columns            ColumnList
-	ParentRelations    RelationList
-	ChildRelations     RelationList
-	Indexes            IndexList
-	Description        string
+	Name                string `json:"name" yaml:"name"`
+	ModelName           string `json:"modelName" yaml:"modelName"`
+	ContextualName      string `json:"contextualName" yaml:"contextualName"`
+	Type                string `json:"type" yaml:"type"`
+	Schema              string `json:"schema" yaml:"schema"`
+	Alias               string `json:"alias" yaml:"alias"`
+	RowCount            int
+	UsesIdentityColumn  bool
+	UsesDeletedColumn   bool
+	DeletedColumnName   string
+	Columns             ColumnList
+	ParentRelations     []Relation
+	ChildRelations      []Relation
+	Indexes             []Index
+	Description         string
+	ParentRelationCount int
+	ChildRelationCount  int
+	ColumnCount         int
+	IdentityColumnCount int
+	NullableColumnCount int
+	IsVersioned         bool
+	IsHistory           bool
+	HistoryTable        string
 }
 
 func (d *EntityList) ToRows() [][]string {
@@ -40,6 +48,9 @@ func (d *EntityList) ToRows() [][]string {
 			e.Schema,
 			e.Alias,
 			p.Sprintf("%d", e.RowCount),
+			p.Sprintf("%d", e.ColumnCount),
+			p.Sprintf("%d", e.ParentRelationCount),
+			p.Sprintf("%d", e.ChildRelationCount),
 			// strconv.Itoa(len(e.ChildRelations)),
 			// strconv.Itoa(len(e.ParentRelations)),
 		}
@@ -56,7 +67,7 @@ func (d *EntityList) ToRows() [][]string {
 }
 
 func (d *EntityList) BuildHeader() []string {
-	h := []string{"Name", "Schema", "Alias", "Rows"}
+	h := []string{"Name", "Schema", "Alias", "Rows", "Col Cnt", "P Relations", "C Relations"}
 
 	// if withDesc {
 	// 	h = append(h, "Description"), "Children", "Parents"
@@ -115,14 +126,14 @@ type Column struct {
 type Index struct {
 	ID                      string
 	Name                    string
-	Size                    int
-	AvgFragmentationPercent int
+	Size                    float32
+	AvgFragmentationPercent float32
 	IsClustered             bool
 	IsPrimaryKey            bool
 	IsUnique                bool
-	AvgPageSpacePercent     int
-	AvgRecordSize           int
-	Rows                    int
+	AvgPageSpacePercent     float32
+	AvgRecordSize           float32
+	Rows                    float32
 	Columns                 []IndexColumn
 }
 
