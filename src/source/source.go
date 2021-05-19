@@ -3,6 +3,7 @@ package source
 import (
 	"log"
 	"strings"
+	"unicode"
 )
 
 type LanguageDef struct {
@@ -16,7 +17,12 @@ type ConnectionProvider interface {
 
 type Source interface {
 	Entity(name string) (*Entity, error)
-	Entities(pattern string) (*EntityList, error)
+	Entities(pattern string) (*[]Entity, error)
+}
+
+type RelationTree interface {
+	GetParentRelationTree(schema string, entityName string) (*[]RelationTreeItem, error)
+	// Entities(pattern string) (*[]Entity, error)
 }
 
 // should be renamed
@@ -25,7 +31,11 @@ type Connection struct {
 	Description      string                     `json:"description" yaml:"description"`
 	ConnectionString string                     `json:"connectionString" yaml:"connectionString"`
 	Schema           string                     `json:"schema" yaml:"schema"`
+	Database         string                     `json:"database" yaml:"database"`
+	Server           string                     `json:"server" yaml:"server"`
 	Type             string                     `json:"type" yaml:"type"`
+	Port             int                        `json:"port" yaml:"port"`
+	Entities         []string                   `json:"entities" yaml:"entities"`
 	Groups           map[string]ConnectionGroup `json:"groups" yaml:"groups"`
 	Options          map[string]interface{}     `json:"options" yaml:"options"`
 }
