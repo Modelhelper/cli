@@ -121,3 +121,31 @@ type CodeKey struct {
 	Imports   []string `yaml:"imports,omitempty"`
 	Inject    []string `yaml:"inject,omitempty"`
 }
+
+func FindNearestProjectDir() (string, bool) {
+	basePath := "./"
+	root := DefaultDir()
+	updir := "../"
+
+	for i := 1; i < 6; i++ {
+		files, err := ioutil.ReadDir(basePath)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, f := range files {
+
+			if f.IsDir() && f.Name() == dirname {
+				fp := filepath.Join(basePath, f.Name(), "project.yaml")
+				return fp, true
+			}
+		}
+
+		relp, _ := filepath.Rel(root, basePath)
+		basePath = filepath.Join(updir, relp)
+
+		updir += "../"
+	}
+
+	return "", false
+}
