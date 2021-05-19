@@ -22,7 +22,8 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
+	"modelhelper/cli/config"
+	"modelhelper/cli/project"
 
 	"github.com/spf13/cobra"
 )
@@ -30,23 +31,33 @@ import (
 // projectCmd represents the project command
 var projectCmd = &cobra.Command{
 	Use:   "project",
-	Short: "<not implemented>",
+	Short: "Working with the projects",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("project called")
+		open, _ := cmd.Flags().GetBool("open")
+
+		if project.Exists(project.DefaultLocation()) {
+
+			if open {
+				openProjectInEditor()
+			}
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(projectCmd)
+	projectCmd.Flags().Bool("open", false, "Opens the project file in default editor")
 
-	// Here you will define your flags and configuration settings.
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// projectCmd.PersistentFlags().String("foo", "", "A help for foo")
+func openProjectInEditor() {
+	cfg := config.Load()
+	editor := cfg.DefaultEditor
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// projectCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	if len(cfg.DefaultEditor) == 0 {
+		editor = promptForEditorKey("Please select a editor to open the project file")
+	}
+
+	openPathInEditor(editor, project.DefaultLocation())
 }
