@@ -163,10 +163,10 @@ var generateCmd = &cobra.Command{
 
 		duration := time.Since(start)
 
-		if !codeOnly {
+		if !codeOnly && len(generatedCode) > 0 {
 			con := 1.2
 			min := float64(charCount) * con / 60
-			fmt.Printf("\nIt took %vms to generate this code (with %v characters). You saved around %v minutes not typing it youreself", duration.Milliseconds(), charCount, min)
+			fmt.Printf("\nIt took %vms to generate this code (with a total of %v characters). You saved around %v minutes not typing it youreself", duration.Milliseconds(), charCount, min)
 		}
 	},
 }
