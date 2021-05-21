@@ -21,18 +21,15 @@ import (
 // "fmt"
 
 func main() {
-	// openProject()
 	execute()
 }
 
 func execute() {
 	a := app.Application{}
 
-	rootExists := config.LocationExists()
+	isInitialized := a.IsInitialized()
 
-	if rootExists == false {
-
-		a.Configuration = config.Load()
+	if isInitialized == false {
 
 		err := a.Initialize()
 
@@ -42,9 +39,13 @@ func execute() {
 		}
 
 	} else {
-		cmd.SetApplication(&a)
+		// cmd.SetApplication(&a)
 		cmd.Execute()
 	}
+}
+
+func checkIdent() {
+	app.PrintWelcomeMessage()
 }
 
 type Some struct {

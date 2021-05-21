@@ -7,6 +7,7 @@ import (
 	"modelhelper/cli/project"
 	"modelhelper/cli/source"
 	"os"
+	"os/user"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
@@ -55,19 +56,29 @@ type Datatype struct {
 	NullableAlternative string `json:"nullableAlternative" yaml:"nullableAlternative"`
 }
 
+func New() *Config {
+
+	usr, err := user.Current()
+	if err != nil {
+
+	}
+
+	c := Config{
+		Port:          3003,
+		ConfigVersion: "3.0",
+	}
+
+	if usr != nil {
+		c.Developer.Name = usr.Name
+	}
+	return &c
+}
+
 // Load returns a new default configuration
 func Load() *Config {
 	path := filepath.Join(Location(), "config.yaml")
 	return LoadFromFile(path)
 
-}
-
-// Initialize builds the configuration
-func (c *Config) Initialize() error {
-
-	fmt.Println("Initialize stuff from config here")
-
-	return nil
 }
 
 func (c *Config) GetLanguageDefs() (*map[string]LanguageDef, error) {
@@ -134,4 +145,12 @@ func LocationExists() bool {
 	} else {
 		return true
 	}
+}
+
+func (cfg *Config) Save(path string) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.Mkdir(path, 0755)
+	}
+
+	return update(cfg)
 }
