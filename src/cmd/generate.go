@@ -38,6 +38,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type codeContext struct {
+	TemplateName             string
+	Templates                map[string]string
+	Blocks                   map[string]string
+	Datatypes                map[string]string
+	NullableTypes            map[string]string
+	AlternativeNullableTypes map[string]string
+}
+
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:     "generate",
@@ -50,108 +59,37 @@ var generateCmd = &cobra.Command{
 		entityFlagArray, _ := cmd.Flags().GetStringArray("entity")
 		tempPath, _ := cmd.Flags().GetString("template-path")
 		projectPath, _ := cmd.Flags().GetString("project")
+		configFile, _ := cmd.Flags().GetString("config")
+		inputTemplates, err := cmd.Flags().GetStringArray("template")
+		printScreen, _ := cmd.Flags().GetBool("screen")
 
 		// if isDemo == false && len(entityFlagArray) == 0 {
 		// 	return
 		// }
+
 		appCtx := modelHelperApp.CreateContext()
 		// var ctx *app.Context
-		var cfg *config.Config
 		var prj *project.Project
 		var entities []source.Entity
 
 		charCount := 0
 
-		if isDemo {
-			cfg = config.Load()
-			// load demo project
-			var ds *source.DemoSource
-			el, _ := ds.Entities("")
+		cfg := loadConfig(configFile)
 
-			for _, eitem := range *el {
-				entities = append(entities, eitem)
-			}
+		entities = *loadEntities(*appCtx, entityFlagArray, isDemo)
 
-			// load demo tables (2)
-		} else {
+		prj = loadProject(projectPath)
 
-			conName := appCtx.DefaultConnection
-
-			con := appCtx.Connections[conName]
-			src := con.LoadSource()
-
-			if len(entityFlagArray) > 0 {
-				for _, entityName := range entityFlagArray {
-					entity, err := src.Entity(entityName)
-					if err != nil {
-						log.Fatalln(err)
-					}
-
-					entities = append(entities, *entity)
-				}
-			}
-
-			if len(tempPath) > 0 {
-				fmt.Println("Use this path to template")
-			}
-
-			configFile, _ := cmd.Flags().GetString("config")
-
-			if len(configFile) > 0 {
-				cfg = config.LoadFromFile(configFile)
-			} else {
-				cfg = config.Load()
-			}
-
+		if len(tempPath) == 0 {
+			tempPath = cfg.Templates.Location
 		}
 
-		if len(projectPath) == 0 {
-			if project.Exists(project.DefaultLocation()) {
-				projectPath = project.DefaultLocation()
-			} else {
-				fp, foundProject := project.FindNearestProjectDir()
-				if foundProject && project.Exists(fp) {
-					projectPath = fp
-
-				}
-			}
-		}
-
-		if len(projectPath) > 0 {
-
-			fmt.Println("Project found here: ", projectPath)
-			prj, _ = project.Load(projectPath)
-		}
-		// currentProject := *project.Project{}
-
-		// if len(projectPath) > 0 {
-		// 	prj, _ = project.Load(projectPath)
-		// } else {
-		// 	if project.Exists(project.DefaultLocation()) {
-
-		// 		prj, _ = project.Load(project.DefaultLocation())
-		// 	} else {
-		// 		fp, p :=project.FindNearestProjectDir() {
-		// 			if project.Exists(fp) {
-		// 			prj, _ = project.Load(fp)}
-		// 		}
-		// 	}
-		// }
-
-		tl := tpl.TemplateLoader{
-			Directory: app.TemplateFolder(cfg.Templates.Location),
-		}
-
-		allTemplates, _ := tl.LoadTemplates()
-		blocks := tpl.ExtractBlocks(&allTemplates)
-
-		inputTemplates, err := cmd.Flags().GetStringArray("template")
+		allTemplates, blocks := loadTemplates(tempPath)
 
 		if err != nil {
 			panic(err)
 		}
 
-		printScreen, _ := cmd.Flags().GetBool("screen")
 		start := time.Now()
 
 		var generatedCode []string
@@ -169,14 +107,16 @@ var generateCmd = &cobra.Command{
 
 					tplMap := make(map[string]string)
 
-					for k, b := range blocks {
-						tplMap[k] = b.Body
-					}
+					// for k, b := range blocks {
+					// 	tplMap[k] = b.Body
+					// }
 					tplMap[tname] = currentTemplate.Body
+
+					// create context
 
 					codeCtx := ctx.Context{}
 					codeCtx.TemplateName = tname
-					codeCtx.Templates = tplMap
+					codeCtx.Templates = blocks
 
 					generator := codegen.GoLangGenerator{
 						Templates:    tplMap,
@@ -226,7 +166,7 @@ var generateCmd = &cobra.Command{
 		if !codeOnly {
 			con := 1.2
 			min := float64(charCount) * con / 60
-			fmt.Printf("\nIt took %vms to generate this code. You saved around %v minutes not typing it youreself", duration.Milliseconds(), min)
+			fmt.Printf("\nIt took %vms to generate this code (with %v characters). You saved around %v minutes not typing it youreself", duration.Milliseconds(), charCount, min)
 		}
 	},
 }
@@ -269,6 +209,91 @@ type entitiesModel struct {
 	key       string
 }
 
+func loadTemplates(templatePath string) (all map[string]tpl.Template, blocks map[string]string) {
+
+	tl := tpl.TemplateLoader{
+		Directory: app.TemplateFolder(templatePath),
+	}
+
+	a, _ := tl.LoadTemplates()
+
+	var b = make(map[string]string)
+
+	for tk, tv := range a {
+		if strings.ToLower(tv.Type) == "block" {
+			b[tk] = tv.Body
+		}
+	}
+	// b := tpl.ExtractBlocks(&a)
+
+	return a, b
+}
+
+func loadEntities(appCtx app.Context, names []string, isDemo bool) *[]source.Entity {
+	var entities []source.Entity
+
+	if isDemo {
+		// load demo project
+		var ds *source.DemoSource
+		el, _ := ds.Entities("")
+
+		for _, eitem := range *el {
+			entities = append(entities, eitem)
+		}
+
+		// load demo tables (2)
+	} else {
+
+		conName := appCtx.DefaultConnection
+
+		con := appCtx.Connections[conName]
+		src := con.LoadSource()
+
+		if len(names) > 0 {
+			for _, entityName := range names {
+				entity, err := src.Entity(entityName)
+				if err != nil {
+					log.Fatalln(err)
+				}
+
+				entities = append(entities, *entity)
+			}
+		}
+
+	}
+
+	return &entities
+}
+
+func loadConfig(configPath string) *config.Config {
+	if len(configPath) > 0 {
+		return config.LoadFromFile(configPath)
+	} else {
+		return config.Load()
+	}
+}
+func loadProject(projectPath string) *project.Project {
+	if len(projectPath) == 0 {
+		if project.Exists(project.DefaultLocation()) {
+			projectPath = project.DefaultLocation()
+		} else {
+			fp, foundProject := project.FindNearestProjectDir()
+			if foundProject && project.Exists(fp) {
+				projectPath = fp
+
+			}
+		}
+	}
+
+	if len(projectPath) > 0 {
+
+		fmt.Println("Project found here: ", projectPath)
+		prj, _ := project.Load(projectPath)
+		return prj
+	}
+
+	return nil
+}
 func (input *entityModel) ToModel(codeCtx ctx.Context) interface{} {
 
 	imports := []string{}
