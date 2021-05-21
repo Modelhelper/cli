@@ -220,7 +220,7 @@ func init() {
 	// entityCmd.Flags().String("by", "", "Groups the list of entities by type (view, table), schema")
 	entityCmd.Flags().StringArray("type", []string{}, "Filter the entities by the name of the type [view, table]")
 	entityCmd.Flags().StringArray("schema", []string{}, "Filter the templates by the name of the schema [dbo, nn]")
-	entityCmd.Flags().Bool("desc", true, "Show or hide description (default true)")
+	entityCmd.Flags().Bool("desc", false, "Show or hide description (default true)")
 	entityCmd.Flags().Bool("has-rows", false, "Filter only entities with rows")
 	entityCmd.Flags().Bool("with-relations", false, "Filter only entities with relations")
 	entityCmd.Flags().Bool("no-relations", false, "Filter only entities without relations")
