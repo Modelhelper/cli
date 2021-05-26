@@ -16,6 +16,8 @@ import (
 
 	"github.com/olekukonko/ts"
 	"gopkg.in/yaml.v3"
+
+	"github.com/gookit/color"
 )
 
 // "fmt"
@@ -42,6 +44,9 @@ func execute() {
 		// cmd.SetApplication(&a)
 		cmd.Execute()
 	}
+
+	slog := app.Slogan()
+	color.FgDarkGray.Println(slog)
 }
 
 func checkIdent() {
@@ -49,17 +54,17 @@ func checkIdent() {
 }
 
 type Some struct {
-	Version string `yaml: "version"`
-	Code    Code   `yaml: "code"`
+	Version string `yaml:"version"`
+	Code    Code   `yaml:"code"`
 }
 
 type Code struct {
-	Keys map[string]Thing `yaml: "keys"`
+	Keys map[string]Thing `yaml:"keys"`
 }
 type Thing struct {
-	Postfix   string   `yaml: "postfix"`
-	Namespace string   `yaml: "namespace"`
-	Imports   []string `yaml: "imports,omitempty"`
+	Postfix   string   `yaml:"postfix"`
+	Namespace string   `yaml:"namespace"`
+	Imports   []string `yaml:"imports,omitempty"`
 }
 
 func openProject() {
