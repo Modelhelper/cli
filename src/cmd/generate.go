@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"modelhelper/cli/app"
@@ -66,13 +67,12 @@ var generateCmd = &cobra.Command{
 		// if isDemo == false && len(entityFlagArray) == 0 {
 		// 	return
 		// }
+		modelHelperApp = app.New()
 
 		appCtx := modelHelperApp.CreateContext()
 		// var ctx *app.Context
 		var prj *project.Project
 		var entities []source.Entity
-
-		charCount := 0
 
 		cfg := loadConfig(configFile)
 
@@ -91,8 +91,8 @@ var generateCmd = &cobra.Command{
 		}
 
 		start := time.Now()
-
-		var generatedCode []string
+		var cstat = codeStat{}
+		var generatedCode []codeFile
 		if len(inputTemplates) > 0 {
 
 			for _, tname := range inputTemplates {
@@ -105,45 +105,76 @@ var generateCmd = &cobra.Command{
 
 					var input interface{}
 
+					// obsolete when context is completed
 					tplMap := make(map[string]string)
 
-					// for k, b := range blocks {
-					// 	tplMap[k] = b.Body
-					// }
+					for k, b := range blocks {
+						tplMap[k] = b
+					}
 					tplMap[tname] = currentTemplate.Body
 
 					// create context
-
+					// obsolete when context is completed
 					codeCtx := ctx.Context{}
 					codeCtx.TemplateName = tname
 					codeCtx.Templates = blocks
 
+					// obsolete when context is completed
 					generator := codegen.GoLangGenerator{
 						Templates:    tplMap,
 						TemplateName: tname,
 					}
 
+					// TODO: refactor to method
 					if len(currentTemplate.Model) == 0 || currentTemplate.Model == "basic" {
+						tstart := time.Now()
+
 						basicModel := basicModel{
 							project: prj,
 							key:     currentTemplate.Key,
 						}
+
 						input = basicModel.ToModel(codeCtx)
 						o, _ := generator.Generate(codeCtx, input)
-						generatedCode = append(generatedCode, o)
+						f := codeFile{
+							content: o,
+							stat:    getStat(o),
+						}
+						f.stat.duration = time.Since(tstart)
+						cstat.appendStat(f.stat)
 
+						generatedCode = append(generatedCode, f)
 					}
 
+					// TODO: refactor to method
 					if currentTemplate.Model == "entity" && len(entities) > 0 {
+
 						for _, entity := range entities {
+							// stat["entities"] += 1
+							tstart := time.Now()
+
 							entityModel := entityModel{
 								entity:  &entity,
 								project: prj,
 								key:     currentTemplate.Key,
 							}
 							input = entityModel.ToModel(codeCtx)
+
+							// input = getEntityModel(codeCtx, &entity, prj, currentTemplate.Key)
+							// f := generateCode(codeCtx, input)
 							o, _ := generator.Generate(codeCtx, input)
-							generatedCode = append(generatedCode, o)
+
+							f := codeFile{
+								content: o,
+								stat:    getStat(o),
+							}
+
+							f.stat.duration = time.Since(tstart)
+
+							cstat.appendStat(f.stat)
+
+							generatedCode = append(generatedCode, f)
+
 						}
 					}
 
@@ -154,23 +185,106 @@ var generateCmd = &cobra.Command{
 			if printScreen && len(generatedCode) > 0 {
 				screenWriter := tpl.ScreenExporter{}
 				for _, s := range generatedCode {
-					charCount += len(s)
-					screenWriter.Export([]byte(s))
+					screenWriter.Export([]byte(s.content))
 				}
 			}
 
+			// TODO: export to file
+
+			cstat.duration = time.Since(start)
+			// stat["total.time"] = int(cstat.duration.Milliseconds())
+			if !codeOnly {
+				wpm := 40.0
+				min := float64(cstat.words) / wpm
+				// stat["total.savings"] = int(min)
+				printStat(cstat)
+				fmt.Printf("\nIn summary... It took \033[32m%vms\033[0m to generate \033[34m%d\033[0m words and \033[34m%d\033[0m lines. \nYou saved around \033[32m%v minutes\033[0m by not typing it youreself\n",
+					cstat.duration.Milliseconds(),
+					cstat.words,
+					cstat.lines,
+					int(min))
+			}
 		}
 
-		duration := time.Since(start)
-
-		if !codeOnly && len(generatedCode) > 0 {
-			con := 1.2
-			min := float64(charCount) * con / 60
-			fmt.Printf("\nIt took %vms to generate this code (with a total of %v characters). You saved around %v minutes not typing it youreself", duration.Milliseconds(), charCount, min)
-		}
 	},
 }
 
+func (cstat *codeStat) appendStat(instat codeStat) {
+	cstat.chars += instat.chars
+	cstat.lines += instat.lines
+	cstat.words += instat.words
+}
+func getEntityModel(c ctx.Context, entity *source.Entity, prj *project.Project, key string) interface{} {
+	mdl := entityModel{
+		entity:  entity,
+		project: prj,
+		key:     key,
+	}
+	input := mdl.ToModel(c)
+
+	return input
+}
+func generateCode(cctx ctx.Context, model interface{}) codeFile {
+	generator := codegen.GoLangGenerator{}
+	start := time.Now()
+
+	o, _ := generator.Generate(cctx, model)
+	f := codeFile{
+		content: o,
+		stat:    getStat(o),
+	}
+	f.stat.duration = time.Since(start)
+
+	return f
+}
+
+func getStat(s string) codeStat {
+	stat := codeStat{
+		chars: len(s),
+		lines: getLines(s),
+		words: getWords(s),
+	}
+
+	return stat
+}
+
+type codeFile struct {
+	filename        string
+	content         string
+	stat            codeStat
+	exists          bool
+	existingContent string
+}
+
+type codeStat struct {
+	chars     int
+	lines     int
+	words     int
+	duration  time.Duration
+	timeSaved int
+}
+
+func getWords(input string) int {
+	scanner := bufio.NewScanner(strings.NewReader(input))
+	scanner.Split(bufio.ScanWords)
+	count := 0
+	for scanner.Scan() {
+		count++
+	}
+
+	return count
+}
+func getLines(input string) int {
+	scanner := bufio.NewScanner(strings.NewReader(input))
+	scanner.Split(bufio.ScanLines)
+
+	count := 0
+	for scanner.Scan() {
+		count++
+	}
+
+	return count
+}
 func init() {
 	rootCmd.AddCommand(generateCmd)
 
@@ -187,6 +301,26 @@ func init() {
 	generateCmd.Flags().String("project", "", "Instructs the program to use this project as input")
 
 	generateCmd.Flags().String("setup", "", "Use this setup to generate code")
+}
+
+func printStat(stat codeStat) {
+	fmt.Printf(`
+
+Statistics:
+---------------------------------------
+`)
+	tpl := "%-20s%8d\n"
+
+	fmt.Printf(tpl, "Templates used", 2)
+	fmt.Printf(tpl, "Entities used", 4)
+	fmt.Printf(tpl, "Files exported", 6)
+	fmt.Printf(tpl, "Snippets inserted", 1)
+	fmt.Println()
+	fmt.Printf(tpl, "Character count", stat.chars)
+	fmt.Printf(tpl, "Word count", stat.words)
+	fmt.Printf(tpl, "Line count", stat.lines)
+	fmt.Printf(tpl, "Time used (ms)", stat.duration.Milliseconds())
+
 }
 
 type basicModel struct {
