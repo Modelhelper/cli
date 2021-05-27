@@ -10,7 +10,7 @@ func Slogan() string {
 	out := `
 %s
 `
-	msg := fmt.Sprintf("'ModelHelper' the %s helper...", RandAdjective())
+	msg := fmt.Sprintf("'ModelHelper' the \033[32m%s\033[0m helper...", RandAdjective())
 	slogan := fmt.Sprintf(randBand(), msg)
 
 	return fmt.Sprintf(out, slogan)
