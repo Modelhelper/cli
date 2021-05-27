@@ -16,8 +16,6 @@ import (
 
 	"github.com/olekukonko/ts"
 	"gopkg.in/yaml.v3"
-
-	"github.com/gookit/color"
 )
 
 // "fmt"
@@ -46,7 +44,8 @@ func execute() {
 	}
 
 	slog := app.Slogan()
-	color.FgDarkGray.Println(slog)
+	// code := color.FgDarkGray.Sprint(slog)
+	fmt.Println(slog)
 }
 
 func checkIdent() {
