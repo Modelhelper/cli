@@ -36,6 +36,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 )
 
@@ -63,6 +64,7 @@ var generateCmd = &cobra.Command{
 		configFile, _ := cmd.Flags().GetString("config")
 		inputTemplates, err := cmd.Flags().GetStringArray("template")
 		printScreen, _ := cmd.Flags().GetBool("screen")
+		toClipBoard, _ := cmd.Flags().GetBool("copy")
 
 		// if isDemo == false && len(entityFlagArray) == 0 {
 		// 	return
@@ -182,14 +184,23 @@ var generateCmd = &cobra.Command{
 
 			}
 
-			if printScreen && len(generatedCode) > 0 {
-				screenWriter := tpl.ScreenExporter{}
-				for _, s := range generatedCode {
+			sb := strings.Builder{}
+			for _, s := range generatedCode {
+				if printScreen {
+					screenWriter := tpl.ScreenExporter{}
 					screenWriter.Export([]byte(s.content))
 				}
+
+				if toClipBoard {
+					sb.WriteString(s.content)
+				}
+				// TODO: export to file
 			}
 
-			// TODO: export to file
+			if toClipBoard {
+				fmt.Printf("\nGenerated code is copied to the \033[37mclipboard\033[0m. Use \033[34mctrl+v\033[0m to paste it where you like")
+				clipboard.WriteAll(sb.String())
+			}
 
 			cstat.duration = time.Since(start)
 			// stat["total.time"] = int(cstat.duration.Milliseconds())
@@ -290,11 +301,12 @@ func init() {
 
 	generateCmd.Flags().StringArrayP("template", "t", []string{}, "a list of template to convert")
 	generateCmd.Flags().StringArrayP("entity", "e", []string{}, "a list of entits to use as a model")
-	generateCmd.Flags().Bool("screen", false, "List the output to the screen")
+	generateCmd.Flags().Bool("screen", false, "List the output to the screen, default false")
+	generateCmd.Flags().Bool("copy", false, "Copies the generated code to the clipboard (ctrl + v), default false")
 	generateCmd.Flags().String("export", "", "Exports to a directory")
-	generateCmd.Flags().Bool("export-bykey", false, "Exports the code using the template keys")
-	generateCmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code")
-	generateCmd.Flags().Bool("demo", false, "Uses a demo as input source, this will override any other input sources (entity, graphql) ")
+	generateCmd.Flags().Bool("export-bykey", false, "Exports the code using the template keys, default false")
+	generateCmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code, default false")
+	generateCmd.Flags().Bool("demo", false, "Uses a demo as input source, this will override any other input sources (entity, graphql), default false ")
 
 	generateCmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
 	generateCmd.Flags().String("config", "", "Instructs the program to use this config as the config")
