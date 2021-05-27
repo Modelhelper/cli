@@ -3,6 +3,7 @@ module modelhelper/cli
 go 1.16
 
 require (
+	github.com/atotto/clipboard v0.1.4
 	github.com/denisenkom/go-mssqldb v0.10.0
 	github.com/gertd/go-pluralize v0.1.7
 	github.com/go-playground/universal-translator v0.17.0 // indirect
