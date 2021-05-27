@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"strings"
 
+	"modelhelper/cli/app"
 	"modelhelper/cli/source"
 	"modelhelper/cli/ui"
 
@@ -60,6 +61,7 @@ var entityCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// fmt.Println("entity called")
+		modelHelperApp = app.New()
 		ctx := modelHelperApp.CreateContext()
 		conName := ctx.DefaultConnection
 
