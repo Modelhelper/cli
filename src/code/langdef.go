@@ -1,5 +1,15 @@
 package code
 
+import (
+	"io/ioutil"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"gopkg.in/yaml.v3"
+)
+
 type LanguageDefinition struct {
 	Version        string                     `json:"version" yaml:"version"`
 	Language       string                     `json:"language" yaml:"language"`
@@ -31,6 +41,49 @@ type LangDefKey struct {
 	Namespace string   `json:"namespace" yaml:"namespace"`
 }
 
-func LoadFromPath(path string) (*LanguageDefinition, error) {
-	return nil, nil
+func LoadFromPath(dir string) (map[string]LanguageDefinition, error) {
+
+	defs := make(map[string]LanguageDefinition)
+
+	err := filepath.Walk(dir, func(p string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() == false && strings.HasSuffix(p, "yaml") {
+			t, err := loadDef(p)
+
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			defs[t.Language] = *t
+		}
+
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+	}
+
+	return defs, nil
+
+}
+
+func loadDef(fileName string) (*LanguageDefinition, error) {
+	var langDef *LanguageDefinition
+	// fmt.Println("load file: ", fileName)
+	dat, e := ioutil.ReadFile(fileName)
+	if e != nil {
+		log.Fatalf("cannot load file: %v", e)
+		return nil, e
+	}
+
+	err := yaml.Unmarshal(dat, &langDef)
+	if err != nil {
+		log.Fatalf("cannot unmarshal data: %v", err)
+		return nil, err
+	}
+
+	return langDef, nil
 }

@@ -15,7 +15,7 @@
             // "args": ["set", "defcon"]
             // "args": ["t", "cs-gql-hc-resolver", "--open"]
             // "args": ["set", "dev", "--name", "Hans-Petter Eitvet", "--email", "hpe@hpe.no"]
-            "args": ["g", "-t", "cs-poco", "--demo"], 
+            "args": ["language", "ls"], 
         }
     ]
 }
