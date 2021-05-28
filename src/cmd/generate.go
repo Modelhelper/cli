@@ -143,7 +143,6 @@ var generateCmd = &cobra.Command{
 							stat:    getStat(o),
 						}
 						f.stat.duration = time.Since(tstart)
-						cstat.appendStat(f.stat)
 
 						generatedCode = append(generatedCode, f)
 					}
@@ -173,8 +172,6 @@ var generateCmd = &cobra.Command{
 
 							f.stat.duration = time.Since(tstart)
 
-							cstat.appendStat(f.stat)
-
 							generatedCode = append(generatedCode, f)
 
 						}
@@ -186,6 +183,8 @@ var generateCmd = &cobra.Command{
 
 			sb := strings.Builder{}
 			for _, s := range generatedCode {
+				cstat.appendStat(s.stat)
+
 				if printScreen {
 					screenWriter := tpl.ScreenExporter{}
 					screenWriter.Export([]byte(s.content))
