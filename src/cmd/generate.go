@@ -311,6 +311,8 @@ func init() {
 	generateCmd.Flags().String("config", "", "Instructs the program to use this config as the config")
 	generateCmd.Flags().String("project", "", "Instructs the program to use this project as input")
 
+	generateCmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
+
 	generateCmd.Flags().String("setup", "", "Use this setup to generate code")
 }
 

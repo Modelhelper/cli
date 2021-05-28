@@ -228,6 +228,8 @@ func init() {
 	entityCmd.Flags().Bool("no-relations", false, "Filter only entities without relations")
 	entityCmd.Flags().Bool("is-versioned", false, "Filter only entities that is versioned")
 	entityCmd.Flags().Bool("tree", false, "Filter only entities that is versioned")
+	entityCmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
+
 	// entityCmd.Flags().Bool("include-history", false, "Includes history enities in the list")
 
 }
