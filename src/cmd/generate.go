@@ -131,6 +131,10 @@ var generateCmd = &cobra.Command{
 					if len(currentTemplate.Model) == 0 || currentTemplate.Model == "basic" {
 						tstart := time.Now()
 
+						go func(c ctx.Context) {
+							fmt.Println(c)
+						}(codeCtx)
+
 						basicModel := basicModel{
 							project: prj,
 							key:     currentTemplate.Key,
