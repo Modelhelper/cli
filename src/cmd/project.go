@@ -22,8 +22,11 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"modelhelper/cli/config"
 	"modelhelper/cli/project"
+	"modelhelper/cli/source"
+	"modelhelper/cli/ui"
 
 	"github.com/spf13/cobra"
 )
@@ -40,6 +43,8 @@ var projectCmd = &cobra.Command{
 
 			if open {
 				openProjectInEditor()
+			} else {
+				printProjectInfo(project.DefaultLocation(), true)
 			}
 		}
 	},
@@ -51,6 +56,53 @@ func init() {
 
 }
 
+func printProjectInfo(projectFile string, renderTables bool) {
+	p, err := project.Load(projectFile)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	cfg := config.Load()
+	cons := source.JoinConnections("smart", cfg, p)
+
+	ui.PrintConsoleTitle("Project information")
+
+	fmt.Printf("\n%-20s%8s", "Name", p.Name)
+	fmt.Printf("\n%-20s%8s", "Version", p.Version)
+	fmt.Printf("\n%-20s%8s", "Owner", p.OwnerName)
+	fmt.Printf("\n%-20s%8s", "Primary language", p.Language)
+	fmt.Printf("\n\n")
+
+	// fmt.Println("Defaults:")
+	// fmt.Printf("%-20s%8s", "Connection", p.DefaultSource)
+	// fmt.Printf("\n%-20s%8s", "Key", p.DefaultKey)
+
+	if len(cons) > 0 {
+		fmt.Printf("\n\n")
+		fmt.Println("Available Connections:")
+		fmt.Printf("\n")
+
+		cr := connectionRenderer{cons, p.DefaultSource}
+		ui.RenderTable(&cr, &cr)
+		fmt.Printf("\n")
+	}
+	if renderTables {
+
+		if len(p.Code.Keys) > 0 {
+
+			kr := keyRenderer{keys: p.Code.Keys}
+			ui.RenderTable(&kr, &kr)
+		}
+
+		if len(p.Code.Inject) > 0 {
+
+			ir := injectRenderer{p.Code.Inject}
+			ui.RenderTable(&ir, &ir)
+		}
+	}
+}
+
 func openProjectInEditor() {
 	cfg := config.Load()
 	editor := cfg.DefaultEditor
@@ -60,4 +112,43 @@ func openProjectInEditor() {
 	}
 
 	openPathInEditor(editor, project.DefaultLocation())
+}
+
+type connectionRenderer struct {
+	rows   map[string]source.Connection
+	defcon string
+}
+
+func (l *connectionRenderer) BuildHeader() []string {
+	return []string{
+		"Key",
+		"Default",
+		"Type",
+		"Description",
+		"constr",
+	}
+}
+
+func (d *connectionRenderer) ToRows() [][]string {
+	var rows [][]string
+	// p := message.NewPrinter(language.English)
+
+	for key, val := range d.rows {
+		def := ""
+
+		if d.defcon == key {
+			def = "Yes"
+		}
+		r := []string{
+			key,
+			def,
+			val.Type,
+			val.Description,
+			val.ConnectionString,
+		}
+
+		rows = append(rows, r)
+	}
+
+	return rows
 }
