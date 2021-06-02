@@ -11,11 +11,12 @@
             "mode": "debug",
             "program": "${workspaceFolder}/src",
             // "args": ["generate", "--screen", "-t", "cs-poco", "--demo", "--project", "C:\\dev\\projects\\mh\\cli\\configuration\\project\\.modelhelper\\project.yaml"]
+            "args": ["generate", "--screen", "-t", "cs-poco", "--eg", "histology"]
             // "args": ["template"]
             // "args": ["set", "defcon"]
             // "args": ["t", "cs-gql-hc-resolver", "--open"]
             // "args": ["set", "dev", "--name", "Hans-Petter Eitvet", "--email", "hpe@hpe.no"]
-            "args": ["language", "cs"], 
+            // "args": ["language", "cs"], 
         }
     ]
 }

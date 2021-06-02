@@ -60,14 +60,14 @@ var generateCmd = &cobra.Command{
 		codeOnly, _ := cmd.Flags().GetBool("code-only")
 		isDemo, _ := cmd.Flags().GetBool("demo")
 		entityFlagArray, _ := cmd.Flags().GetStringArray("entity")
-		// entityGroupFlagArray, _ := cmd.Flags().GetStringArray("eg")
+		entityGroupFlagArray, _ := cmd.Flags().GetStringArray("eg")
 		tempPath, _ := cmd.Flags().GetString("template-path")
 		projectPath, _ := cmd.Flags().GetString("project")
 		configFile, _ := cmd.Flags().GetString("config")
 		inputTemplates, err := cmd.Flags().GetStringArray("template")
 		printScreen, _ := cmd.Flags().GetBool("screen")
 		toClipBoard, _ := cmd.Flags().GetBool("copy")
-
+		conName, _ := cmd.Flags().GetString("connection")
 		// if isDemo == false && len(entityFlagArray) == 0 {
 		// 	return
 		// }
@@ -75,12 +75,29 @@ var generateCmd = &cobra.Command{
 
 		appCtx := modelHelperApp.CreateContext()
 		// var ctx *app.Context
+
+		if len(conName) == 0 {
+
+			conName = appCtx.DefaultConnection
+		}
+
+		if len(conName) == 0 {
+			ka := keyArray(appCtx.Connections)
+			conName = ka[0]
+		}
+
 		var prj *project.Project
 		var entities []source.Entity
 
 		cfg := loadConfig(configFile)
 
-		entities = *loadEntities(*appCtx, entityFlagArray, isDemo)
+		con := appCtx.Connections[conName]
+
+		entityList := mergedList(entityFlagArray, entitiesFromGroups(con, entityGroupFlagArray))
+
+		src := con.LoadSource()
+
+		entities = *loadEntities(src, entityList, isDemo)
 
 		prj = loadProject(projectPath)
 
@@ -225,6 +242,39 @@ var generateCmd = &cobra.Command{
 	},
 }
 
+func entitiesFromGroups(con source.Connection, groups []string) []string {
+	list := []string{}
+
+	for _, group := range groups {
+
+		conGrp, found := con.Groups[group]
+		if found {
+			for _, e := range conGrp.Items {
+				list = append(list, e)
+			}
+		}
+	}
+
+	return list
+}
+
+func mergedList(lists ...[]string) []string {
+	items := make(map[string]int)
+	out := []string{}
+
+	for _, list := range lists {
+		for _, item := range list {
+			items[item] += 1
+		}
+	}
+
+	for key, _ := range items {
+		out = append(out, key)
+	}
+
+	return out
+
+}
 func (cstat *codeStat) appendStat(instat codeStat) {
 	cstat.chars += instat.chars
 	cstat.lines += instat.lines
@@ -323,6 +373,8 @@ func init() {
 	generateCmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
 
 	generateCmd.Flags().String("setup", "", "Use this setup to generate code")
+	generateCmd.Flags().StringP("connection", "c", "", "The connection to be used, uses default connection if not provided")
+
 }
 
 func printStat(stat codeStat) {
@@ -385,7 +437,7 @@ func loadTemplates(templatePath string) (all map[string]tpl.Template, blocks map
 	return a, b
 }
 
-func loadEntities(appCtx app.Context, names []string, isDemo bool) *[]source.Entity {
+func loadEntities(src source.Source, names []string, isDemo bool) *[]source.Entity {
 	var entities []source.Entity
 
 	if isDemo {
@@ -400,10 +452,10 @@ func loadEntities(appCtx app.Context, names []string, isDemo bool) *[]source.Ent
 		// load demo tables (2)
 	} else {
 
-		conName := appCtx.DefaultConnection
+		// conName := appCtx.DefaultConnection
 
-		con := appCtx.Connections[conName]
-		src := con.LoadSource()
+		// con := appCtx.Connections[conName]
+		// src := con.LoadSource()
 
 		if len(names) > 0 {
 			for _, entityName := range names {
