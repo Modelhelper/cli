@@ -63,7 +63,6 @@ var entityCmd = &cobra.Command{
 		// fmt.Println("entity called")
 		modelHelperApp = app.New()
 		ctx := modelHelperApp.CreateContext()
-		conName := ctx.DefaultConnection
 
 		if len(ctx.Connections) == 0 {
 			fmt.Println("Could not find any connections to use, please add a connection")
@@ -132,25 +131,33 @@ var entityCmd = &cobra.Command{
 			}
 			renderColumns(&e.Columns)
 
-			ui.PrintConsoleTitle("Indexes")
+			if len(e.Indexes) > 0 {
+				ui.PrintConsoleTitle("Indexes")
 
-			itr := indexTableRenderer{
-				rows: e.Indexes,
+				itr := indexTableRenderer{
+					rows: e.Indexes,
+				}
+
+				ui.RenderTable(&itr, &itr)
 			}
 
-			ui.RenderTable(&itr, &itr)
+			if len(e.ChildRelations) > 0 {
+				ui.PrintConsoleTitle("One to many (.ChildRelations)")
+				crtr := relTableRenderer{
+					rows: e.ChildRelations,
+				}
 
-			ui.PrintConsoleTitle("One to many (.ChildRelations)")
-			crtr := relTableRenderer{
-				rows: e.ChildRelations,
+				ui.RenderTable(&crtr, &crtr)
 			}
 
-			ui.RenderTable(&crtr, &crtr)
+			if len(e.ParentRelations) > 0 {
+				ui.PrintConsoleTitle("Many to one (.ParentRelations)")
+				crtr := relTableRenderer{
+					rows: e.ParentRelations,
+				}
+				ui.RenderTable(&crtr, &crtr)
 
-			ui.PrintConsoleTitle("Many to one (.ParentRelations)")
-			crtr.rows = e.ParentRelations
-			ui.RenderTable(&crtr, &crtr)
-
+			}
 			fmt.Println("")
 
 			showTree, _ := cmd.Flags().GetBool("tree")
