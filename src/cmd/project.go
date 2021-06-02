@@ -125,7 +125,6 @@ func (l *connectionRenderer) BuildHeader() []string {
 		"Default",
 		"Type",
 		"Description",
-		"constr",
 	}
 }
 
@@ -144,7 +143,6 @@ func (d *connectionRenderer) ToRows() [][]string {
 			def,
 			val.Type,
 			val.Description,
-			val.ConnectionString,
 		}
 
 		rows = append(rows, r)
