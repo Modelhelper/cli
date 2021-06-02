@@ -65,6 +65,22 @@ var entityCmd = &cobra.Command{
 		ctx := modelHelperApp.CreateContext()
 		conName := ctx.DefaultConnection
 
+		if len(ctx.Connections) == 0 {
+			fmt.Println("Could not find any connections to use, please add a connection")
+			fmt.Println("to the config and/or any project file")
+			return
+		}
+		conName, _ := cmd.Flags().GetString("connection")
+
+		if len(conName) == 0 {
+
+			conName = ctx.DefaultConnection
+		}
+
+		if len(conName) == 0 {
+			ka := keyArray(ctx.Connections)
+			conName = ka[0]
+		}
 		con := ctx.Connections[conName]
 
 		src := con.LoadSource()
@@ -200,6 +216,15 @@ var entityCmd = &cobra.Command{
 	},
 }
 
+func keyArray(input map[string]source.Connection) []string {
+	keys := []string{}
+	for k := range input {
+		keys = append(keys, k)
+	}
+
+	return keys
+}
+
 func yesNo(eval bool) string {
 	if eval {
 		return "Yes"
@@ -229,6 +254,7 @@ func init() {
 	entityCmd.Flags().Bool("is-versioned", false, "Filter only entities that is versioned")
 	entityCmd.Flags().Bool("tree", false, "Filter only entities that is versioned")
 	entityCmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
+	entityCmd.Flags().StringP("connection", "c", "", "The connection to be used, uses default connection if not provided")
 
 	// entityCmd.Flags().Bool("include-history", false, "Includes history enities in the list")
 
