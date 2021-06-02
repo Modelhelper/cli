@@ -24,6 +24,7 @@ package cmd
 import (
 	"fmt"
 	"modelhelper/cli/app"
+	"modelhelper/cli/project"
 
 	"github.com/gookit/color"
 
@@ -45,6 +46,15 @@ func init() {
 
 func printLogoInfo() {
 	color.Green.Print(app.Logo())
-	fmt.Println(app.Info())
+
+	dir := project.DefaultLocation()
+
+	fmt.Println("Check this dir for project", dir)
+	if project.Exists(dir) {
+		printProjectInfo(project.DefaultLocation(), true)
+
+	} else {
+		fmt.Println(app.Info())
+	}
 
 }
