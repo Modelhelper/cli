@@ -60,6 +60,7 @@ var generateCmd = &cobra.Command{
 		codeOnly, _ := cmd.Flags().GetBool("code-only")
 		isDemo, _ := cmd.Flags().GetBool("demo")
 		entityFlagArray, _ := cmd.Flags().GetStringArray("entity")
+		// entityGroupFlagArray, _ := cmd.Flags().GetStringArray("eg")
 		tempPath, _ := cmd.Flags().GetString("template-path")
 		projectPath, _ := cmd.Flags().GetString("project")
 		configFile, _ := cmd.Flags().GetString("config")
@@ -304,6 +305,9 @@ func init() {
 	rootCmd.AddCommand(generateCmd)
 
 	generateCmd.Flags().StringArrayP("template", "t", []string{}, "a list of template to convert")
+	generateCmd.Flags().StringArray("tg", []string{}, "Use a group of templates")
+	generateCmd.Flags().StringArray("eg", []string{}, "Use a group of entities (must be defines in the current connection)")
+
 	generateCmd.Flags().StringArrayP("entity", "e", []string{}, "a list of entits to use as a model")
 	generateCmd.Flags().Bool("screen", false, "List the output to the screen, default false")
 	generateCmd.Flags().Bool("copy", false, "Copies the generated code to the clipboard (ctrl + v), default false")
