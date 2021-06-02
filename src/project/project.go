@@ -3,6 +3,7 @@ package project
 import (
 	"io/ioutil"
 	"log"
+	"modelhelper/cli/code"
 	"modelhelper/cli/source"
 	"os"
 	"path/filepath"
@@ -135,38 +136,16 @@ func (p *Project) GetConnections() (*map[string]source.Connection, error) {
 }
 
 type ProjectCode struct {
-	OmitSourcePrefix bool                  `yaml:"omitSourcePrefix"`
-	Global           GlobalCode            `yaml:"global"`
-	Groups           []string              `yaml:"groups"`
-	Options          map[string]string     `yaml:"options"`
-	Keys             map[string]CodeKey    `yaml:"keys,omitempty"`
-	Inject           map[string]CodeInject `yaml:"inject,omitempty"`
-	Locations        map[string]string     `yaml:"exportLocations"`
-	FileHeader       string                `yaml:"fileHeader"`
-}
-
-type CodeInject struct {
-	Name         string   `yaml:"name,omitempty"`
-	Language     string   `yaml:"language,omitempty"`
-	PropertyName string   `yaml:"propertyName,omitempty"`
-	Interface    string   `yaml:"interface,omitempty"`
-	Namespace    string   `yaml:"namespace,omitempty"`
-	Method       string   `yaml:"method,omitempty"`
-	Imports      []string `yaml:"imports,omitempty"`
-}
-
-type GlobalCode struct {
-	VariablePrefix  string `yaml:"variablePrefix"`
-	VariablePostfix string `yaml:"variablePostfix"`
-}
-type CodeKey struct {
-	// Name      string `yaml:"name"`
-	Path      string   `yaml:"path,omitempty"`
-	NameSpace string   `yaml:"namespace,omitempty"`
-	Postfix   string   `yaml:"postfix,omitempty"`
-	Prefix    string   `yaml:"prefix,omitempty"`
-	Imports   []string `yaml:"imports,omitempty"`
-	Inject    []string `yaml:"inject,omitempty"`
+	OmitSourcePrefix       bool                   `yaml:"omitSourcePrefix"`
+	Global                 code.Global            `yaml:"global"`
+	Groups                 []string               `yaml:"groups"`
+	Options                map[string]string      `yaml:"options"`
+	Keys                   map[string]code.Key    `yaml:"keys,omitempty"`
+	Inject                 map[string]code.Inject `yaml:"inject,omitempty"`
+	Locations              map[string]string      `yaml:"exportLocations"`
+	FileHeader             string                 `yaml:"fileHeader"`
+	DisableNullableTypes   bool                   `json:"diableNullableTypes" yaml:"diableNullableTypes"`
+	UseNullableAlternative bool                   `json:"useNullableAlternative" yaml:"useNullableAlternative"`
 }
 
 func FindNearestProjectDir() (string, bool) {
@@ -195,4 +174,67 @@ func FindNearestProjectDir() (string, bool) {
 	}
 
 	return "", false
+}
+
+func JoinProject(joinType string, projects ...*Project) Project {
+	switch joinType {
+	case "merge":
+		return mergeProject(projects...)
+
+	case "smart":
+		return smartMergeProject(projects...)
+
+	case "replace":
+		return replaceProject(projects...)
+	default:
+		return smartMergeProject(projects...)
+
+	}
+}
+func mergeProject(projects ...*Project) Project {
+	current := Project{}
+
+	conProv := []source.ConnectionProvider{}
+	for _, p := range projects {
+		conProv = append(conProv, p)
+	}
+
+	current.Connections = source.JoinConnections("merge", conProv...)
+
+	for _, proj := range projects {
+
+		current.Code = proj.Code
+	}
+
+	return current
+}
+
+func smartMergeProject(projects ...*Project) Project {
+	current := Project{}
+
+	conProv := []source.ConnectionProvider{}
+	for _, p := range projects {
+		conProv = append(conProv, p)
+	}
+
+	current.Connections = source.JoinConnections("smart", conProv...)
+
+	for _, proj := range projects {
+
+		current.Code = proj.Code
+	}
+
+	return current
+}
+
+func replaceProject(projects ...*Project) Project {
+	current := Project{}
+
+	l := len(projects)
+
+	if l > 0 {
+		return *projects[l-1]
+	}
+
+	return current
 }
