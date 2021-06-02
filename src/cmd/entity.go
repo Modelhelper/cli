@@ -373,14 +373,20 @@ type indexTableRenderer struct {
 }
 
 func (r *indexTableRenderer) BuildHeader() []string {
-	return []string{"Name", "Clustered", "Primary", "Unique", "Fragmentation"}
+	return []string{
+		"Name",
+		"Clustered",
+		"Primary",
+		"Unique",
+		// "Fragmentation",
+	}
 }
 
 func (r *indexTableRenderer) ToRows() [][]string {
 	var rows [][]string
 
 	for _, i := range r.rows {
-		p := message.NewPrinter(language.English)
+		// p := message.NewPrinter(language.English)
 
 		cluster := "No"
 		primary := "No"
@@ -400,7 +406,7 @@ func (r *indexTableRenderer) ToRows() [][]string {
 			cluster,
 			primary,
 			unique,
-			p.Sprintf("%d%%", i.AvgFragmentationPercent),
+			// p.Sprintf("%d%%", i.AvgFragmentationPercent),
 		}
 
 		rows = append(rows, r)
