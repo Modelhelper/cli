@@ -11,29 +11,37 @@ import (
 )
 
 type LanguageDefinition struct {
-	Version        string                     `json:"version" yaml:"version"`
-	Language       string                     `json:"language" yaml:"language"`
-	DataTypes      map[string]LangDefDataType `json:"datatypes" yaml:"datatypes"`
-	DefaultImports []string                   `json:"defaultImports" yaml:"defaultImports"`
+	Version        string              `json:"version" yaml:"version"`
+	Language       string              `json:"language" yaml:"language"`
+	DataTypes      map[string]Datatype `json:"datatypes" yaml:"datatypes"`
+	DefaultImports []string            `json:"defaultImports" yaml:"defaultImports"`
+	Keys           map[string]Key      `json:"keys" yaml:"keys"`
+	Inject         map[string]Inject   `json:"inject" yaml:"inject"`
+	Global         Global              `json:"global" yaml:"global"`
+	Short          string              `json:"short" yaml:"short"`
+	Description    string              `json:"description" yaml:"description"`
+	Path           string
 	// CanInject                 bool                       `json:"canInject" yaml:"canInject"`
 	// UsesNamespace             bool                       `json:"usesNamespace" yaml:"usesNamespace"`
 	// ModuleLevelVariablePrefix string                     `json:"moduleLevelVariablePrefix" yaml:"moduleLevelVariablePrefix"`
 }
 
-type LangDefDataType struct {
-	Key                 string `json:"key" yaml:"key"`
-	NotNull             string `json:"notNull" yaml:"notNull"`
-	Nullable            string `json:"nullable" yaml:"nullable"`
-	NullableAlternative string `json:"nullableAlternative" yaml:"nullableAlternative"`
+type Datatype struct {
+	Key                 string      `json:"key" yaml:"key"`
+	NotNull             string      `json:"notNull" yaml:"notNull"`
+	Nullable            string      `json:"nullable" yaml:"nullable"`
+	NullableAlternative string      `json:"nullableAlternative" yaml:"nullableAlternative"`
+	DefaultValue        interface{} `json:"defaultValue" yaml:"defaultValue"`
 }
 
-type LangDefInject struct {
+type Inject struct {
 	Name         string   `json:"name" yaml:"name"`
 	PropertyName string   `json:"propertyName" yaml:"propertyName"`
+	Method       string   `json:"method" yaml:"method"`
 	Imports      []string `json:"imports" yaml:"imports"`
 }
 
-type LangDefKey struct {
+type Key struct {
 	Postfix   string   `json:"postfix" yaml:"postfix"`
 	Prefix    string   `json:"prefix" yaml:"prefix"`
 	Imports   []string `json:"imports" yaml:"imports"`
@@ -41,29 +49,36 @@ type LangDefKey struct {
 	Namespace string   `json:"namespace" yaml:"namespace"`
 }
 
+type Global struct {
+	VariablePrefix  string `yaml:"variablePrefix"`
+	VariablePostfix string `yaml:"variablePostfix"`
+}
+
 func LoadFromPath(dir string) (map[string]LanguageDefinition, error) {
 
 	defs := make(map[string]LanguageDefinition)
 
-	err := filepath.Walk(dir, func(p string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
+	_, err := os.Stat(dir)
 
-		if info.IsDir() == false && strings.HasSuffix(p, "yaml") {
-			t, err := loadDef(p)
+	if os.IsNotExist(err) {
+		return nil, err
+	}
+
+	files, _ := ioutil.ReadDir(dir)
+
+	for _, file := range files {
+		fileName := filepath.Join(dir, file.Name())
+		if !file.IsDir() && (strings.HasSuffix(fileName, "yaml") || strings.HasSuffix(fileName, "yml")) {
+			t, err := loadDef(fileName)
 
 			if err != nil {
 				log.Fatalln(err)
 			}
 
-			defs[t.Language] = *t
+			if t != nil {
+				defs[t.Language] = *t
+			}
 		}
-
-		return nil
-	})
-	if err != nil {
-		log.Println(err)
 	}
 
 	return defs, nil
@@ -85,5 +100,10 @@ func loadDef(fileName string) (*LanguageDefinition, error) {
 		return nil, err
 	}
 
+	if langDef == nil {
+		return nil, nil
+	}
+
+	langDef.Path = fileName
 	return langDef, nil
 }
