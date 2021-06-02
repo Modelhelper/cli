@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"log"
 	"modelhelper/cli/app"
+	"modelhelper/cli/code"
 	"modelhelper/cli/codegen"
 	"modelhelper/cli/config"
 	"modelhelper/cli/ctx"
@@ -466,7 +467,7 @@ func (input *entityModel) ToModel(codeCtx ctx.Context) interface{} {
 		if len(input.key) > 0 {
 			val, found := input.project.Code.Keys[input.key]
 			if found {
-				out.Namespace = val.NameSpace
+				out.Namespace = val.Namespace
 				out.Postfix = val.Postfix
 				out.Prefix = val.Prefix
 
@@ -622,7 +623,7 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 
 	return out
 }
-func toInjectSection(from project.CodeInject, m interface{}) model.InjectSection {
+func toInjectSection(from code.Inject, m interface{}) model.InjectSection {
 	name, _ := codegen.Generate("fileName", from.Name, m)
 	code := model.InjectSection{
 		Name:         name,
