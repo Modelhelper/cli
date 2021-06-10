@@ -68,11 +68,12 @@ func printProjectInfo(projectFile string, renderTables bool) {
 
 	ui.PrintConsoleTitle("Project information")
 
-	fmt.Printf("\n%-20s%8s", "Name", p.Name)
-	fmt.Printf("\n%-20s%8s", "Version", p.Version)
-	fmt.Printf("\n%-20s%8s", "Owner", p.OwnerName)
-	fmt.Printf("\n%-20s%8s", "Primary language", p.Language)
+	fmt.Printf("\n%-20s%20s", "Name", p.Name)
+	fmt.Printf("\n%-20s%20s", "Version", p.Version)
+	fmt.Printf("\n%-20s%20s", "Owner", p.OwnerName)
+	fmt.Printf("\n%-20s%20s", "Primary language", p.Language)
 	fmt.Printf("\n\n")
+	fmt.Println(p.Description)
 
 	// fmt.Println("Defaults:")
 	// fmt.Printf("%-20s%8s", "Connection", p.DefaultSource)
@@ -89,16 +90,46 @@ func printProjectInfo(projectFile string, renderTables bool) {
 	}
 	if renderTables {
 
+		showTemplateKey := false
 		if len(p.Code.Keys) > 0 {
 
 			kr := keyRenderer{keys: p.Code.Keys}
 			ui.RenderTable(&kr, &kr)
+		} else {
+			fmt.Printf(`No keys is defined for this project
+Using keys will enable the templates to render correct namespace, package etc
+
+use the command 'mh project key <name> --namespace 'namespace'
+`)
+
+			showTemplateKey = true
 		}
 
 		if len(p.Code.Inject) > 0 {
 
 			ir := injectRenderer{p.Code.Inject}
 			ui.RenderTable(&ir, &ir)
+		} else {
+			showTemplateKey = true
+		}
+		if len(p.Code.Locations) > 0 {
+
+			lr := locationRenderer{p.Code.Locations}
+			ui.RenderTable(&lr, &lr)
+
+		} else {
+			fmt.Printf(`Locations is not defined for this project
+Connecting keys to a location will enable the templates export generated code to a path relative to this project
+
+use the command 'mh project location <name> <path>
+`)
+			showTemplateKey = true
+		}
+
+		if showTemplateKey {
+			fmt.Println()
+			fmt.Println("Where to find keys to use in project")
+			fmt.Println("use 'mh template' to see which keys that each template implement")
 		}
 	}
 }
@@ -112,6 +143,34 @@ func openProjectInEditor() {
 	}
 
 	openPathInEditor(editor, project.DefaultLocation())
+}
+
+type locationRenderer struct {
+	rows map[string]string
+}
+
+func (l *locationRenderer) BuildHeader() []string {
+	return []string{
+		"Key",
+		"Path",
+	}
+}
+
+func (d *locationRenderer) ToRows() [][]string {
+	var rows [][]string
+	// p := message.NewPrinter(language.English)
+
+	for key, val := range d.rows {
+
+		r := []string{
+			key,
+			val,
+		}
+
+		rows = append(rows, r)
+	}
+
+	return rows
 }
 
 type connectionRenderer struct {
