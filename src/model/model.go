@@ -1,7 +1,9 @@
 package model
 
+import "context"
+
 type ModelConverter interface {
-	ToModel() interface{}
+	ToModel(ctx context.Context) interface{}
 }
 
 type BasicModel struct {

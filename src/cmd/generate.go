@@ -22,14 +22,13 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"bufio"
+	"context"
 	"fmt"
 	"log"
 	"modelhelper/cli/app"
 	"modelhelper/cli/code"
 	"modelhelper/cli/codegen"
 	"modelhelper/cli/config"
-	"modelhelper/cli/ctx"
 	"modelhelper/cli/model"
 	"modelhelper/cli/project"
 	"modelhelper/cli/source"
@@ -41,15 +40,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type codeContext struct {
-	TemplateName             string
-	Templates                map[string]string
-	Blocks                   map[string]string
-	Datatypes                map[string]string
-	NullableTypes            map[string]string
-	AlternativeNullableTypes map[string]string
-}
-
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:     "generate",
@@ -60,21 +50,30 @@ var generateCmd = &cobra.Command{
 		codeOnly, _ := cmd.Flags().GetBool("code-only")
 		isDemo, _ := cmd.Flags().GetBool("demo")
 		entityFlagArray, _ := cmd.Flags().GetStringArray("entity")
-		entityGroupFlagArray, _ := cmd.Flags().GetStringArray("eg")
+		entityGroupFlagArray, _ := cmd.Flags().GetStringArray("entity-group")
 		tempPath, _ := cmd.Flags().GetString("template-path")
-		projectPath, _ := cmd.Flags().GetString("project")
-		configFile, _ := cmd.Flags().GetString("config")
+		projectPath, _ := cmd.Flags().GetString("project-path")
+		configFile, _ := cmd.Flags().GetString("config-path")
 		inputTemplates, err := cmd.Flags().GetStringArray("template")
 		printScreen, _ := cmd.Flags().GetBool("screen")
 		toClipBoard, _ := cmd.Flags().GetBool("copy")
 		conName, _ := cmd.Flags().GetString("connection")
-		// if isDemo == false && len(entityFlagArray) == 0 {
-		// 	return
-		// }
+
+		if len(inputTemplates) == 0 {
+			// no point to continue if no templates is given
+			fmt.Printf(`No templates or template groups are provided resulting in nothing to create
+please use mh generate with the -t or --template [templatename] to set at template
+
+You could also use mh template or mh t to see a list of all available templates`)
+
+			return
+		}
+
+		// obsolete
 		modelHelperApp = app.New()
 
+		// obsolete
 		appCtx := modelHelperApp.CreateContext()
-		// var ctx *app.Context
 
 		if len(conName) == 0 {
 
@@ -101,6 +100,8 @@ var generateCmd = &cobra.Command{
 
 		prj = loadProject(projectPath)
 
+		languages, _ := code.LoadFromPath(cfg.Languages.Definitions)
+
 		if len(tempPath) == 0 {
 			tempPath = cfg.Templates.Location
 		}
@@ -112,134 +113,150 @@ var generateCmd = &cobra.Command{
 		}
 
 		start := time.Now()
-		var cstat = codeStat{}
+		var cstat = codegen.Statistics{}
 		var generatedCode []codeFile
-		if len(inputTemplates) > 0 {
 
-			for _, tname := range inputTemplates {
+		// creates the root context to be passed to each sub routine
+		ctxVal := codegen.CodeContextValue{}
+		ctxVal.Blocks = blocks
 
-				// var tt *tpl.Template
-				// fmt.Println(tname)
-				currentTemplate, found := allTemplates[tname]
+		for _, tname := range inputTemplates {
 
-				if found {
+			// var tt *tpl.Template
+			// fmt.Println(tname)
+			currentTemplate, found := allTemplates[tname]
 
-					var input interface{}
+			if found {
 
-					// obsolete when context is completed
-					tplMap := make(map[string]string)
+				// obsolete when context is completed
+				tplMap := make(map[string]string)
 
-					for k, b := range blocks {
-						tplMap[k] = b
+				for k, b := range blocks {
+					tplMap[k] = b
+				}
+				tplMap[tname] = currentTemplate.Body
+
+				ctxVal.TemplateName = tname
+				ctxVal.Template = currentTemplate.Body
+
+				ctxVal.Datatypes = defaultNoNullDatatype()
+				ctxVal.NullableTypes = defaultNullDatatype()
+
+				def, defFound := languages[currentTemplate.Language]
+				if defFound {
+
+					for k, v := range def.DataTypes {
+						ctxVal.Datatypes[k] = v.NotNull
+						ctxVal.NullableTypes[k] = v.Nullable
+
 					}
-					tplMap[tname] = currentTemplate.Body
 
-					// create context
-					// obsolete when context is completed
-					codeCtx := ctx.Context{}
-					codeCtx.TemplateName = tname
-					codeCtx.Templates = blocks
+				}
 
-					// obsolete when context is completed
-					generator := codegen.GoLangGenerator{
-						Templates:    tplMap,
-						TemplateName: tname,
+				generator := codegen.GoLangGenerator{}
+
+				ctx := context.WithValue(context.Background(), "code", ctxVal)
+				if len(currentTemplate.Model) == 0 || currentTemplate.Model == "basic" {
+
+					basicModel := basicModel{
+						project: prj,
+						key:     currentTemplate.Key,
 					}
 
-					// TODO: refactor to method
-					if len(currentTemplate.Model) == 0 || currentTemplate.Model == "basic" {
-						tstart := time.Now()
+					o, _ := generator.Generate(ctx, &basicModel)
+					f := codeFile{
+						result: o,
+					}
+					generatedCode = append(generatedCode, f)
+				}
 
-						go func(c ctx.Context) {
-							fmt.Println(c)
-						}(codeCtx)
+				if currentTemplate.Model == "entity" && len(entities) > 0 {
 
-						basicModel := basicModel{
+					for _, entity := range entities {
+
+						entityModel := entityModel{
+							entity:  &entity,
 							project: prj,
 							key:     currentTemplate.Key,
 						}
+						o, _ := generator.Generate(ctx, &entityModel)
 
-						input = basicModel.ToModel(codeCtx)
-						o, _ := generator.Generate(codeCtx, input)
 						f := codeFile{
-							content: o,
-							stat:    getStat(o),
+							result: o,
 						}
-						f.stat.duration = time.Since(tstart)
 
 						generatedCode = append(generatedCode, f)
+
 					}
-
-					// TODO: refactor to method
-					if currentTemplate.Model == "entity" && len(entities) > 0 {
-
-						for _, entity := range entities {
-							// stat["entities"] += 1
-							tstart := time.Now()
-
-							entityModel := entityModel{
-								entity:  &entity,
-								project: prj,
-								key:     currentTemplate.Key,
-							}
-							input = entityModel.ToModel(codeCtx)
-
-							// input = getEntityModel(codeCtx, &entity, prj, currentTemplate.Key)
-							// f := generateCode(codeCtx, input)
-							o, _ := generator.Generate(codeCtx, input)
-
-							f := codeFile{
-								content: o,
-								stat:    getStat(o),
-							}
-
-							f.stat.duration = time.Since(tstart)
-
-							generatedCode = append(generatedCode, f)
-
-						}
-					}
-
 				}
 
 			}
 
-			sb := strings.Builder{}
-			for _, s := range generatedCode {
-				cstat.appendStat(s.stat)
+		}
 
-				if printScreen {
-					screenWriter := tpl.ScreenExporter{}
-					screenWriter.Export([]byte(s.content))
-				}
+		sb := strings.Builder{}
+		for _, s := range generatedCode {
+			cstat.AppendStat(s.result.Stat)
 
-				if toClipBoard {
-					sb.WriteString(s.content)
-				}
-				// TODO: export to file
+			if printScreen {
+				screenWriter := tpl.ScreenExporter{}
+				screenWriter.Write([]byte(s.result.Content))
 			}
 
 			if toClipBoard {
-				fmt.Printf("\nGenerated code is copied to the \033[37mclipboard\033[0m. Use \033[34mctrl+v\033[0m to paste it where you like")
-				clipboard.WriteAll(sb.String())
+				sb.WriteString(s.result.Content)
 			}
+			// TODO: export to file
+		}
 
-			cstat.duration = time.Since(start)
-			// stat["total.time"] = int(cstat.duration.Milliseconds())
-			if !codeOnly {
-				wpm := 40.0
-				min := float64(cstat.words) / wpm
-				// stat["total.savings"] = int(min)
-				printStat(cstat)
-				fmt.Printf("\nIn summary... It took \033[32m%vms\033[0m to generate \033[34m%d\033[0m words and \033[34m%d\033[0m lines. \nYou saved around \033[32m%v minutes\033[0m by not typing it youreself\n",
-					cstat.duration.Milliseconds(),
-					cstat.words,
-					cstat.lines,
-					int(min))
-			}
+		if toClipBoard {
+			fmt.Printf("\nGenerated code is copied to the \033[37mclipboard\033[0m. Use \033[34mctrl+v\033[0m to paste it where you like")
+			clipboard.WriteAll(sb.String())
+		}
+
+		cstat.Duration = time.Since(start)
+		// stat["total.time"] = int(cstat.duration.Milliseconds())
+		if !codeOnly {
+			wpm := 40.0
+			min := float64(cstat.Words) / wpm
+			// stat["total.savings"] = int(min)
+			printStat(cstat)
+			fmt.Printf("\nIn summary... It took \033[32m%vms\033[0m to generate \033[34m%d\033[0m words and \033[34m%d\033[0m lines. \nYou saved around \033[32m%v minutes\033[0m by not typing it youreself\n",
+				cstat.Duration.Milliseconds(),
+				cstat.Words,
+				cstat.Lines,
+				int(min))
 		}
 
 	},
+}
+
+func defaultNoNullDatatype() map[string]string {
+	// build current template context
+	dtm := make(map[string]string)
+	dtm["varchar"] = "string"
+	dtm["nvarchar"] = "string"
+	dtm["datetimeoffset"] = "DateTimeOffset"
+	dtm["datetime2"] = "DateTimeOffset"
+	dtm["bit"] = "bool"
+	dtm["decimal"] = "decimal"
+
+	return dtm
+
+}
+
+func defaultNullDatatype() map[string]string {
+
+	ndtm := make(map[string]string)
+	ndtm["varchar"] = "string"
+	ndtm["nvarchar"] = "string"
+	ndtm["int"] = "int?"
+	ndtm["datetimeoffset"] = "DateTimeOffset?"
+	ndtm["datetime2"] = "DateTimeOffset?"
+	ndtm["bit"] = "bool?"
+	ndtm["decimal"] = "decimal?"
+
+	return ndtm
 }
 
 func entitiesFromGroups(con source.Connection, groups []string) []string {
@@ -275,109 +292,52 @@ func mergedList(lists ...[]string) []string {
 	return out
 
 }
-func (cstat *codeStat) appendStat(instat codeStat) {
-	cstat.chars += instat.chars
-	cstat.lines += instat.lines
-	cstat.words += instat.words
-}
-func getEntityModel(c ctx.Context, entity *source.Entity, prj *project.Project, key string) interface{} {
-	mdl := entityModel{
-		entity:  entity,
-		project: prj,
-		key:     key,
-	}
-	input := mdl.ToModel(c)
-
-	return input
-}
-func generateCode(cctx ctx.Context, model interface{}) codeFile {
-	generator := codegen.GoLangGenerator{}
-	start := time.Now()
-
-	o, _ := generator.Generate(cctx, model)
-	f := codeFile{
-		content: o,
-		stat:    getStat(o),
-	}
-	f.stat.duration = time.Since(start)
-
-	return f
-}
-
-func getStat(s string) codeStat {
-	stat := codeStat{
-		chars: len(s),
-		lines: getLines(s),
-		words: getWords(s),
-	}
-
-	return stat
-}
 
 type codeFile struct {
 	filename        string
-	content         string
-	stat            codeStat
+	result          codegen.Result
 	exists          bool
 	existingContent string
 }
 
-type codeStat struct {
-	chars     int
-	lines     int
-	words     int
-	duration  time.Duration
-	timeSaved int
-}
-
-func getWords(input string) int {
-	scanner := bufio.NewScanner(strings.NewReader(input))
-	scanner.Split(bufio.ScanWords)
-	count := 0
-	for scanner.Scan() {
-		count++
-	}
-
-	return count
-}
-func getLines(input string) int {
-	scanner := bufio.NewScanner(strings.NewReader(input))
-	scanner.Split(bufio.ScanLines)
-
-	count := 0
-	for scanner.Scan() {
-		count++
-	}
-
-	return count
-}
 func init() {
 	rootCmd.AddCommand(generateCmd)
 
-	generateCmd.Flags().StringArrayP("template", "t", []string{}, "a list of template to convert")
-	generateCmd.Flags().StringArray("tg", []string{}, "Use a group of templates")
-	generateCmd.Flags().StringArray("eg", []string{}, "Use a group of entities (must be defines in the current connection)")
+	generateCmd.Flags().StringArrayP("template", "t", []string{}, "A list of template to convert")
+	generateCmd.Flags().StringArray("template-group", []string{}, "Use a group of templates")
+	generateCmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
 
-	generateCmd.Flags().StringArrayP("entity", "e", []string{}, "a list of entits to use as a model")
+	generateCmd.Flags().StringP("relations [direct, all, complete]", "r", "", "Include related entities based on the entities in --entity or --entity-group ('direct' | 'all' | 'complete' | 'children' | 'parents')")
+	// generateCmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
+
+	generateCmd.Flags().StringArray("entity-group", []string{}, "Use a group of entities (must be defines in the current connection)")
+	generateCmd.Flags().StringArrayP("entity", "e", []string{}, "A list of entits to use as a model")
+
 	generateCmd.Flags().Bool("screen", false, "List the output to the screen, default false")
 	generateCmd.Flags().Bool("copy", false, "Copies the generated code to the clipboard (ctrl + v), default false")
-	generateCmd.Flags().String("export", "", "Exports to a directory")
+	generateCmd.Flags().String("export-path", "", "Exports to a directory")
 	generateCmd.Flags().Bool("export-bykey", false, "Exports the code using the template keys, default false")
+
 	generateCmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code, default false")
+
 	generateCmd.Flags().Bool("demo", false, "Uses a demo as input source, this will override any other input sources (entity, graphql), default false ")
 
-	generateCmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
-	generateCmd.Flags().String("config", "", "Instructs the program to use this config as the config")
-	generateCmd.Flags().String("project", "", "Instructs the program to use this project as input")
+	generateCmd.Flags().String("config-path", "", "Instructs the program to use this config as the config")
+	generateCmd.Flags().String("project-path", "", "Instructs the program to use this project as input")
 
 	generateCmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
 
-	generateCmd.Flags().String("setup", "", "Use this setup to generate code")
-	generateCmd.Flags().StringP("connection", "c", "", "The connection to be used, uses default connection if not provided")
+	// generateCmd.Flags().String("setup", "", "Use this setup to generate code") // version 3.1
+	generateCmd.Flags().StringP("connection", "c", "", "The connection key to be used, uses default connection if not provided")
+
+	generateCmd.RegisterFlagCompletionFunc("relations", completeRelations)
 
 }
 
-func printStat(stat codeStat) {
+func completeRelations(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return []string{"direct", "all", "complete", "children", "parents"}, cobra.ShellCompDirectiveDefault
+}
+func printStat(stat codegen.Statistics) {
 	fmt.Printf(`
 
 Statistics:
@@ -385,15 +345,15 @@ Statistics:
 `)
 	tpl := "%-20s%8d\n"
 
-	fmt.Printf(tpl, "Templates used", 2)
-	fmt.Printf(tpl, "Entities used", 4)
-	fmt.Printf(tpl, "Files exported", 6)
-	fmt.Printf(tpl, "Snippets inserted", 1)
+	// fmt.Printf(tpl, "Templates used", 2)
+	// fmt.Printf(tpl, "Entities used", 4)
+	// fmt.Printf(tpl, "Files exported", 6)
+	// fmt.Printf(tpl, "Snippets inserted", 1)
 	fmt.Println()
-	fmt.Printf(tpl, "Character count", stat.chars)
-	fmt.Printf(tpl, "Word count", stat.words)
-	fmt.Printf(tpl, "Line count", stat.lines)
-	fmt.Printf(tpl, "Time used (ms)", stat.duration.Milliseconds())
+	fmt.Printf(tpl, "Character count", stat.Chars)
+	fmt.Printf(tpl, "Word count", stat.Words)
+	fmt.Printf(tpl, "Line count", stat.Lines)
+	fmt.Printf(tpl, "Time used (ms)", stat.Duration.Milliseconds())
 
 }
 
@@ -495,14 +455,13 @@ func loadProject(projectPath string) *project.Project {
 
 	if len(projectPath) > 0 {
 
-		fmt.Println("Project found here: ", projectPath)
 		prj, _ := project.Load(projectPath)
 		return prj
 	}
 
 	return nil
 }
-func (input *entityModel) ToModel(codeCtx ctx.Context) interface{} {
+func (input *entityModel) ToModel(ctx context.Context) interface{} {
 
 	imports := []string{}
 
@@ -550,7 +509,7 @@ func (input *entityModel) ToModel(codeCtx ctx.Context) interface{} {
 	return out
 }
 
-func (input *basicModel) ToModel(codeCtx ctx.Context) interface{} {
+func (input *basicModel) ToModel(ctx context.Context) interface{} {
 	b := model.BasicModel{}
 	imports := []string{}
 	// inject := map[]
@@ -771,24 +730,3 @@ func testTypes() map[string]tpl.CodeTypeImportModel {
 	}
 	return tl
 }
-
-// func getEntityModel(name string) interface{} {
-// 	src := source
-
-// 	if len(source) == 0 {
-// 		src = getSourceName()
-// 	}
-// 	input := input.GetSource(src, mhConfig)
-
-// 	e, err := input.Entity(name)
-// 	if err == nil {
-// 		fmt.Println("The entity could not be found")
-// 	}
-
-// 	// em := tpl.EntityToModel{
-// 	// 	Entity: e,
-// 	// }
-// 	// m := em.Convert()
-
-// 	return e
-// }

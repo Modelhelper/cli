@@ -11,7 +11,7 @@
             "mode": "debug",
             "program": "${workspaceFolder}/src",
             // "args": ["generate", "--screen", "-t", "cs-poco", "--demo", "--project", "C:\\dev\\projects\\mh\\cli\\configuration\\project\\.modelhelper\\project.yaml"]
-            "args": ["generate", "--screen", "-t", "cs-poco", "--eg", "histology"]
+            "args": ["generate", "--screen", "-t", "cs-poco", "--relations", "all"]
             // "args": ["template"]
             // "args": ["set", "defcon"]
             // "args": ["t", "cs-gql-hc-resolver", "--open"]

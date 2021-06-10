@@ -54,6 +54,15 @@ type Global struct {
 	VariablePostfix string `yaml:"variablePostfix"`
 }
 
+// func Load() (map[string]LanguageDefinition, error) {
+// 	cfg := config.Load()
+
+// 	if len(cfg.Languages.Definitions) == 0 {
+// 		return nil, nil
+// 	}
+// 	return LoadFromPath(cfg.Languages.Definitions)
+// }
+
 func LoadFromPath(dir string) (map[string]LanguageDefinition, error) {
 
 	defs := make(map[string]LanguageDefinition)
