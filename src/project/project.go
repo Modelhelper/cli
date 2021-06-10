@@ -17,6 +17,7 @@ type Project struct {
 	Version       string                       `yaml:"version"`
 	Name          string                       `yaml:"name"`
 	Language      string                       `yaml:"language"`
+	Description   string                       `yaml:"description"`
 	DefaultSource string                       `yaml:"defaultSource,omitempty"`
 	DefaultKey    string                       `yaml:"defaultKey,omitempty"`
 	Connections   map[string]source.Connection `yaml:"connections,omitempty"`
