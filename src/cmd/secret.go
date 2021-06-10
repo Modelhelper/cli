@@ -37,8 +37,9 @@ var secretCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(secretCmd)
 
-	configCmd.AddCommand(secretCmd)
-	projectCmd.AddCommand(secretCmd)
+	secretCmd.PersistentFlags().String("scope", "config", "Sets the scope to use secrets for [config | project], default value is config")
+	// configCmd.AddCommand(secretCmd)
+	// projectCmd.AddCommand(secretCmd)
 	secretCmd.PersistentFlags().String("key", "", "The key to use when encoding and decoding secrets")
 
 }
