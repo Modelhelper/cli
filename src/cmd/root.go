@@ -38,37 +38,11 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		printLogoInfo()
-		// rootExists := config.LocationExists()
 
-		// if rootExists == false {
-		// 	ex, err := os.Executable()
-		// 	if err != nil {
-		// 		panic(err)
-		// 	}
-
-		// 	// Path to executable file
-		// 	fmt.Println(ex)
-
-		// 	// Resolve the direcotry
-		// 	// of the executable
-		// 	exPath := filepath.Dir(ex)
-		// 	fmt.Println("Executable path :" + exPath)
-
-		// 	// Use EvalSymlinks to get
-		// 	// the real path.
-		// 	realPath, err := filepath.EvalSymlinks(exPath)
-		// 	if err != nil {
-		// 		panic(err)
-		// 	}
-		// 	fmt.Println("Symlink evaluated:" + realPath)
-
-		// 	dir, err := os.UserHomeDir()
-		// 	if err != nil {
-		// 		panic(err)
-		// 	}
-
-		// 	fmt.Println(dir)
-		// }
+	},
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		slog := app.Slogan()
+		fmt.Println(slog)
 	},
 }
 
@@ -84,6 +58,7 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
 }
 
 // func GetConfig() *config.Config {
