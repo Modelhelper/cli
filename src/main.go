@@ -9,6 +9,7 @@ import (
 // "fmt"
 
 func main() {
+
 	execute()
 }
 
@@ -29,9 +30,6 @@ func execute() {
 	} else {
 		cmd.Execute()
 	}
-
-	slog := app.Slogan()
-	fmt.Println(slog)
 }
 
 // func printTerminalSizes() {
