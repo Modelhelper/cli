@@ -9,16 +9,17 @@ type Exporter interface {
 
 type ScreenExporter struct{}
 
-func (e *ScreenExporter) Export(b []byte) error {
+func (e *ScreenExporter) Write(b []byte) (int, error) {
 	fmt.Println(string(b))
-	return nil
+	return len(b), nil
 }
 
 type DirectoryExporter struct {
-	Directory string
+	Filename  string
+	Overwrite bool
 }
 
-func (e *DirectoryExporter) Export(b []byte) error {
+func (e *DirectoryExporter) Write(b []byte) (int, error) {
 	fmt.Println(string(b))
-	return nil
+	return len(b), nil
 }
