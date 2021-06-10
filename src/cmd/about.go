@@ -49,7 +49,6 @@ func printLogoInfo() {
 
 	dir := project.DefaultLocation()
 
-	fmt.Println("Check this dir for project", dir)
 	if project.Exists(dir) {
 		printProjectInfo(project.DefaultLocation(), true)
 
