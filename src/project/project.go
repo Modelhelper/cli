@@ -7,6 +7,7 @@ import (
 	"modelhelper/cli/source"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -147,6 +148,42 @@ type ProjectCode struct {
 	FileHeader             string                 `yaml:"fileHeader"`
 	DisableNullableTypes   bool                   `json:"diableNullableTypes" yaml:"diableNullableTypes"`
 	UseNullableAlternative bool                   `json:"useNullableAlternative" yaml:"useNullableAlternative"`
+}
+
+//FindRelatedProjects gets a list of all the related projects by following the path from DefaultDir() to the volumeroot
+//The returning list is in correct importance from least to most (the project nearest to DefaultDir())
+func FindReleatedProjects() []string {
+	startPath := DefaultDir()
+	basePath := startPath
+	list := []string{}
+
+	dirs := strings.Split(startPath, string(os.PathSeparator))
+	if len(dirs) > 0 {
+		dirs[0] = filepath.VolumeName(startPath) + string(os.PathSeparator)
+	}
+	for i := 0; i <= len(dirs); i++ {
+		basePath = filepath.Join(dirs[0:i]...)
+		if len(basePath) == 0 {
+			continue
+		}
+
+		files, err := ioutil.ReadDir(basePath)
+		if err != nil {
+			log.Fatal(err)
+			break
+		}
+		for _, f := range files {
+
+			if f.IsDir() && f.Name() == dirname {
+				fp := filepath.Join(basePath, f.Name(), "project.yaml")
+				list = append(list, fp)
+			}
+
+		}
+
+	}
+	return list
+
 }
 
 func FindNearestProjectDir() (string, bool) {
