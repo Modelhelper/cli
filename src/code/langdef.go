@@ -26,6 +26,18 @@ type LanguageDefinition struct {
 	// ModuleLevelVariablePrefix string                     `json:"moduleLevelVariablePrefix" yaml:"moduleLevelVariablePrefix"`
 }
 
+type Code struct {
+	OmitSourcePrefix       bool              `yaml:"omitSourcePrefix"`
+	Global                 Global            `yaml:"global"`
+	Groups                 []string          `yaml:"groups"`
+	Options                map[string]string `yaml:"options"`
+	Keys                   map[string]Key    `yaml:"keys,omitempty"`
+	Inject                 map[string]Inject `yaml:"inject,omitempty"`
+	Locations              map[string]string `yaml:"locations"`
+	FileHeader             string            `yaml:"header"`
+	DisableNullableTypes   bool              `json:"diableNullableTypes" yaml:"diableNullableTypes"`
+	UseNullableAlternative bool              `json:"useNullableAlternative" yaml:"useNullableAlternative"`
+}
 type Datatype struct {
 	Key                 string      `json:"key" yaml:"key"`
 	NotNull             string      `json:"notNull" yaml:"notNull"`
