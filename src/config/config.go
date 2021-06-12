@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"modelhelper/cli/project"
+	"modelhelper/cli/code"
 	"modelhelper/cli/source"
 	"os"
 	"os/user"
@@ -23,7 +23,7 @@ type Config struct {
 	DefaultEditor     string                       `json:"editor" yaml:"editor"`
 	Developer         Developer                    `json:"developer" yaml:"developer"`
 	Port              int                          `json:"port" yaml:"port"`
-	Code              project.ProjectCode          `json:"code" yaml:"code"`
+	Code              code.Code                    `json:"code" yaml:"code"`
 	Templates         struct {
 		Location string `json:"location" yaml:"location"`
 	} `json:"templates" yaml:"templates"`
