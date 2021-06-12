@@ -38,13 +38,15 @@ var projectCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		open, _ := cmd.Flags().GetBool("open")
+		path, _ := cmd.Flags().GetString("path")
+		// projects := project.LoadProjects(project.FindReleatedProjects()...)
 
-		if project.Exists(project.DefaultLocation()) {
+		if project.Exists(path) {
 
 			if open {
 				openProjectInEditor()
 			} else {
-				printProjectInfo(project.DefaultLocation(), true)
+				printProjectInfo(path, true)
 			}
 		}
 	},
@@ -53,28 +55,39 @@ var projectCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(projectCmd)
 	projectCmd.Flags().Bool("open", false, "Opens the project file in default editor")
+	projectCmd.Flags().String("path", project.DefaultLocation(), "Opens the project file in default editor")
 
 }
 
 func printProjectInfo(projectFile string, renderTables bool) {
-	p, err := project.Load(projectFile)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+
+	paths := project.FindReleatedProjects(projectFile)
+	ps := project.LoadProjects(paths...)
+
+	p := project.JoinProject("smart", ps...)
+	// p, err := project.Load(projectFile)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
 
 	cfg := config.Load()
-	cons := source.JoinConnections("smart", cfg, p)
+	cons := source.JoinConnections("smart", cfg, &p)
 
 	ui.PrintConsoleTitle("Project information")
 
 	fmt.Printf("\n%-20s%20s", "Name", p.Name)
-	fmt.Printf("\n%-20s%20s", "Version", p.Version)
+	// fmt.Printf("\n%-20s%20s", "Version", p.Version)
 	fmt.Printf("\n%-20s%20s", "Owner", p.OwnerName)
 	fmt.Printf("\n%-20s%20s", "Primary language", p.Language)
 	fmt.Printf("\n\n")
 	fmt.Println(p.Description)
 
+	fmt.Println()
+	fmt.Println("OPTIONS....")
+	for k, v := range p.Options {
+		fmt.Printf("\n%-20s%20s", k, v)
+	}
 	// fmt.Println("Defaults:")
 	// fmt.Printf("%-20s%8s", "Connection", p.DefaultSource)
 	// fmt.Printf("\n%-20s%8s", "Key", p.DefaultKey)
@@ -89,47 +102,50 @@ func printProjectInfo(projectFile string, renderTables bool) {
 		fmt.Printf("\n")
 	}
 	if renderTables {
+		for _, langVal := range p.Code {
 
-		showTemplateKey := false
-		if len(p.Code.Keys) > 0 {
-
-			kr := keyRenderer{keys: p.Code.Keys}
-			ui.RenderTable(&kr, &kr)
-		} else {
-			fmt.Printf(`No keys is defined for this project
+			showTemplateKey := false
+			if len(langVal.Keys) > 0 {
+				ui.PrintConsoleTitle("Keys")
+				kr := keyRenderer{keys: langVal.Keys}
+				ui.RenderTable(&kr, &kr)
+			} else {
+				fmt.Printf(`No keys is defined for this project
 Using keys will enable the templates to render correct namespace, package etc
 
 use the command 'mh project key <name> --namespace 'namespace'
 `)
 
-			showTemplateKey = true
-		}
+				showTemplateKey = true
+			}
 
-		if len(p.Code.Inject) > 0 {
+			if len(langVal.Inject) > 0 {
+				ui.PrintConsoleTitle("Inject")
+				ir := injectRenderer{langVal.Inject}
+				ui.RenderTable(&ir, &ir)
+			} else {
+				showTemplateKey = true
+			}
+			if len(langVal.Locations) > 0 {
+				ui.PrintConsoleTitle("Locations")
 
-			ir := injectRenderer{p.Code.Inject}
-			ui.RenderTable(&ir, &ir)
-		} else {
-			showTemplateKey = true
-		}
-		if len(p.Code.Locations) > 0 {
+				lr := locationRenderer{langVal.Locations}
+				ui.RenderTable(&lr, &lr)
 
-			lr := locationRenderer{p.Code.Locations}
-			ui.RenderTable(&lr, &lr)
-
-		} else {
-			fmt.Printf(`Locations is not defined for this project
+			} else {
+				fmt.Printf(`Locations is not defined for this project
 Connecting keys to a location will enable the templates export generated code to a path relative to this project
 
 use the command 'mh project location <name> <path>
 `)
-			showTemplateKey = true
-		}
+				showTemplateKey = true
+			}
 
-		if showTemplateKey {
-			fmt.Println()
-			fmt.Println("Where to find keys to use in project")
-			fmt.Println("use 'mh template' to see which keys that each template implement")
+			if showTemplateKey {
+				fmt.Println()
+				fmt.Println("Where to find keys to use in project")
+				fmt.Println("use 'mh template' to see which keys that each template implement")
+			}
 		}
 	}
 }
