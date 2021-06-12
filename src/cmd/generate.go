@@ -33,6 +33,7 @@ import (
 	"modelhelper/cli/project"
 	"modelhelper/cli/source"
 	"modelhelper/cli/tpl"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -127,7 +128,7 @@ You could also use mh template or mh t to see a list of all available templates`
 			currentTemplate, found := allTemplates[tname]
 
 			if found {
-
+				codeSection, csFound := prj.Code[currentTemplate.Language]
 				// obsolete when context is completed
 				tplMap := make(map[string]string)
 
@@ -158,36 +159,58 @@ You could also use mh template or mh t to see a list of all available templates`
 				ctx := context.WithValue(context.Background(), "code", ctxVal)
 				if len(currentTemplate.Model) == 0 || currentTemplate.Model == "basic" {
 
-					basicModel := basicModel{
-						project: prj,
-						key:     currentTemplate.Key,
-					}
+					model := ToBasicModel(currentTemplate.Key, currentTemplate.Language, prj)
+					o, _ := generator.Generate(ctx, model)
 
-					o, _ := generator.Generate(ctx, &basicModel)
 					f := codeFile{
-						result: o,
+						result:   o,
+						filename: "",
 					}
 					generatedCode = append(generatedCode, f)
-				}
-
-				if currentTemplate.Model == "entity" && len(entities) > 0 {
+				} else if currentTemplate.Model == "entity" && len(entities) > 0 {
 
 					for _, entity := range entities {
+						model := ToEntityModel(currentTemplate.Key, currentTemplate.Language, prj, &entity)
+						pageHeader, _ := codegen.Generate("header", model.PageHeader, model)
+						model.PageHeader = pageHeader
 
-						entityModel := entityModel{
-							entity:  &entity,
-							project: prj,
-							key:     currentTemplate.Key,
+						o, _ := generator.Generate(ctx, model)
+						filen, _ := codegen.Generate("filename", currentTemplate.FileName, model)
+						fullPath := ""
+						if csFound {
+
+							fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
 						}
-						o, _ := generator.Generate(ctx, &entityModel)
 
 						f := codeFile{
-							result: o,
+							result:   o,
+							filename: fullPath,
 						}
 
 						generatedCode = append(generatedCode, f)
 
 					}
+				} else if currentTemplate.Model == "entities" && len(entities) > 0 {
+
+					model := ToEntitiesModel(currentTemplate.Key, currentTemplate.Language, prj, &entities)
+					pageHeader, _ := codegen.Generate("header", model.PageHeader, model)
+					model.PageHeader = pageHeader
+
+					o, _ := generator.Generate(ctx, model)
+					filen, _ := codegen.Generate("filename", currentTemplate.FileName, model)
+					fullPath := ""
+					if csFound {
+
+						fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+					}
+
+					f := codeFile{
+						result:   o,
+						filename: fullPath,
+					}
+
+					generatedCode = append(generatedCode, f)
+
 				}
 
 			}
@@ -206,6 +229,8 @@ You could also use mh template or mh t to see a list of all available templates`
 			if toClipBoard {
 				sb.WriteString(s.result.Content)
 			}
+
+			fmt.Println("*** FILENAME::", s.filename)
 			// TODO: export to file
 		}
 
@@ -358,23 +383,23 @@ Statistics:
 }
 
 type basicModel struct {
-	project   *project.Project
-	generator *codegen.SimpleGenerator
-	key       string
+	project  *project.Project
+	key      string
+	language string
 }
 
 type entityModel struct {
-	entity    *source.Entity
-	project   *project.Project
-	generator *codegen.SimpleGenerator
-	key       string
+	entity   *source.Entity
+	project  *project.Project
+	key      string
+	language string
 }
 
 type entitiesModel struct {
-	entity    *[]source.Entity
-	project   *project.Project
-	generator *codegen.SimpleGenerator
-	key       string
+	entities *[]source.Entity
+	project  *project.Project
+	key      string
+	// generator *codegen.SimpleGenerator
 }
 
 func loadTemplates(templatePath string) (all map[string]tpl.Template, blocks map[string]string) {
@@ -461,78 +486,109 @@ func loadProject(projectPath string) *project.Project {
 
 	return nil
 }
-func (input *entityModel) ToModel(ctx context.Context) interface{} {
 
-	imports := []string{}
-
-	out := model.EntityModel{}
-
-	if input.entity != nil {
-		out = toEntitySection(input.entity)
+func toProjectModel(input project.Project) model.ProjectSection {
+	return model.ProjectSection{
+		Owner: input.OwnerName,
+		Name:  input.Name,
 	}
 
-	if input.project != nil {
-		if len(input.project.Options) > 0 {
-			out.Options = input.project.Options
+}
+
+func ToEntityModel(key, language string, project *project.Project, entity *source.Entity) model.EntityModel {
+
+	entityBase := model.EntityModel{}
+
+	base := ToBasicModel(key, language, project)
+	if entity != nil {
+		entityBase = toEntitySection(entity)
+	}
+
+	out := model.EntityModel{
+		Namespace:                 base.Namespace,
+		Postfix:                   base.Postfix,
+		Prefix:                    base.Prefix,
+		ModuleLevelVariablePrefix: base.ModuleLevelVariablePrefix,
+		Inject:                    base.Inject,
+		Imports:                   base.Imports,
+		Project:                   base.Project,
+		Developer:                 base.Developer,
+		Options:                   base.Options,
+		PageHeader:                base.PageHeader,
+		Name:                      entityBase.Name,
+		Schema:                    entityBase.Schema,
+		Type:                      entityBase.Type,
+		Alias:                     entityBase.Alias,
+		Description:               entityBase.Description,
+		HasDescription:            len(entityBase.Description) > 0,
+		HasPrefix:                 false, //len(entityBase.Prefix) > 0,
+		NameWithoutPrefix:         "",
+		Columns:                   entityBase.Columns,
+		Parents:                   entityBase.Parents,
+		Children:                  entityBase.Children,
+		PrimaryKeys:               entityBase.PrimaryKeys,
+		ForeignKeys:               entityBase.ForeignKeys,
+		UsedAsColumns:             entityBase.UsedAsColumns,
+		UsesIdentityColumn:        entityBase.UsesIdentityColumn,
+	}
+
+	return out
+}
+func ToEntitiesModel(key, language string, project *project.Project, entities *[]source.Entity) model.EntityListModel {
+
+	entitylist := []model.EntityModel{}
+
+	base := ToBasicModel(key, language, project)
+	if entities != nil && len(*entities) > 0 {
+		for _, entity := range *entities {
+
+			entityBase := toEntitySection(&entity)
+			entitylist = append(entitylist, entityBase)
 		}
-		out.Project.Name = input.project.Name
-		out.Project.Owner = input.project.OwnerName
+	}
 
-		out.PageHeader = input.project.Header
-		if len(input.key) > 0 {
-			val, found := input.project.Code.Keys[input.key]
-			if found {
-				out.Namespace = val.Namespace
-				out.Postfix = val.Postfix
-				out.Prefix = val.Prefix
-
-				for _, imp := range val.Imports {
-					imports = append(imports, imp)
-				}
-				out.Imports = imports
-				out.Inject = []model.InjectSection{}
-				for _, injectKey := range val.Inject {
-					injItem, foundInj := input.project.Code.Inject[injectKey]
-					if foundInj {
-						for _, injImport := range injItem.Imports {
-							out.Imports = append(out.Imports, injImport)
-						}
-						out.Inject = append(out.Inject, toInjectSection(injItem, out))
-
-					}
-				}
-			}
-		}
-
+	out := model.EntityListModel{
+		Namespace:                 base.Namespace,
+		Postfix:                   base.Postfix,
+		Prefix:                    base.Prefix,
+		ModuleLevelVariablePrefix: base.ModuleLevelVariablePrefix,
+		Inject:                    base.Inject,
+		Imports:                   base.Imports,
+		Project:                   base.Project,
+		Developer:                 base.Developer,
+		Options:                   base.Options,
+		PageHeader:                base.PageHeader,
+		Entities:                  entitylist,
 	}
 
 	return out
 }
 
-func (input *basicModel) ToModel(ctx context.Context) interface{} {
+func ToBasicModel(key, language string, project *project.Project) model.BasicModel {
 	b := model.BasicModel{}
 	imports := []string{}
-	// inject := map[]
-	if input.project != nil {
+	code, codeFound := project.Code[language]
 
-		if len(input.project.Options) > 0 {
-			fmt.Println("has options")
-			b.Options = input.project.Options
+	// inject := map[]
+	if project != nil {
+
+		if len(project.Options) > 0 {
+			b.Options = project.Options
 		}
 
-		b.Project.Name = input.project.Name
-		b.Project.Owner = input.project.OwnerName
+		b.Project.Name = project.Name
+		b.Project.Owner = project.OwnerName
 
-		b.PageHeader = input.project.Header
+		b.PageHeader = project.Header
 
-		if len(input.key) > 0 {
-			val, found := input.project.Code.Keys[input.key]
+		if len(key) > 0 && codeFound {
+			val, found := code.Keys[key]
 			if found {
 				imports = append(imports, val.Imports...)
 
 				b.Inject = []model.InjectSection{}
 				for _, injectKey := range val.Inject {
-					injItem, foundInj := input.project.Code.Inject[injectKey]
+					injItem, foundInj := code.Inject[injectKey]
 					if foundInj {
 						b.Inject = append(b.Inject, toInjectSection(injItem, b))
 					}
