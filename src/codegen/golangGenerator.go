@@ -6,7 +6,6 @@ import (
 	"context"
 	"io/ioutil"
 	"log"
-	"modelhelper/cli/model"
 	"os"
 	"path/filepath"
 	"strings"
@@ -40,7 +39,7 @@ func Generate(name string, body string, model interface{}) (string, error) {
 
 }
 
-func (g *GoLangGenerator) Generate(ctx context.Context, m model.ModelConverter) (Result, error) {
+func (g *GoLangGenerator) Generate(ctx context.Context, model interface{}) (Result, error) {
 	start := time.Now()
 
 	code, ok := ctx.Value("code").(CodeContextValue)
@@ -58,7 +57,7 @@ func (g *GoLangGenerator) Generate(ctx context.Context, m model.ModelConverter) 
 
 	template := fromFiles(code)
 	buf := new(bytes.Buffer)
-	err := template.ExecuteTemplate(buf, code.TemplateName, m.ToModel(ctx))
+	err := template.ExecuteTemplate(buf, code.TemplateName, model)
 	if err != nil {
 		return res, err
 	}
@@ -105,7 +104,7 @@ func getLines(input string) int {
 	return count
 }
 
-func (g *SimpleGenerator) Generate(ctx context.Context, m model.ModelConverter) (Result, error) {
+func (g *SimpleGenerator) Generate(ctx context.Context, model interface{}) (Result, error) {
 	code, ok := ctx.Value("code").(CodeContextValue)
 	res := Result{}
 
@@ -114,7 +113,7 @@ func (g *SimpleGenerator) Generate(ctx context.Context, m model.ModelConverter) 
 	}
 
 	var err error
-	res.Content, err = Generate(code.TemplateName, code.Template, m.ToModel(ctx))
+	res.Content, err = Generate(code.TemplateName, code.Template, model)
 	return res, err
 
 }
