@@ -22,11 +22,11 @@ type Project struct {
 	DefaultSource string                       `yaml:"defaultSource,omitempty"`
 	DefaultKey    string                       `yaml:"defaultKey,omitempty"`
 	Connections   map[string]source.Connection `yaml:"connections,omitempty"`
-	Code          ProjectCode                  `yaml:"code,omitempty"`
-	OwnerName     string                       `yaml:"customerName,omitempty"`
-	Header        string                       `yaml:"header,omitempty"`
+	Code          map[string]code.Code         `yaml:"code,omitempty"`
+	OwnerName     string                       `yaml:"ownerName,omitempty"`
 	Options       map[string]string            `yaml:"options,omitempty"`
 	Custom        interface{}                  `yaml:"custom,omitempty"`
+	Header        string                       `yaml:"header,omitempty"`
 }
 
 func (p *Project) Save() error {
@@ -93,6 +93,15 @@ func Exists(path string) bool {
 	return true
 }
 
+func LoadProjects(path ...string) []Project {
+	l := []Project{}
+
+	for _, p := range path {
+		project, _ := loadProjectFromFile(p)
+		l = append(l, *project)
+	}
+	return l
+}
 func Load(path string) (*Project, error) {
 	if len(path) > 0 {
 		pathInfo, err := os.Stat(path)
@@ -137,24 +146,10 @@ func (p *Project) GetConnections() (*map[string]source.Connection, error) {
 	return &p.Connections, nil
 }
 
-type ProjectCode struct {
-	OmitSourcePrefix       bool                   `yaml:"omitSourcePrefix"`
-	Global                 code.Global            `yaml:"global"`
-	Groups                 []string               `yaml:"groups"`
-	Options                map[string]string      `yaml:"options"`
-	Keys                   map[string]code.Key    `yaml:"keys,omitempty"`
-	Inject                 map[string]code.Inject `yaml:"inject,omitempty"`
-	Locations              map[string]string      `yaml:"exportLocations"`
-	FileHeader             string                 `yaml:"fileHeader"`
-	DisableNullableTypes   bool                   `json:"diableNullableTypes" yaml:"diableNullableTypes"`
-	UseNullableAlternative bool                   `json:"useNullableAlternative" yaml:"useNullableAlternative"`
-}
-
 //FindRelatedProjects gets a list of all the related projects by following the path from DefaultDir() to the volumeroot
 //The returning list is in correct importance from least to most (the project nearest to DefaultDir())
-func FindReleatedProjects() []string {
-	startPath := DefaultDir()
-	basePath := startPath
+func FindReleatedProjects(startPath string) []string {
+	basePath, _ := filepath.Split(startPath)
 	list := []string{}
 
 	dirs := strings.Split(startPath, string(os.PathSeparator))
@@ -167,7 +162,14 @@ func FindReleatedProjects() []string {
 			continue
 		}
 
-		files, err := ioutil.ReadDir(basePath)
+		if dirs[i] == dirname {
+			fp := filepath.Join(basePath, dirname, "project.yaml")
+			list = append(list, fp)
+			break
+		}
+
+		files, err := os.ReadDir(basePath)
+		// files, err := ioutil.ReadDir(basePath)
 		if err != nil {
 			log.Fatal(err)
 			break
@@ -214,7 +216,7 @@ func FindNearestProjectDir() (string, bool) {
 	return "", false
 }
 
-func JoinProject(joinType string, projects ...*Project) Project {
+func JoinProject(joinType string, projects ...Project) Project {
 	switch joinType {
 	case "merge":
 		return mergeProject(projects...)
@@ -229,12 +231,12 @@ func JoinProject(joinType string, projects ...*Project) Project {
 
 	}
 }
-func mergeProject(projects ...*Project) Project {
+func mergeProject(projects ...Project) Project {
 	current := Project{}
 
 	conProv := []source.ConnectionProvider{}
 	for _, p := range projects {
-		conProv = append(conProv, p)
+		conProv = append(conProv, &p)
 	}
 
 	current.Connections = source.JoinConnections("merge", conProv...)
@@ -247,17 +249,30 @@ func mergeProject(projects ...*Project) Project {
 	return current
 }
 
-func smartMergeProject(projects ...*Project) Project {
+func smartMergeProject(projects ...Project) Project {
 	current := Project{}
-
+	current.Options = make(map[string]string)
 	conProv := []source.ConnectionProvider{}
 	for _, p := range projects {
-		conProv = append(conProv, p)
+		conProv = append(conProv, &p)
 	}
 
 	current.Connections = source.JoinConnections("smart", conProv...)
 
 	for _, proj := range projects {
+		current.Name = mergeString(current.Name, proj.Name)
+		// if len(proj.Name) > 0 {
+		// 	current.Name = proj.Name
+		// }
+		current.Description = mergeString(current.Description, proj.Description)
+		current.DefaultKey = mergeString(current.DefaultKey, proj.DefaultKey)
+		current.DefaultSource = mergeString(current.DefaultSource, proj.DefaultSource)
+		current.OwnerName = mergeString(current.OwnerName, proj.OwnerName)
+		current.Language = mergeString(current.Language, proj.Language)
+
+		for optKey, optVal := range proj.Options {
+			current.Options[optKey] = optVal
+		}
 
 		current.Code = proj.Code
 	}
@@ -265,13 +280,20 @@ func smartMergeProject(projects ...*Project) Project {
 	return current
 }
 
-func replaceProject(projects ...*Project) Project {
+func mergeString(current string, target string) string {
+	if len(target) > 0 {
+		return target
+	}
+
+	return current
+}
+func replaceProject(projects ...Project) Project {
 	current := Project{}
 
 	l := len(projects)
 
 	if l > 0 {
-		return *projects[l-1]
+		return projects[l-1]
 	}
 
 	return current
