@@ -169,14 +169,25 @@ You could also use mh template or mh t to see a list of all available templates`
 				ctx := context.WithValue(context.Background(), "code", ctxVal)
 				if len(currentTemplate.Model) == 0 || currentTemplate.Model == "basic" {
 
-					model := ToBasicModel(currentTemplate.Key, currentTemplate.Language, prj)
-					o, _ := generator.Generate(ctx, model)
+					basicGenerator := func() {
+						defer wg.Done()
 
-					f := codeFile{
-						result:   o,
-						filename: "",
+						model := ToBasicModel(currentTemplate.Key, currentTemplate.Language, prj)
+						o, _ := generator.Generate(ctx, model)
+
+						f := codeFile{
+							result:   o,
+							filename: "",
+						}
+
+						lock.Lock()
+						generatedCode = append(generatedCode, f)
+						lock.Unlock()
 					}
-					generatedCode = append(generatedCode, f)
+
+					wg.Add(1)
+					go basicGenerator()
+
 				} else if currentTemplate.Model == "entity" && len(entities) > 0 {
 
 					for _, entity := range entities {
@@ -223,23 +234,32 @@ You could also use mh template or mh t to see a list of all available templates`
 					}
 				} else if currentTemplate.Model == "entities" && len(entities) > 0 {
 
-					model := ToEntitiesModel(currentTemplate.Key, currentTemplate.Language, prj, &entities)
-					model.PageHeader = codegen.Generate("header", model.PageHeader, model)
+					entitiesGenerator := func() {
+						defer wg.Done()
+						model := ToEntitiesModel(currentTemplate.Key, currentTemplate.Language, prj, &entities)
+						model.PageHeader = codegen.Generate("header", model.PageHeader, model)
 
-					o, _ := generator.Generate(ctx, model)
-					filen := codegen.Generate("filename", currentTemplate.FileName, model)
-					fullPath := ""
-					if csFound {
+						o, _ := generator.Generate(ctx, model)
+						filen := codegen.Generate("filename", currentTemplate.FileName, model)
+						fullPath := ""
+						if csFound {
 
-						fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+							fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+						}
+
+						f := codeFile{
+							result:   o,
+							filename: fullPath,
+						}
+
+						lock.Lock()
+						generatedCode = append(generatedCode, f)
+						lock.Unlock()
+
 					}
 
-					f := codeFile{
-						result:   o,
-						filename: fullPath,
-					}
-
-					generatedCode = append(generatedCode, f)
+					wg.Add(1)
+					go entitiesGenerator()
 
 				}
 
