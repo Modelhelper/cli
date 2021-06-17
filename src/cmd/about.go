@@ -34,7 +34,7 @@ import (
 // aboutCmd represents the about command
 var aboutCmd = &cobra.Command{
 	Use:   "about",
-	Short: "<not implemented>",
+	Short: "Show information about the modelhelper CLI",
 	Run: func(cmd *cobra.Command, args []string) {
 		printLogoInfo()
 	},
