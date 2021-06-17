@@ -32,7 +32,7 @@ import (
 // configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "<not implemented>",
+	Short: "Manage modelhelper configuration",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		open, _ := cmd.Flags().GetBool("open")
