@@ -156,7 +156,9 @@ You could also use mh template or mh t to see a list of all available templates`
 				}
 
 				// if len(prj.Code. {
-				codeSection, csFound = prj.Code[currentTemplate.Language]
+				if prj != nil && prj.Code != nil {
+					codeSection, csFound = prj.Code[currentTemplate.Language]
+				}
 				// }
 				generator := codegen.GoLangGenerator{}
 
@@ -582,10 +584,10 @@ func ToEntitiesModel(key, language string, project *project.Project, entities *[
 func ToBasicModel(key, language string, project *project.Project) model.BasicModel {
 	b := model.BasicModel{}
 	imports := []string{}
-	code, codeFound := project.Code[language]
 
 	// inject := map[]
 	if project != nil {
+		code, codeFound := project.Code[language]
 
 		if len(project.Options) > 0 {
 			b.Options = project.Options
