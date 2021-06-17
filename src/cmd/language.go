@@ -16,7 +16,7 @@ import (
 var languageCmd = &cobra.Command{
 	Use:     "language",
 	Aliases: []string{"lang", "l"},
-	Short:   "Root command for working with language definitions installed for modelhelper",
+	Short:   "Show a list of language definitions installed for modelhelper",
 	Args:    cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Load()
