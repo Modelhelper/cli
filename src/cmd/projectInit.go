@@ -34,7 +34,7 @@ import (
 // projectInitCmd represents the projectInit command
 var projectInitCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initializes a new project in the current working directory",
+	Short: "Initialize a new project in the current working directory",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		p := *&project.Project{}
