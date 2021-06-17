@@ -35,6 +35,7 @@ import (
 	"modelhelper/cli/tpl"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/atotto/clipboard"
@@ -69,6 +70,9 @@ You could also use mh template or mh t to see a list of all available templates`
 
 			return
 		}
+
+		var wg sync.WaitGroup
+		var lock = sync.Mutex{}
 
 		// obsolete
 		modelHelperApp = app.New()
@@ -174,36 +178,45 @@ You could also use mh template or mh t to see a list of all available templates`
 				} else if currentTemplate.Model == "entity" && len(entities) > 0 {
 
 					for _, entity := range entities {
-						model := ToEntityModel(currentTemplate.Key, currentTemplate.Language, prj, &entity)
 
-						model.PageHeader = codegen.Generate("header", model.PageHeader, model)
-						model.Namespace = codegen.Generate("namesp", model.Namespace, model)
+						entityGenerator := func() {
+							defer wg.Done()
+							model := ToEntityModel(currentTemplate.Key, currentTemplate.Language, prj, &entity)
 
-						for i, imp := range model.Imports {
+							model.PageHeader = codegen.Generate("header", model.PageHeader, model)
+							model.Namespace = codegen.Generate("namesp", model.Namespace, model)
 
-							model.Imports[i] = codegen.Generate("import", imp, model)
+							for i, imp := range model.Imports {
+
+								model.Imports[i] = codegen.Generate("import", imp, model)
+							}
+
+							for x, inj := range model.Inject {
+
+								model.Inject[x].Name = codegen.Generate("injprop", inj.Name, model)
+							}
+
+							o, _ := generator.Generate(ctx, model)
+							filen := codegen.Generate("filename", currentTemplate.FileName, model)
+
+							fullPath := ""
+							if csFound {
+
+								fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+							}
+
+							f := codeFile{
+								result:   o,
+								filename: fullPath,
+							}
+
+							lock.Lock()
+							generatedCode = append(generatedCode, f)
+							lock.Unlock()
 						}
 
-						for x, inj := range model.Inject {
-
-							model.Inject[x].Name = codegen.Generate("injprop", inj.Name, model)
-						}
-
-						o, _ := generator.Generate(ctx, model)
-						filen := codegen.Generate("filename", currentTemplate.FileName, model)
-
-						fullPath := ""
-						if csFound {
-
-							fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
-						}
-
-						f := codeFile{
-							result:   o,
-							filename: fullPath,
-						}
-
-						generatedCode = append(generatedCode, f)
+						wg.Add(1)
+						go entityGenerator()
 
 					}
 				} else if currentTemplate.Model == "entities" && len(entities) > 0 {
@@ -231,6 +244,8 @@ You could also use mh template or mh t to see a list of all available templates`
 			}
 
 		}
+
+		wg.Wait()
 
 		sb := strings.Builder{}
 		for _, s := range generatedCode {
