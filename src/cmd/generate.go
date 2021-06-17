@@ -557,6 +557,7 @@ func ToEntityModel(key, language string, project *project.Project, entity *sourc
 	}
 
 	out := model.EntityModel{
+		RootNamespace:             base.RootNamespace,
 		Namespace:                 base.Namespace,
 		Postfix:                   base.Postfix,
 		Prefix:                    base.Prefix,
