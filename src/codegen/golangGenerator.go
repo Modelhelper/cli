@@ -26,16 +26,16 @@ func (cstat *Statistics) AppendStat(instat Statistics) {
 	cstat.Words += instat.Words
 }
 
-func Generate(name string, body string, model interface{}) (string, error) {
+func Generate(name string, body string, model interface{}) string {
 	tmpl, err := template.New(name).Funcs(simpleFuncMap()).Parse(body)
 	if err != nil {
-		return "", err
+		return ""
 	}
 
 	buf := new(bytes.Buffer)
 
 	tmpl.Execute(buf, model)
-	return buf.String(), nil
+	return buf.String()
 
 }
 
@@ -113,7 +113,7 @@ func (g *SimpleGenerator) Generate(ctx context.Context, model interface{}) (Resu
 	}
 
 	var err error
-	res.Content, err = Generate(code.TemplateName, code.Template, model)
+	res.Content = Generate(code.TemplateName, code.Template, model)
 	return res, err
 
 }
