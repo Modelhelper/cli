@@ -27,7 +27,8 @@ type LanguageDefinition struct {
 }
 
 type Code struct {
-	OmitSourcePrefix       bool              `yaml:"omitSourcePrefix"`
+	RootNamespace          string            `yaml:"rootNamespace,omitempty"`
+	OmitSourcePrefix       bool              `yaml:"omitSourcePrefix,omitempty"`
 	Global                 Global            `yaml:"global"`
 	Groups                 []string          `yaml:"groups"`
 	Options                map[string]string `yaml:"options"`
