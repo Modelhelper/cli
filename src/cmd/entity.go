@@ -58,6 +58,7 @@ var (
 var entityCmd = &cobra.Command{
 	Use:     "entity",
 	Aliases: []string{"e"},
+	Short:   "Show a list of entities or details of a single entity",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// fmt.Println("entity called")
