@@ -34,7 +34,7 @@ import (
 // projectCmd represents the project command
 var projectCmd = &cobra.Command{
 	Use:   "project",
-	Short: "Working with the projects",
+	Short: "Manage the current project in the working directory",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		open, _ := cmd.Flags().GetBool("open")
