@@ -128,7 +128,8 @@ You could also use mh template or mh t to see a list of all available templates`
 			currentTemplate, found := allTemplates[tname]
 
 			if found {
-				codeSection, csFound := prj.Code[currentTemplate.Language]
+				var codeSection code.Code
+				var csFound = false
 				// obsolete when context is completed
 				tplMap := make(map[string]string)
 
@@ -154,6 +155,9 @@ You could also use mh template or mh t to see a list of all available templates`
 
 				}
 
+				// if len(prj.Code. {
+				codeSection, csFound = prj.Code[currentTemplate.Language]
+				// }
 				generator := codegen.GoLangGenerator{}
 
 				ctx := context.WithValue(context.Background(), "code", ctxVal)
@@ -171,11 +175,23 @@ You could also use mh template or mh t to see a list of all available templates`
 
 					for _, entity := range entities {
 						model := ToEntityModel(currentTemplate.Key, currentTemplate.Language, prj, &entity)
-						pageHeader, _ := codegen.Generate("header", model.PageHeader, model)
-						model.PageHeader = pageHeader
+
+						model.PageHeader = codegen.Generate("header", model.PageHeader, model)
+						model.Namespace = codegen.Generate("namesp", model.Namespace, model)
+
+						for i, imp := range model.Imports {
+
+							model.Imports[i] = codegen.Generate("import", imp, model)
+						}
+
+						for x, inj := range model.Inject {
+
+							model.Inject[x].Name = codegen.Generate("injprop", inj.Name, model)
+						}
 
 						o, _ := generator.Generate(ctx, model)
-						filen, _ := codegen.Generate("filename", currentTemplate.FileName, model)
+						filen := codegen.Generate("filename", currentTemplate.FileName, model)
+
 						fullPath := ""
 						if csFound {
 
@@ -193,11 +209,10 @@ You could also use mh template or mh t to see a list of all available templates`
 				} else if currentTemplate.Model == "entities" && len(entities) > 0 {
 
 					model := ToEntitiesModel(currentTemplate.Key, currentTemplate.Language, prj, &entities)
-					pageHeader, _ := codegen.Generate("header", model.PageHeader, model)
-					model.PageHeader = pageHeader
+					model.PageHeader = codegen.Generate("header", model.PageHeader, model)
 
 					o, _ := generator.Generate(ctx, model)
-					filen, _ := codegen.Generate("filename", currentTemplate.FileName, model)
+					filen := codegen.Generate("filename", currentTemplate.FileName, model)
 					fullPath := ""
 					if csFound {
 
@@ -575,7 +590,6 @@ func ToBasicModel(key, language string, project *project.Project) model.BasicMod
 		if len(project.Options) > 0 {
 			b.Options = project.Options
 		}
-
 		b.Project.Name = project.Name
 		b.Project.Owner = project.OwnerName
 
@@ -584,6 +598,7 @@ func ToBasicModel(key, language string, project *project.Project) model.BasicMod
 		if len(key) > 0 && codeFound {
 			val, found := code.Keys[key]
 			if found {
+				b.RootNamespace = code.RootNamespace
 				imports = append(imports, val.Imports...)
 
 				b.Inject = []model.InjectSection{}
@@ -593,6 +608,11 @@ func ToBasicModel(key, language string, project *project.Project) model.BasicMod
 						b.Inject = append(b.Inject, toInjectSection(injItem, b))
 					}
 				}
+
+				b.Postfix = val.Postfix
+				b.Prefix = val.Prefix
+				b.Namespace = val.Namespace
+
 			}
 		}
 
@@ -695,9 +715,9 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 	return out
 }
 func toInjectSection(from code.Inject, m interface{}) model.InjectSection {
-	name, _ := codegen.Generate("fileName", from.Name, m)
+	// name, _ := codegen.Generate("fileName", from.Name, m)
 	code := model.InjectSection{
-		Name:         name,
+		Name:         from.Name,
 		PropertyName: from.PropertyName,
 	}
 
