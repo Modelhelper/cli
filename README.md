@@ -13,4 +13,4 @@ You are welcome to contribute to the project. But as of now I will not approve a
 
 ## ModelHelper on Slack
 
-Join our growing community on Slack: [Join ModelHelper]( https://join.slack.com/t/model-helper/shared_invite/zt-ow6ahgpj-OzpdeAvcPHlE58Tai~1oFg)
+Join our growing community on Slack: [Join ModelHelper](https://join.slack.com/t/model-helper/shared_invite/zt-ruud19ok-RFe871ZyFjLHvNGilcjMlg)
