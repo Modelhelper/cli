@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"context"
+
 	"fmt"
 	"log"
 	"modelhelper/cli/app"
@@ -35,11 +36,47 @@ import (
 	"modelhelper/cli/tpl"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 )
+
+func init() {
+	rootCmd.AddCommand(generateCmd)
+
+	generateCmd.Flags().StringArrayP("template", "t", []string{}, "A list of template to convert")
+	generateCmd.Flags().StringArray("template-group", []string{}, "Use a group of templates")
+	generateCmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
+
+	generateCmd.Flags().StringP("relations [direct, all, complete]", "r", "", "Include related entities based on the entities in --entity or --entity-group ('direct' | 'all' | 'complete' | 'children' | 'parents')")
+	// generateCmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
+
+	generateCmd.Flags().StringArray("entity-group", []string{}, "Use a group of entities (must be defines in the current connection)")
+	generateCmd.Flags().StringArrayP("entity", "e", []string{}, "A list of entits to use as a model")
+
+	generateCmd.Flags().Bool("screen", false, "List the output to the screen, default false")
+	generateCmd.Flags().Bool("copy", false, "Copies the generated code to the clipboard (ctrl + v), default false")
+	generateCmd.Flags().String("export-path", "", "Exports to a directory")
+	generateCmd.Flags().Bool("export-bykey", false, "Exports the code using the template keys, default false")
+	generateCmd.Flags().Bool("overwrite", false, "Overwrite any existing file when exporting to file on disk")
+
+	generateCmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code, default false")
+
+	generateCmd.Flags().Bool("demo", false, "Uses a demo as input source, this will override any other input sources (entity, graphql), default false ")
+
+	generateCmd.Flags().String("config-path", "", "Instructs the program to use this config as the config")
+	generateCmd.Flags().String("project-path", "", "Instructs the program to use this project as input")
+
+	generateCmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
+
+	// generateCmd.Flags().String("setup", "", "Use this setup to generate code") // version 3.1
+	generateCmd.Flags().StringP("connection", "c", "", "The connection key to be used, uses default connection if not provided")
+
+	generateCmd.RegisterFlagCompletionFunc("relations", completeRelations)
+
+}
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
@@ -56,11 +93,14 @@ var generateCmd = &cobra.Command{
 		projectPath, _ := cmd.Flags().GetString("project-path")
 		configFile, _ := cmd.Flags().GetString("config-path")
 		inputTemplates, err := cmd.Flags().GetStringArray("template")
+		inputGroupTemplates, err := cmd.Flags().GetStringArray("template-group")
 		printScreen, _ := cmd.Flags().GetBool("screen")
 		toClipBoard, _ := cmd.Flags().GetBool("copy")
+		exportByKey, _ := cmd.Flags().GetBool("export-bykey")
 		conName, _ := cmd.Flags().GetString("connection")
+		overwriteAll, _ := cmd.Flags().GetBool("overwrite")
 
-		if len(inputTemplates) == 0 {
+		if len(inputTemplates) == 0 && len(inputGroupTemplates) == 0 {
 			// no point to continue if no templates is given
 			fmt.Printf(`No templates or template groups are provided resulting in nothing to create
 please use mh generate with the -t or --template [templatename] to set at template
@@ -112,6 +152,8 @@ You could also use mh template or mh t to see a list of all available templates`
 		if err != nil {
 			panic(err)
 		}
+
+		inputTemplates = selectTemplates(allTemplates, inputTemplates, inputGroupTemplates)
 
 		start := time.Now()
 		var cstat = codegen.Statistics{}
@@ -165,20 +207,79 @@ You could also use mh template or mh t to see a list of all available templates`
 				ctx := context.WithValue(context.Background(), "code", ctxVal)
 				if len(currentTemplate.Model) == 0 || currentTemplate.Model == "basic" {
 
-					model := ToBasicModel(currentTemplate.Key, currentTemplate.Language, prj)
-					o, _ := generator.Generate(ctx, model)
+					basicGenerator := func() {
+						cstat.TemplatesUsed += 1
 
-					f := codeFile{
-						result:   o,
-						filename: "",
+						model := ToBasicModel(currentTemplate.Key, currentTemplate.Language, prj)
+						o, _ := generator.Generate(ctx, model)
+
+						f := codeFile{
+							result:   o,
+							filename: "",
+						}
+
+						generatedCode = append(generatedCode, f)
 					}
-					generatedCode = append(generatedCode, f)
+
+					basicGenerator()
+
 				} else if currentTemplate.Model == "entity" && len(entities) > 0 {
 
 					for _, entity := range entities {
-						model := ToEntityModel(currentTemplate.Key, currentTemplate.Language, prj, &entity)
 
+						entityGenerator := func() {
+							cstat.TemplatesUsed += 1
+							cstat.EntitiesUsed += 1
+
+							model := ToEntityModel(currentTemplate.Key, currentTemplate.Language, prj, &entity)
+
+							model.PageHeader = codegen.Generate("header", model.PageHeader, model)
+							model.Namespace = codegen.Generate("namesp", model.Namespace, model)
+
+							for i, imp := range model.Imports {
+
+								model.Imports[i] = codegen.Generate("import", imp, model)
+							}
+
+							model.Imports = removeDuplicateStringValues(model.Imports)
+
+							for x, inj := range model.Inject {
+
+								model.Inject[x].Name = codegen.Generate("injprop", inj.Name, model)
+							}
+
+							o, _ := generator.Generate(ctx, model)
+
+							fullPath := ""
+							if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+								cstat.FilesCreated += 1
+
+								filen := codegen.Generate("filename", currentTemplate.FileName, model)
+
+								if csFound {
+
+									fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+								}
+							}
+
+							f := codeFile{
+								result:   o,
+								filename: fullPath,
+							}
+
+							generatedCode = append(generatedCode, f)
+						}
+
+						entityGenerator()
+
+					}
+				} else if currentTemplate.Model == "entities" && len(entities) > 0 {
+
+					entitiesGenerator := func() {
+						cstat.TemplatesUsed += 1
+						model := ToEntitiesModel(currentTemplate.Key, currentTemplate.Language, prj, &entities)
 						model.PageHeader = codegen.Generate("header", model.PageHeader, model)
+
 						model.Namespace = codegen.Generate("namesp", model.Namespace, model)
 
 						for i, imp := range model.Imports {
@@ -186,18 +287,23 @@ You could also use mh template or mh t to see a list of all available templates`
 							model.Imports[i] = codegen.Generate("import", imp, model)
 						}
 
+						model.Imports = removeDuplicateStringValues(model.Imports)
+
 						for x, inj := range model.Inject {
 
 							model.Inject[x].Name = codegen.Generate("injprop", inj.Name, model)
 						}
 
 						o, _ := generator.Generate(ctx, model)
-						filen := codegen.Generate("filename", currentTemplate.FileName, model)
 
 						fullPath := ""
-						if csFound {
+						if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+							cstat.FilesCreated += 1
+							filen := codegen.Generate("filename", currentTemplate.FileName, model)
+							if csFound {
 
-							fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+								fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+							}
 						}
 
 						f := codeFile{
@@ -208,25 +314,8 @@ You could also use mh template or mh t to see a list of all available templates`
 						generatedCode = append(generatedCode, f)
 
 					}
-				} else if currentTemplate.Model == "entities" && len(entities) > 0 {
 
-					model := ToEntitiesModel(currentTemplate.Key, currentTemplate.Language, prj, &entities)
-					model.PageHeader = codegen.Generate("header", model.PageHeader, model)
-
-					o, _ := generator.Generate(ctx, model)
-					filen := codegen.Generate("filename", currentTemplate.FileName, model)
-					fullPath := ""
-					if csFound {
-
-						fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
-					}
-
-					f := codeFile{
-						result:   o,
-						filename: fullPath,
-					}
-
-					generatedCode = append(generatedCode, f)
+					entitiesGenerator()
 
 				}
 
@@ -235,22 +324,44 @@ You could also use mh template or mh t to see a list of all available templates`
 		}
 
 		sb := strings.Builder{}
+		var fwg sync.WaitGroup
+		var flock = sync.Mutex{}
 		for _, s := range generatedCode {
 			cstat.AppendStat(s.result.Stat)
-
+			content := []byte(s.result.Content)
 			if printScreen {
 				screenWriter := tpl.ScreenExporter{}
-				screenWriter.Write([]byte(s.result.Content))
+				screenWriter.Write([]byte(content))
 			}
 
 			if toClipBoard {
 				sb.WriteString(s.result.Content)
 			}
 
-			fmt.Println("*** FILENAME::", s.filename)
+			if exportByKey && len(s.filename) > 0 {
+				fwg.Add(1)
+				go func(filename string, rootPath string, content []byte) {
+					defer fwg.Done()
+					keyExporter := tpl.FileExporter{
+						Filename:  filepath.Join(rootPath, filename),
+						Overwrite: overwriteAll,
+					}
+
+					_, err = keyExporter.Write([]byte(content))
+					if err != nil {
+						fmt.Println(filepath.ErrBadPattern)
+					}
+					// fmt.Println("*** FILENAME::", s.filename)
+					flock.Lock()
+					cstat.FilesExported += 1
+					flock.Unlock()
+				}(s.filename, "D:/projects/ModelHelper", content)
+
+			}
 			// TODO: export to file
 		}
 
+		fwg.Wait()
 		if toClipBoard {
 			fmt.Printf("\nGenerated code is copied to the \033[37mclipboard\033[0m. Use \033[34mctrl+v\033[0m to paste it where you like")
 			clipboard.WriteAll(sb.String())
@@ -259,8 +370,11 @@ You could also use mh template or mh t to see a list of all available templates`
 		cstat.Duration = time.Since(start)
 		// stat["total.time"] = int(cstat.duration.Milliseconds())
 		if !codeOnly {
-			wpm := 40.0
+			wpm := 30.0
+			cpm := 250.0
+
 			min := float64(cstat.Words) / wpm
+			min = float64(cstat.Chars) / cpm
 			// stat["total.savings"] = int(min)
 			printStat(cstat)
 			fmt.Printf("\nIn summary... It took \033[32m%vms\033[0m to generate \033[34m%d\033[0m words and \033[34m%d\033[0m lines. \nYou saved around \033[32m%v minutes\033[0m by not typing it youreself\n",
@@ -271,6 +385,49 @@ You could also use mh template or mh t to see a list of all available templates`
 		}
 
 	},
+}
+
+func selectTemplates(templates map[string]tpl.Template, input []string, groups []string) []string {
+	list := input
+
+	if len(groups) > 0 {
+		for keyTpl, tplVal := range templates {
+			for _, templateGroup := range tplVal.Groups {
+
+				for _, checkGroupName := range groups {
+					if checkGroupName == templateGroup {
+						list = append(list, keyTpl)
+					}
+				}
+			}
+		}
+	}
+
+	return removeDuplicateStringValues(list)
+
+}
+
+func isInArray(toFind string, items []string) bool {
+
+	for _, entry := range items {
+		if entry == toFind {
+			return true
+		}
+	}
+	return false
+}
+
+func removeDuplicateStringValues(stringSlice []string) []string {
+	keys := make(map[string]bool)
+	list := []string{}
+
+	for _, entry := range stringSlice {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
 }
 
 func defaultNoNullDatatype() map[string]string {
@@ -301,6 +458,7 @@ func defaultNullDatatype() map[string]string {
 	return ndtm
 }
 
+// func templatesFromGroups()
 func entitiesFromGroups(con source.Connection, groups []string) []string {
 	list := []string{}
 
@@ -342,40 +500,6 @@ type codeFile struct {
 	existingContent string
 }
 
-func init() {
-	rootCmd.AddCommand(generateCmd)
-
-	generateCmd.Flags().StringArrayP("template", "t", []string{}, "A list of template to convert")
-	generateCmd.Flags().StringArray("template-group", []string{}, "Use a group of templates")
-	generateCmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
-
-	generateCmd.Flags().StringP("relations [direct, all, complete]", "r", "", "Include related entities based on the entities in --entity or --entity-group ('direct' | 'all' | 'complete' | 'children' | 'parents')")
-	// generateCmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
-
-	generateCmd.Flags().StringArray("entity-group", []string{}, "Use a group of entities (must be defines in the current connection)")
-	generateCmd.Flags().StringArrayP("entity", "e", []string{}, "A list of entits to use as a model")
-
-	generateCmd.Flags().Bool("screen", false, "List the output to the screen, default false")
-	generateCmd.Flags().Bool("copy", false, "Copies the generated code to the clipboard (ctrl + v), default false")
-	generateCmd.Flags().String("export-path", "", "Exports to a directory")
-	generateCmd.Flags().Bool("export-bykey", false, "Exports the code using the template keys, default false")
-
-	generateCmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code, default false")
-
-	generateCmd.Flags().Bool("demo", false, "Uses a demo as input source, this will override any other input sources (entity, graphql), default false ")
-
-	generateCmd.Flags().String("config-path", "", "Instructs the program to use this config as the config")
-	generateCmd.Flags().String("project-path", "", "Instructs the program to use this project as input")
-
-	generateCmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
-
-	// generateCmd.Flags().String("setup", "", "Use this setup to generate code") // version 3.1
-	generateCmd.Flags().StringP("connection", "c", "", "The connection key to be used, uses default connection if not provided")
-
-	generateCmd.RegisterFlagCompletionFunc("relations", completeRelations)
-
-}
-
 func completeRelations(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return []string{"direct", "all", "complete", "children", "parents"}, cobra.ShellCompDirectiveDefault
 }
@@ -387,9 +511,10 @@ Statistics:
 `)
 	tpl := "%-20s%8d\n"
 
-	// fmt.Printf(tpl, "Templates used", 2)
-	// fmt.Printf(tpl, "Entities used", 4)
-	// fmt.Printf(tpl, "Files exported", 6)
+	fmt.Printf(tpl, "Templates used", stat.TemplatesUsed)
+	fmt.Printf(tpl, "Entities used", stat.EntitiesUsed)
+	fmt.Printf(tpl, "Files created", stat.FilesCreated)
+	fmt.Printf(tpl, "Files exported", stat.FilesExported)
 	// fmt.Printf(tpl, "Snippets inserted", 1)
 	fmt.Println()
 	fmt.Printf(tpl, "Character count", stat.Chars)
@@ -460,14 +585,25 @@ func loadEntities(src source.Source, names []string, isDemo bool) *[]source.Enti
 		// src := con.LoadSource()
 
 		if len(names) > 0 {
+			var wg sync.WaitGroup
+			var lock = sync.Mutex{}
 			for _, entityName := range names {
-				entity, err := src.Entity(entityName)
-				if err != nil {
-					log.Fatalln(err)
-				}
 
-				entities = append(entities, *entity)
+				wg.Add(1)
+				go func(name string) {
+					defer wg.Done()
+					entity, err := src.Entity(name)
+					if err != nil {
+						log.Fatalln(err)
+					}
+
+					lock.Lock()
+					entities = append(entities, *entity)
+					lock.Unlock()
+				}(entityName)
 			}
+
+			wg.Wait()
 		}
 
 	}
@@ -522,6 +658,7 @@ func ToEntityModel(key, language string, project *project.Project, entity *sourc
 	}
 
 	out := model.EntityModel{
+		RootNamespace:             base.RootNamespace,
 		Namespace:                 base.Namespace,
 		Postfix:                   base.Postfix,
 		Prefix:                    base.Prefix,

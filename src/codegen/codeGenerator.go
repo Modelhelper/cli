@@ -30,11 +30,17 @@ type CodeContextValue struct {
 }
 
 type Statistics struct {
-	Chars     int
-	Lines     int
-	Words     int
-	Duration  time.Duration
-	TimeSaved int
+	FilesExported    int
+	TemplatesUsed    int
+	EntitiesUsed     int
+	SnippetsInserted int
+	FilesCreated     int
+	SnippetsCreated  int
+	Chars            int
+	Lines            int
+	Words            int
+	Duration         time.Duration
+	TimeSaved        int
 }
 
 type Result struct {
