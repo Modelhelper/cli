@@ -12,7 +12,7 @@
             "program": "${workspaceFolder}/src",
             // "args": ["generate", "--screen", "-t", "cs-poco", "--demo", "--project", "C:\\dev\\projects\\mh\\cli\\configuration\\project\\.modelhelper\\project.yaml"]
             //"args": ["project", "--path", "D:\\projects\\ModelHelper\\.modelhelper\\project.yaml"]
-            "args": ["generate", "--screen", "-t", "cs-poco", "--demo"]
+            "args": ["generate", "--screen", "--export-bykey", "-t", "cs-poco", "--demo", "--project-path", "D:\\projects\\ModelHelper\\.modelhelper\\project.yaml"]
             // "args": ["template"]
             // "args": ["set", "defcon"]
             // "args": ["t", "cs-gql-hc-resolver", "--open"]
