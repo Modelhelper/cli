@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"context"
+
 	"fmt"
 	"log"
 	"modelhelper/cli/app"
@@ -108,9 +109,6 @@ You could also use mh template or mh t to see a list of all available templates`
 
 			return
 		}
-
-		var wg sync.WaitGroup
-		var lock = sync.Mutex{}
 
 		// obsolete
 		modelHelperApp = app.New()
@@ -220,9 +218,7 @@ You could also use mh template or mh t to see a list of all available templates`
 							filename: "",
 						}
 
-						lock.Lock()
 						generatedCode = append(generatedCode, f)
-						lock.Unlock()
 					}
 
 					basicGenerator()
@@ -245,18 +241,25 @@ You could also use mh template or mh t to see a list of all available templates`
 								model.Imports[i] = codegen.Generate("import", imp, model)
 							}
 
+							model.Imports = removeDuplicateStringValues(model.Imports)
+
 							for x, inj := range model.Inject {
 
 								model.Inject[x].Name = codegen.Generate("injprop", inj.Name, model)
 							}
 
 							o, _ := generator.Generate(ctx, model)
-							filen := codegen.Generate("filename", currentTemplate.FileName, model)
 
 							fullPath := ""
-							if csFound {
+							if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+								cstat.FilesCreated += 1
 
-								fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+								filen := codegen.Generate("filename", currentTemplate.FileName, model)
+
+								if csFound {
+
+									fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+								}
 							}
 
 							f := codeFile{
@@ -264,9 +267,7 @@ You could also use mh template or mh t to see a list of all available templates`
 								filename: fullPath,
 							}
 
-							lock.Lock()
 							generatedCode = append(generatedCode, f)
-							lock.Unlock()
 						}
 
 						entityGenerator()
@@ -279,12 +280,30 @@ You could also use mh template or mh t to see a list of all available templates`
 						model := ToEntitiesModel(currentTemplate.Key, currentTemplate.Language, prj, &entities)
 						model.PageHeader = codegen.Generate("header", model.PageHeader, model)
 
-						o, _ := generator.Generate(ctx, model)
-						filen := codegen.Generate("filename", currentTemplate.FileName, model)
-						fullPath := ""
-						if csFound {
+						model.Namespace = codegen.Generate("namesp", model.Namespace, model)
 
-							fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+						for i, imp := range model.Imports {
+
+							model.Imports[i] = codegen.Generate("import", imp, model)
+						}
+
+						model.Imports = removeDuplicateStringValues(model.Imports)
+
+						for x, inj := range model.Inject {
+
+							model.Inject[x].Name = codegen.Generate("injprop", inj.Name, model)
+						}
+
+						o, _ := generator.Generate(ctx, model)
+
+						fullPath := ""
+						if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+							cstat.FilesCreated += 1
+							filen := codegen.Generate("filename", currentTemplate.FileName, model)
+							if csFound {
+
+								fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+							}
 						}
 
 						f := codeFile{
@@ -292,9 +311,7 @@ You could also use mh template or mh t to see a list of all available templates`
 							filename: fullPath,
 						}
 
-						lock.Lock()
 						generatedCode = append(generatedCode, f)
-						lock.Unlock()
 
 					}
 
@@ -481,40 +498,6 @@ type codeFile struct {
 	result          codegen.Result
 	exists          bool
 	existingContent string
-}
-
-func init() {
-	rootCmd.AddCommand(generateCmd)
-
-	generateCmd.Flags().StringArrayP("template", "t", []string{}, "A list of template to convert")
-	generateCmd.Flags().StringArray("template-group", []string{}, "Use a group of templates")
-	generateCmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
-
-	generateCmd.Flags().StringP("relations [direct, all, complete]", "r", "", "Include related entities based on the entities in --entity or --entity-group ('direct' | 'all' | 'complete' | 'children' | 'parents')")
-	// generateCmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
-
-	generateCmd.Flags().StringArray("entity-group", []string{}, "Use a group of entities (must be defines in the current connection)")
-	generateCmd.Flags().StringArrayP("entity", "e", []string{}, "A list of entits to use as a model")
-
-	generateCmd.Flags().Bool("screen", false, "List the output to the screen, default false")
-	generateCmd.Flags().Bool("copy", false, "Copies the generated code to the clipboard (ctrl + v), default false")
-	generateCmd.Flags().String("export-path", "", "Exports to a directory")
-	generateCmd.Flags().Bool("export-bykey", false, "Exports the code using the template keys, default false")
-
-	generateCmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code, default false")
-
-	generateCmd.Flags().Bool("demo", false, "Uses a demo as input source, this will override any other input sources (entity, graphql), default false ")
-
-	generateCmd.Flags().String("config-path", "", "Instructs the program to use this config as the config")
-	generateCmd.Flags().String("project-path", "", "Instructs the program to use this project as input")
-
-	generateCmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
-
-	// generateCmd.Flags().String("setup", "", "Use this setup to generate code") // version 3.1
-	generateCmd.Flags().StringP("connection", "c", "", "The connection key to be used, uses default connection if not provided")
-
-	generateCmd.RegisterFlagCompletionFunc("relations", completeRelations)
-
 }
 
 func completeRelations(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
