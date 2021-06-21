@@ -99,7 +99,7 @@ var generateCmd = &cobra.Command{
 		conName, _ := cmd.Flags().GetString("connection")
 		overwriteAll, _ := cmd.Flags().GetBool("overwrite")
 
-		if len(inputTemplates) == 0 {
+		if len(inputTemplates) == 0 && len(inputGroupTemplates) == 0 {
 			// no point to continue if no templates is given
 			fmt.Printf(`No templates or template groups are provided resulting in nothing to create
 please use mh generate with the -t or --template [templatename] to set at template
