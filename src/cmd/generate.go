@@ -503,9 +503,10 @@ Statistics:
 `)
 	tpl := "%-20s%8d\n"
 
-	// fmt.Printf(tpl, "Templates used", 2)
-	// fmt.Printf(tpl, "Entities used", 4)
-	// fmt.Printf(tpl, "Files exported", 6)
+	fmt.Printf(tpl, "Templates used", stat.TemplatesUsed)
+	fmt.Printf(tpl, "Entities used", stat.EntitiesUsed)
+	fmt.Printf(tpl, "Files created", stat.FilesCreated)
+	fmt.Printf(tpl, "Files exported", stat.FilesExported)
 	// fmt.Printf(tpl, "Snippets inserted", 1)
 	fmt.Println()
 	fmt.Printf(tpl, "Character count", stat.Chars)
