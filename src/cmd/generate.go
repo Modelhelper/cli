@@ -311,10 +311,10 @@ You could also use mh template or mh t to see a list of all available templates`
 		var flock = sync.Mutex{}
 		for _, s := range generatedCode {
 			cstat.AppendStat(s.result.Stat)
-
+			content := []byte(s.result.Content)
 			if printScreen {
 				screenWriter := tpl.ScreenExporter{}
-				screenWriter.Write([]byte(s.result.Content))
+				screenWriter.Write([]byte(content))
 			}
 
 			if toClipBoard {
