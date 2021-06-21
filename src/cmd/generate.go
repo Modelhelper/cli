@@ -225,8 +225,7 @@ You could also use mh template or mh t to see a list of all available templates`
 						lock.Unlock()
 					}
 
-					wg.Add(1)
-					go basicGenerator()
+					basicGenerator()
 
 				} else if currentTemplate.Model == "entity" && len(entities) > 0 {
 
@@ -268,8 +267,7 @@ You could also use mh template or mh t to see a list of all available templates`
 							lock.Unlock()
 						}
 
-						wg.Add(1)
-						go entityGenerator()
+						entityGenerator()
 
 					}
 				} else if currentTemplate.Model == "entities" && len(entities) > 0 {
@@ -298,16 +296,13 @@ You could also use mh template or mh t to see a list of all available templates`
 
 					}
 
-					wg.Add(1)
-					go entitiesGenerator()
+					entitiesGenerator()
 
 				}
 
 			}
 
 		}
-
-		wg.Wait()
 
 		sb := strings.Builder{}
 		for _, s := range generatedCode {
