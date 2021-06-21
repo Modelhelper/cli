@@ -319,7 +319,26 @@ You could also use mh template or mh t to see a list of all available templates`
 				sb.WriteString(s.result.Content)
 			}
 
-			fmt.Println("*** FILENAME::", s.filename)
+			if exportByKey && len(s.filename) > 0 {
+				fwg.Add(1)
+				go func(filename string, rootPath string, content []byte) {
+					defer fwg.Done()
+					keyExporter := tpl.FileExporter{
+						Filename:  filepath.Join(rootPath, filename),
+						Overwrite: overwriteAll,
+					}
+
+					_, err = keyExporter.Write([]byte(content))
+					if err != nil {
+						fmt.Println(filepath.ErrBadPattern)
+					}
+					// fmt.Println("*** FILENAME::", s.filename)
+					flock.Lock()
+					cstat.FilesExported += 1
+					flock.Unlock()
+				}(s.filename, "D:/projects/ModelHelper", content)
+
+			}
 			// TODO: export to file
 		}
 
