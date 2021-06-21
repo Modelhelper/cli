@@ -350,8 +350,11 @@ You could also use mh template or mh t to see a list of all available templates`
 		cstat.Duration = time.Since(start)
 		// stat["total.time"] = int(cstat.duration.Milliseconds())
 		if !codeOnly {
-			wpm := 40.0
+			wpm := 30.0
+			cpm := 250.0
+
 			min := float64(cstat.Words) / wpm
+			min = float64(cstat.Chars) / cpm
 			// stat["total.savings"] = int(min)
 			printStat(cstat)
 			fmt.Printf("\nIn summary... It took \033[32m%vms\033[0m to generate \033[34m%d\033[0m words and \033[34m%d\033[0m lines. \nYou saved around \033[32m%v minutes\033[0m by not typing it youreself\n",
