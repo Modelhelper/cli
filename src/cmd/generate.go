@@ -307,6 +307,8 @@ You could also use mh template or mh t to see a list of all available templates`
 		}
 
 		sb := strings.Builder{}
+		var fwg sync.WaitGroup
+		var flock = sync.Mutex{}
 		for _, s := range generatedCode {
 			cstat.AppendStat(s.result.Stat)
 
@@ -342,6 +344,7 @@ You could also use mh template or mh t to see a list of all available templates`
 			// TODO: export to file
 		}
 
+		fwg.Wait()
 		if toClipBoard {
 			fmt.Printf("\nGenerated code is copied to the \033[37mclipboard\033[0m. Use \033[34mctrl+v\033[0m to paste it where you like")
 			clipboard.WriteAll(sb.String())
