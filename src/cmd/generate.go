@@ -92,9 +92,12 @@ var generateCmd = &cobra.Command{
 		projectPath, _ := cmd.Flags().GetString("project-path")
 		configFile, _ := cmd.Flags().GetString("config-path")
 		inputTemplates, err := cmd.Flags().GetStringArray("template")
+		inputGroupTemplates, err := cmd.Flags().GetStringArray("template-group")
 		printScreen, _ := cmd.Flags().GetBool("screen")
 		toClipBoard, _ := cmd.Flags().GetBool("copy")
+		exportByKey, _ := cmd.Flags().GetBool("export-bykey")
 		conName, _ := cmd.Flags().GetString("connection")
+		overwriteAll, _ := cmd.Flags().GetBool("overwrite")
 
 		if len(inputTemplates) == 0 {
 			// no point to continue if no templates is given
