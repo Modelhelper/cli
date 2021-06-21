@@ -577,14 +577,25 @@ func loadEntities(src source.Source, names []string, isDemo bool) *[]source.Enti
 		// src := con.LoadSource()
 
 		if len(names) > 0 {
+			var wg sync.WaitGroup
+			var lock = sync.Mutex{}
 			for _, entityName := range names {
-				entity, err := src.Entity(entityName)
-				if err != nil {
-					log.Fatalln(err)
-				}
 
-				entities = append(entities, *entity)
+				wg.Add(1)
+				go func(name string) {
+					defer wg.Done()
+					entity, err := src.Entity(name)
+					if err != nil {
+						log.Fatalln(err)
+					}
+
+					lock.Lock()
+					entities = append(entities, *entity)
+					lock.Unlock()
+				}(entityName)
 			}
+
+			wg.Wait()
 		}
 
 	}
