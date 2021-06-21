@@ -155,6 +155,8 @@ You could also use mh template or mh t to see a list of all available templates`
 			panic(err)
 		}
 
+		inputTemplates = selectTemplates(allTemplates, inputTemplates, inputGroupTemplates)
+
 		start := time.Now()
 		var cstat = codegen.Statistics{}
 		var generatedCode []codeFile
