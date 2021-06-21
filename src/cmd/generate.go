@@ -210,7 +210,7 @@ You could also use mh template or mh t to see a list of all available templates`
 				if len(currentTemplate.Model) == 0 || currentTemplate.Model == "basic" {
 
 					basicGenerator := func() {
-						defer wg.Done()
+						cstat.TemplatesUsed += 1
 
 						model := ToBasicModel(currentTemplate.Key, currentTemplate.Language, prj)
 						o, _ := generator.Generate(ctx, model)
@@ -232,7 +232,9 @@ You could also use mh template or mh t to see a list of all available templates`
 					for _, entity := range entities {
 
 						entityGenerator := func() {
-							defer wg.Done()
+							cstat.TemplatesUsed += 1
+							cstat.EntitiesUsed += 1
+
 							model := ToEntityModel(currentTemplate.Key, currentTemplate.Language, prj, &entity)
 
 							model.PageHeader = codegen.Generate("header", model.PageHeader, model)
@@ -273,7 +275,7 @@ You could also use mh template or mh t to see a list of all available templates`
 				} else if currentTemplate.Model == "entities" && len(entities) > 0 {
 
 					entitiesGenerator := func() {
-						defer wg.Done()
+						cstat.TemplatesUsed += 1
 						model := ToEntitiesModel(currentTemplate.Key, currentTemplate.Language, prj, &entities)
 						model.PageHeader = codegen.Generate("header", model.PageHeader, model)
 
