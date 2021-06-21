@@ -345,6 +345,49 @@ You could also use mh template or mh t to see a list of all available templates`
 	},
 }
 
+func selectTemplates(templates map[string]tpl.Template, input []string, groups []string) []string {
+	list := input
+
+	if len(groups) > 0 {
+		for keyTpl, tplVal := range templates {
+			for _, templateGroup := range tplVal.Groups {
+
+				for _, checkGroupName := range groups {
+					if checkGroupName == templateGroup {
+						list = append(list, keyTpl)
+					}
+				}
+			}
+		}
+	}
+
+	return removeDuplicateStringValues(list)
+
+}
+
+func isInArray(toFind string, items []string) bool {
+
+	for _, entry := range items {
+		if entry == toFind {
+			return true
+		}
+	}
+	return false
+}
+
+func removeDuplicateStringValues(stringSlice []string) []string {
+	keys := make(map[string]bool)
+	list := []string{}
+
+	for _, entry := range stringSlice {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
+}
+
 func defaultNoNullDatatype() map[string]string {
 	// build current template context
 	dtm := make(map[string]string)
@@ -373,6 +416,7 @@ func defaultNullDatatype() map[string]string {
 	return ndtm
 }
 
+// func templatesFromGroups()
 func entitiesFromGroups(con source.Connection, groups []string) []string {
 	list := []string{}
 
