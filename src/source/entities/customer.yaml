@@ -1,0 +1,10 @@
+name: customer
+schema: dbo
+columns:
+  id: 
+    type: int
+    nullable: false
+    identity: true
+  name: 
+    type: varchar
+    nullable: false

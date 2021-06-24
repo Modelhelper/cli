@@ -1,3 +1,22 @@
 name: order
 schema: dbo
-columns: cols
+columns: 
+  Id: 
+    Identity: true
+    Type: int
+    Description: Holds information about orders
+    nullable: false
+  CustomerId:
+    Type: int
+    References: Customer.yaml
+    Description: Points to the customer table
+    nullable: false
+    
+index:
+  IDX_BLA_BLA:
+    columns:
+      - CustomerId
+
+# referencedIn:
+#   - orderItem:
+#     column: orderId
