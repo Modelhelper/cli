@@ -1,10 +1,13 @@
 package model
 
+import "context"
+
 type ModelConverter interface {
-	ToModel() interface{}
+	ToModel(ctx context.Context) interface{}
 }
 
 type BasicModel struct {
+	RootNamespace             string
 	Namespace                 string
 	Postfix                   string
 	Prefix                    string
@@ -17,6 +20,7 @@ type BasicModel struct {
 	PageHeader                string
 }
 type EntityModel struct {
+	RootNamespace             string
 	Namespace                 string
 	Postfix                   string
 	Prefix                    string
@@ -48,6 +52,7 @@ type EntityModel struct {
 }
 
 type EntityListModel struct {
+	RootNamespace             string
 	Namespace                 string
 	Postfix                   string
 	Prefix                    string

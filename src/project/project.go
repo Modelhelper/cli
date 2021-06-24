@@ -3,9 +3,11 @@ package project
 import (
 	"io/ioutil"
 	"log"
+	"modelhelper/cli/code"
 	"modelhelper/cli/source"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -16,14 +18,15 @@ type Project struct {
 	Version       string                       `yaml:"version"`
 	Name          string                       `yaml:"name"`
 	Language      string                       `yaml:"language"`
+	Description   string                       `yaml:"description"`
 	DefaultSource string                       `yaml:"defaultSource,omitempty"`
 	DefaultKey    string                       `yaml:"defaultKey,omitempty"`
 	Connections   map[string]source.Connection `yaml:"connections,omitempty"`
-	Code          ProjectCode                  `yaml:"code,omitempty"`
-	OwnerName     string                       `yaml:"customerName,omitempty"`
-	Header        string                       `yaml:"header,omitempty"`
+	Code          map[string]code.Code         `yaml:"code,omitempty"`
+	OwnerName     string                       `yaml:"ownerName,omitempty"`
 	Options       map[string]string            `yaml:"options,omitempty"`
 	Custom        interface{}                  `yaml:"custom,omitempty"`
+	Header        string                       `yaml:"header,omitempty"`
 }
 
 func (p *Project) Save() error {
@@ -90,6 +93,15 @@ func Exists(path string) bool {
 	return true
 }
 
+func LoadProjects(path ...string) []Project {
+	l := []Project{}
+
+	for _, p := range path {
+		project, _ := loadProjectFromFile(p)
+		l = append(l, *project)
+	}
+	return l
+}
 func Load(path string) (*Project, error) {
 	if len(path) > 0 {
 		pathInfo, err := os.Stat(path)
@@ -134,39 +146,46 @@ func (p *Project) GetConnections() (*map[string]source.Connection, error) {
 	return &p.Connections, nil
 }
 
-type ProjectCode struct {
-	OmitSourcePrefix bool                  `yaml:"omitSourcePrefix"`
-	Global           GlobalCode            `yaml:"global"`
-	Groups           []string              `yaml:"groups"`
-	Options          map[string]string     `yaml:"options"`
-	Keys             map[string]CodeKey    `yaml:"keys,omitempty"`
-	Inject           map[string]CodeInject `yaml:"inject,omitempty"`
-	Locations        map[string]string     `yaml:"exportLocations"`
-	FileHeader       string                `yaml:"fileHeader"`
-}
+//FindRelatedProjects gets a list of all the related projects by following the path from DefaultDir() to the volumeroot
+//The returning list is in correct importance from least to most (the project nearest to DefaultDir())
+func FindReleatedProjects(startPath string) []string {
+	basePath, _ := filepath.Split(startPath)
+	list := []string{}
 
-type CodeInject struct {
-	Name         string   `yaml:"name,omitempty"`
-	Language     string   `yaml:"language,omitempty"`
-	PropertyName string   `yaml:"propertyName,omitempty"`
-	Interface    string   `yaml:"interface,omitempty"`
-	Namespace    string   `yaml:"namespace,omitempty"`
-	Method       string   `yaml:"method,omitempty"`
-	Imports      []string `yaml:"imports,omitempty"`
-}
+	dirs := strings.Split(startPath, string(os.PathSeparator))
+	if len(dirs) > 0 {
+		dirs[0] = filepath.VolumeName(startPath) + string(os.PathSeparator)
+	}
+	for i := 0; i <= len(dirs); i++ {
+		basePath = filepath.Join(dirs[0:i]...)
+		if len(basePath) == 0 {
+			continue
+		}
 
-type GlobalCode struct {
-	VariablePrefix  string `yaml:"variablePrefix"`
-	VariablePostfix string `yaml:"variablePostfix"`
-}
-type CodeKey struct {
-	// Name      string `yaml:"name"`
-	Path      string   `yaml:"path,omitempty"`
-	NameSpace string   `yaml:"namespace,omitempty"`
-	Postfix   string   `yaml:"postfix,omitempty"`
-	Prefix    string   `yaml:"prefix,omitempty"`
-	Imports   []string `yaml:"imports,omitempty"`
-	Inject    []string `yaml:"inject,omitempty"`
+		if dirs[i] == dirname {
+			fp := filepath.Join(basePath, dirname, "project.yaml")
+			list = append(list, fp)
+			break
+		}
+
+		files, err := os.ReadDir(basePath)
+		// files, err := ioutil.ReadDir(basePath)
+		if err != nil {
+			log.Fatal(err)
+			break
+		}
+		for _, f := range files {
+
+			if f.IsDir() && f.Name() == dirname {
+				fp := filepath.Join(basePath, f.Name(), "project.yaml")
+				list = append(list, fp)
+			}
+
+		}
+
+	}
+	return list
+
 }
 
 func FindNearestProjectDir() (string, bool) {
@@ -195,4 +214,87 @@ func FindNearestProjectDir() (string, bool) {
 	}
 
 	return "", false
+}
+
+func JoinProject(joinType string, projects ...Project) Project {
+	switch joinType {
+	case "merge":
+		return mergeProject(projects...)
+
+	case "smart":
+		return smartMergeProject(projects...)
+
+	case "replace":
+		return replaceProject(projects...)
+	default:
+		return smartMergeProject(projects...)
+
+	}
+}
+func mergeProject(projects ...Project) Project {
+	current := Project{}
+
+	conProv := []source.ConnectionProvider{}
+	for _, p := range projects {
+		conProv = append(conProv, &p)
+	}
+
+	current.Connections = source.JoinConnections("merge", conProv...)
+
+	for _, proj := range projects {
+
+		current.Code = proj.Code
+	}
+
+	return current
+}
+
+func smartMergeProject(projects ...Project) Project {
+	current := Project{}
+	current.Options = make(map[string]string)
+	conProv := []source.ConnectionProvider{}
+	for _, p := range projects {
+		conProv = append(conProv, &p)
+	}
+
+	current.Connections = source.JoinConnections("smart", conProv...)
+
+	for _, proj := range projects {
+		current.Name = mergeString(current.Name, proj.Name)
+		// if len(proj.Name) > 0 {
+		// 	current.Name = proj.Name
+		// }
+		current.Description = mergeString(current.Description, proj.Description)
+		current.DefaultKey = mergeString(current.DefaultKey, proj.DefaultKey)
+		current.DefaultSource = mergeString(current.DefaultSource, proj.DefaultSource)
+		current.OwnerName = mergeString(current.OwnerName, proj.OwnerName)
+		current.Language = mergeString(current.Language, proj.Language)
+
+		for optKey, optVal := range proj.Options {
+			current.Options[optKey] = optVal
+		}
+
+		current.Code = proj.Code
+	}
+
+	return current
+}
+
+func mergeString(current string, target string) string {
+	if len(target) > 0 {
+		return target
+	}
+
+	return current
+}
+func replaceProject(projects ...Project) Project {
+	current := Project{}
+
+	l := len(projects)
+
+	if l > 0 {
+		return projects[l-1]
+	}
+
+	return current
 }

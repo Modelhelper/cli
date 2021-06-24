@@ -111,12 +111,96 @@ func MergeConnections(providers ...ConnectionProvider) (*map[string]Connection, 
 		}
 
 		for p, v := range *cons {
+			current, found := output[p]
+			if found {
+				if current.Type == v.Type && len(current.ConnectionString) > 0 && len(v.ConnectionString) == 0 {
+					v.ConnectionString = current.ConnectionString
+				}
+			}
+
 			output[p] = v
 		}
 	}
 	return &output, nil
 }
 
+//JoinConnections will merge or replace all the connections it is given
+//It works from left to right
+//joiner = merge | replace | empty | mergereplace
+func JoinConnections(joinMethod string, connections ...ConnectionProvider) map[string]Connection {
+	switch joinMethod {
+	case "merge":
+		return mergeConnections(connections...)
+	case "smart":
+		return smartMergeConnections(connections...)
+	case "replace":
+		return replaceConnections(connections...)
+	default:
+		return mergeConnections(connections...)
+	}
+}
+
+func mergeConnections(connections ...ConnectionProvider) map[string]Connection {
+	output := make(map[string]Connection)
+
+	for _, pv := range connections {
+		cons, err := pv.GetConnections()
+		if err != nil {
+			log.Fatal("Could not get connections", err)
+		}
+
+		for p, v := range *cons {
+			current, found := output[p]
+			if found {
+				if current.Type == v.Type && len(current.ConnectionString) > 0 && len(v.ConnectionString) == 0 {
+					v.ConnectionString = current.ConnectionString
+				}
+			}
+
+			output[p] = v
+		}
+	}
+	return output
+}
+func smartMergeConnections(connections ...ConnectionProvider) map[string]Connection {
+	output := make(map[string]Connection)
+
+	for _, pv := range connections {
+
+		cons, err := pv.GetConnections()
+		if err != nil {
+			log.Fatal("Could not get connections", err)
+		}
+
+		for p, v := range *cons {
+			current, found := output[p]
+			if found {
+				if current.Type == v.Type && len(current.ConnectionString) > 0 && len(v.ConnectionString) == 0 {
+					v.ConnectionString = current.ConnectionString
+				}
+			}
+
+			output[p] = v
+		}
+	}
+	return output
+}
+func replaceConnections(connections ...ConnectionProvider) map[string]Connection {
+	output := make(map[string]Connection)
+
+	for _, pv := range connections {
+
+		cons, err := pv.GetConnections()
+		if err != nil {
+			log.Fatal("Could not get connections", err)
+		}
+
+		for p, v := range *cons {
+			output[p] = v
+		}
+	}
+	return output
+}
 func (c *Connection) LoadSource() Source {
 
 	var src Source

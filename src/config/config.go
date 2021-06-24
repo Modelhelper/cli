@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"modelhelper/cli/project"
+	"modelhelper/cli/code"
 	"modelhelper/cli/source"
 	"os"
 	"os/user"
@@ -22,8 +22,8 @@ type Config struct {
 	DefaultConnection string                       `json:"defaultConnection" yaml:"defaultConnection"`
 	DefaultEditor     string                       `json:"editor" yaml:"editor"`
 	Developer         Developer                    `json:"developer" yaml:"developer"`
-	Port              int                          `json:"port" yaml:"portport"`
-	Code              project.ProjectCode          `json:"code" yaml:"code"`
+	Port              int                          `json:"port" yaml:"port"`
+	Code              code.Code                    `json:"code" yaml:"code"`
 	Templates         struct {
 		Location string `json:"location" yaml:"location"`
 	} `json:"templates" yaml:"templates"`
@@ -39,21 +39,6 @@ type Developer struct {
 	Name          string `json:"name" yaml:"name"`
 	Email         string `json:"email" yaml:"email"`
 	GitHubAccount string `json:"github" yaml:"github"`
-}
-type LanguageDef struct {
-	Version        string                     `json:"version" yaml:"version"`
-	Language       string                     `json:"language" yaml:"language"`
-	Datatypes      map[string]Datatype        `json:"datatypes" yaml:"datatypes"`
-	Keys           map[string]project.CodeKey `json:"Keys" yaml:"Keys"`
-	UsesNamespace  bool                       `json:"usesNamespace" yaml:"usesNamespace"`
-	CanInject      bool                       `json:"canInject" yaml:"canInject"`
-	DefaultImports []string                   `json:"defaultImports" yaml:"defaultImports"`
-}
-
-type Datatype struct {
-	NotNull             string `json:"notNull" yaml:"notNull"`
-	Nullable            string `json:"nullable" yaml:"nullable"`
-	NullableAlternative string `json:"nullableAlternative" yaml:"nullableAlternative"`
 }
 
 func New() *Config {
@@ -81,29 +66,8 @@ func Load() *Config {
 
 }
 
-func (c *Config) GetLanguageDefs() (*map[string]LanguageDef, error) {
-	return nil, nil
-}
 func (c *Config) GetConnections() (*map[string]source.Connection, error) {
 	return &c.Connections, nil
-}
-
-func LoadLanguageFile(path string) (*LanguageDef, error) {
-	var lang *LanguageDef
-
-	dat, e := ioutil.ReadFile(path)
-	if e != nil {
-		log.Fatalf("cannot load file: %v", e)
-		return nil, e
-	}
-
-	err := yaml.Unmarshal(dat, &lang)
-	if err != nil {
-		log.Fatalf("cannot unmarshal data: %v", err)
-		return nil, err
-	}
-
-	return lang, nil
 }
 
 func LoadFromFile(path string) *Config {

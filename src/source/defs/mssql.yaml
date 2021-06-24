@@ -1,0 +1,39 @@
+# Defines the source
+key: mssql
+type: sql
+status: dev
+language: TSQL
+vendor: Microsoft
+short: MS SQL server is a database technology from Microsoft. This can be hosted on your computer, server or cloud.
+description: |
+  MS SQL server is a database technology from Microsoft. This can be hosted on your computer, server or cloud.
+
+parameter:
+  prefix: "@"
+  postfix: 
+
+concat: "+"  # this is how this source is handling concatination
+
+# some functions can only be used by mssql, like isnull
+functions:
+  nullhandle: COALESCE(%INPUT%, %REPLACE%)
+  spacing: SPACE
+  addDate: DATEADD
+  textposition: CHARINDEX(%TEST%, %INPUT%)
+  now: GETDATE()
+
+datatypes:
+  varchar:
+    description: string representation
+    size: 8
+
+
+queries:
+  entity: |
+    select * from sys
+  entities: |
+    select * from sys
+  indexes:
+    query: |
+      select * from sys.indexes where object_id = @object_id
+  

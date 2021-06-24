@@ -1,92 +1,205 @@
 package codegen
 
 import (
+	"bufio"
 	"bytes"
+	"context"
 	"io/ioutil"
 	"log"
-	"modelhelper/cli/ctx"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+	"time"
 	"unicode"
 
 	"github.com/gertd/go-pluralize"
 )
 
-var codeCtx ctx.Context
+type GoLangGenerator struct{}
 
-type GoLangGenerator struct {
-	TemplateName  string
-	Templates     map[string]string
-	Datatypes     map[string]string
-	NullableTypes map[string]string
+type SimpleGenerator struct{}
+
+func (cstat *Statistics) AppendStat(instat Statistics) {
+	cstat.Chars += instat.Chars
+	cstat.Lines += instat.Lines
+	cstat.Words += instat.Words
 }
 
-type SimpleGenerator struct {
-	Template string
-}
-
-func Generate(name string, body string, model interface{}) (string, error) {
-	tmpl, err := template.New(name).Funcs(funcMap()).Parse(body)
+func Generate(name string, body string, model interface{}) string {
+	tmpl, err := template.New(name).Funcs(simpleFuncMap()).Parse(body)
 	if err != nil {
-		return "", err
+		return ""
 	}
 
 	buf := new(bytes.Buffer)
 
 	tmpl.Execute(buf, model)
-	return buf.String(), nil
+	return buf.String()
 
 }
 
-func (g *GoLangGenerator) Generate(c ctx.Context, model interface{}) (string, error) {
-	codeCtx = c
+func (g *GoLangGenerator) Generate(ctx context.Context, model interface{}) (Result, error) {
+	start := time.Now()
 
-	template := fromFiles(g.TemplateName, g.Templates)
+	code, ok := ctx.Value("code").(CodeContextValue)
+	res := Result{}
 
+	if !ok {
+		return res, nil
+	}
+	tplMap := make(map[string]string)
+
+	for k, b := range code.Blocks {
+		tplMap[k] = b
+	}
+	tplMap[code.TemplateName] = code.Template
+
+	template := fromFiles(code)
 	buf := new(bytes.Buffer)
-	err := template.ExecuteTemplate(buf, g.TemplateName, model)
-
+	err := template.ExecuteTemplate(buf, code.TemplateName, model)
 	if err != nil {
-		// fmt.Println(err)
-		log.Fatalln(err)
+		return res, err
 	}
 
-	return buf.String(), nil
-
-}
-func (g *SimpleGenerator) Generate(c ctx.Context, model interface{}) (string, error) {
-	codeCtx = c
-
-	if len(c.Templates) > 0 {
-		return Generate(c.TemplateName, g.Template, model)
+	res.Content = buf.String()
+	if len(res.Content) > 0 {
+		res.Stat = getStat(res.Content)
+		res.Stat.Duration = time.Since(start)
 	}
 
-	return "", nil
+	return res, nil
+
 }
 
-func funcMap() template.FuncMap {
+func getStat(s string) Statistics {
+	stat := Statistics{
+		Chars: len(s),
+		Lines: getLines(s),
+		Words: getWords(s),
+	}
+
+	return stat
+}
+
+func getWords(input string) int {
+	scanner := bufio.NewScanner(strings.NewReader(input))
+	scanner.Split(bufio.ScanWords)
+	count := 0
+	for scanner.Scan() {
+		count++
+	}
+
+	return count
+}
+func getLines(input string) int {
+	scanner := bufio.NewScanner(strings.NewReader(input))
+	scanner.Split(bufio.ScanLines)
+
+	count := 0
+	for scanner.Scan() {
+		count++
+	}
+
+	return count
+}
+
+func (g *SimpleGenerator) Generate(ctx context.Context, model interface{}) (Result, error) {
+	code, ok := ctx.Value("code").(CodeContextValue)
+	res := Result{}
+
+	if !ok {
+		return res, nil
+	}
+
+	var err error
+	res.Content = Generate(code.TemplateName, code.Template, model)
+	return res, err
+
+}
+
+func fullFuncMap(dt, ntd map[string]string) template.FuncMap {
+	return funcMap(stringMap(), datatypeMap(dt, ntd))
+}
+
+func simpleFuncMap() template.FuncMap {
+	return funcMap(stringMap())
+}
+
+func funcMap(flist ...template.FuncMap) template.FuncMap {
+	m := make(template.FuncMap)
+
+	for _, list := range flist {
+		for key, val := range list {
+
+			m[key] = val
+		}
+	}
+
+	return m
+}
+
+func datatypeMap(dt, ndt map[string]string) map[string]interface{} {
+	m := make(map[string]interface{})
+
+	nonull := func(input string) string {
+		val, f := dt[input]
+
+		if !f {
+			return input
+		}
+
+		return val
+	}
+
+	null := func(isNullable bool, input string) string {
+		if isNullable {
+			val, f := ndt[input]
+
+			if !f {
+				return input
+			}
+
+			return val
+		} else {
+			return nonull(input)
+		}
+	}
+
+	m["datatype"] = nonull
+	m["datatypeN"] = null
+	m["nullable"] = null
+
+	return m
+}
+
+func stringMap() template.FuncMap {
 	return template.FuncMap{
-		"plural":    pluralForm,
-		"singular":  SingularForm,
-		"datatype":  dataTypeConverter,
-		"lower":     lowerCase,
-		"upper":     upperCase,
-		"words":     asWords,
-		"sentence":  asSentence,
-		"snake":     snakeCase,
-		"kebab":     kebabCase,
-		"pascal":    pascalCase,
-		"camel":     camelCase,
-		"nullable":  nullableDatatype,
-		"datatypeN": dataTypeWithNullcheck,
-		"append":    addWord,
+		"plural":   pluralForm,
+		"singular": SingularForm,
+		// "datatype":  dataTypeConverter,
+		"lower":    lowerCase,
+		"upper":    upperCase,
+		"words":    asWords,
+		"sentence": asSentence,
+		"snake":    snakeCase,
+		"kebab":    kebabCase,
+		"pascal":   pascalCase,
+		"camel":    camelCase,
+		// "nullable":  nullableDatatype,
+		// "datatypeN": dataTypeWithNullcheck,
+		"append": addWord,
 	}
 
 }
 
-func fromFiles(name string, templates map[string]string) *template.Template {
+func fromFiles(cv CodeContextValue) *template.Template {
+	templates := make(map[string]string)
+
+	for k, b := range cv.Blocks {
+		templates[k] = b
+	}
+	templates[cv.TemplateName] = cv.Template
 
 	dir := createTempDir()
 	defer os.RemoveAll(dir)
@@ -99,7 +212,7 @@ func fromFiles(name string, templates map[string]string) *template.Template {
 
 	pattern := filepath.Join(dir, "*")
 
-	drivers := template.Must(template.New(name).Funcs(funcMap()).ParseGlob(pattern))
+	drivers := template.Must(template.New(cv.TemplateName).Funcs(fullFuncMap(cv.Datatypes, cv.NullableTypes)).ParseGlob(pattern))
 
 	return drivers
 }
@@ -138,46 +251,6 @@ func SingularForm(input string) string {
 	output := pluralize.Singular(input)
 
 	return output
-}
-
-func dataTypeWithNullcheck(isNullable bool, input string) string {
-
-	dt := dataTypeConverter(input)
-
-	// if reflect.TypeOf(isNullable) == reflect.Typeof(bool)
-	if isNullable {
-		return nullableDatatype(dt)
-	}
-	return dt
-}
-func alternativeNullableDatatype(input string) string {
-	output := codeCtx.AlternativeNullableTypes[input]
-
-	if len(output) > 0 {
-		return output
-	}
-
-	return input
-}
-func nullableDatatype(input string) string {
-	output, found := codeCtx.NullableTypes[input]
-
-	if found {
-		return output
-	}
-
-	return input
-}
-
-func dataTypeConverter(input string) string {
-
-	output, found := codeCtx.Datatypes[input]
-
-	if found {
-		return output
-	}
-
-	return input
 }
 
 func snakeCase(input string) string {

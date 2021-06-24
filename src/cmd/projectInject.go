@@ -22,24 +22,27 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
-// secretCmd represents the secret command
-var secretCmd = &cobra.Command{
-	Use:   "secret",
-	Short: "This command manages secrets in a vault",
-	Run: func(cmd *cobra.Command, args []string) {
+// projectInjectCmd represents the projectInject command
+var projectInjectCmd = &cobra.Command{
+	Use:   "inject",
+	Short: "A brief description of your command",
 
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("projectInject called")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(secretCmd)
+	projectCmd.AddCommand(projectInjectCmd)
 
-	secretCmd.PersistentFlags().String("scope", "config", "Sets the scope to use secrets for [config | project], default value is config")
-	// configCmd.AddCommand(secretCmd)
-	// projectCmd.AddCommand(secretCmd)
-	secretCmd.PersistentFlags().String("key", "", "The key to use when encoding and decoding secrets")
-
+	projectInjectCmd.Flags().StringP("namespace", "n", "", "Defines the namespace for the key")
+	projectInjectCmd.Flags().String("postfix", "", "Defines the postfix for the key")
+	projectInjectCmd.Flags().String("prefix", "", "Defines the prefix for the key")
+	projectInjectCmd.Flags().StringArray("import", []string{}, "Defines the prefix for the key")
+	projectInjectCmd.Flags().StringArray("inject", []string{}, "Defines the prefix for the key")
 }

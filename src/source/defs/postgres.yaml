@@ -1,0 +1,70 @@
+# Defines the source
+key: mssql
+type: sql
+status: dev
+language: TSQL
+vendor: Microsoft
+short: MS SQL server is a database technology from Microsoft. This can be hosted on your computer, server or cloud.
+description: |
+  MS SQL server is a database technology from Microsoft. This can be hosted on your computer, server or cloud.
+
+connection:
+  template: "server: %server%;"
+  builder:
+    delimiter: ";"
+    parts:
+      server: 
+        name: "server: %s"
+        prompt: "Server: "
+        description: "This is the server location for the database"
+        isSenstive: false
+      database: 
+        description: "This is the default database name for this connection."
+        prompt: "Database name: "
+        isSenstive: false
+      port:
+        name: "port: %s"
+        description: "If the port is needed, enter it here"
+        prompt: "Port: "
+      user:
+        description: "This is the user name for this connection."
+        prompt: "user name: "
+        isSenstive: false
+      password:
+        description: "The password associated to this user. This is sensitive data and will not be stored in clear text"
+        prompt: "Password: "
+        isSenstive: true
+
+parameter:
+  prefix: "@"
+  postfix: 
+
+concat: "+"  # this is how this source is handling concatination
+
+# some functions can only be used by mssql, like isnull
+functions:
+  nullhandle: COALESCE(%INPUT%, %REPLACE%)
+  spacing: SPACE
+  addDate: DATEADD
+  textposition: CHARINDEX(%TEST%, %INPUT%)
+  now: GETDATE()
+
+datatypes:
+  varchar:
+    description: string representation
+    size: 8
+
+
+queries:
+  entity: |
+    select * from sys
+  entities: |
+    select * from sys
+  indexes:
+    query: |
+      select * from sys.indexes where object_id = @object_id
+
+reserved:
+  - go
+  - or
+  - and

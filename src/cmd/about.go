@@ -24,6 +24,7 @@ package cmd
 import (
 	"fmt"
 	"modelhelper/cli/app"
+	"modelhelper/cli/project"
 
 	"github.com/gookit/color"
 
@@ -33,7 +34,7 @@ import (
 // aboutCmd represents the about command
 var aboutCmd = &cobra.Command{
 	Use:   "about",
-	Short: "<not implemented>",
+	Short: "Show information about the modelhelper CLI",
 	Run: func(cmd *cobra.Command, args []string) {
 		printLogoInfo()
 	},
@@ -45,6 +46,14 @@ func init() {
 
 func printLogoInfo() {
 	color.Green.Print(app.Logo())
-	fmt.Println(app.Info())
+
+	dir := project.DefaultLocation()
+
+	if project.Exists(dir) {
+		printProjectInfo(project.DefaultLocation(), true)
+
+	} else {
+		fmt.Println(app.Info())
+	}
 
 }

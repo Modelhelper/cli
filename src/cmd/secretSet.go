@@ -27,6 +27,7 @@ import (
 	"modelhelper/cli/project"
 	"modelhelper/cli/vault"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -39,14 +40,11 @@ var secretSetCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		secretsPath := filepath.Join(config.Location(), ".secrets")
 		encodingKey, _ := cmd.Flags().GetString("key")
-		parent := cmd.Parent()
+		scope, _ := cmd.Flags().GetString("scope")
 
-		if parent != nil {
-			// root
-			if parent.Use == "project" {
-				secretsPath = filepath.Join(project.DefaultLocation(), ".secrets")
-			}
-
+		// parent := cmd.Parent()
+		if strings.ToLower(scope) == "project" {
+			secretsPath = filepath.Join(project.DefaultLocation(), ".secrets")
 		}
 
 		v := vault.File(encodingKey, secretsPath)

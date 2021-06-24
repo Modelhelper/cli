@@ -58,13 +58,29 @@ var (
 var entityCmd = &cobra.Command{
 	Use:     "entity",
 	Aliases: []string{"e"},
+	Short:   "Show a list of entities or details of a single entity",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// fmt.Println("entity called")
 		modelHelperApp = app.New()
 		ctx := modelHelperApp.CreateContext()
-		conName := ctx.DefaultConnection
 
+		if len(ctx.Connections) == 0 {
+			fmt.Println("Could not find any connections to use, please add a connection")
+			fmt.Println("to the config and/or any project file")
+			return
+		}
+		conName, _ := cmd.Flags().GetString("connection")
+
+		if len(conName) == 0 {
+
+			conName = ctx.DefaultConnection
+		}
+
+		if len(conName) == 0 {
+			ka := keyArray(ctx.Connections)
+			conName = ka[0]
+		}
 		con := ctx.Connections[conName]
 
 		src := con.LoadSource()
@@ -116,25 +132,33 @@ var entityCmd = &cobra.Command{
 			}
 			renderColumns(&e.Columns)
 
-			ui.PrintConsoleTitle("Indexes")
+			if len(e.Indexes) > 0 {
+				ui.PrintConsoleTitle("Indexes")
 
-			itr := indexTableRenderer{
-				rows: e.Indexes,
+				itr := indexTableRenderer{
+					rows: e.Indexes,
+				}
+
+				ui.RenderTable(&itr, &itr)
 			}
 
-			ui.RenderTable(&itr, &itr)
+			if len(e.ChildRelations) > 0 {
+				ui.PrintConsoleTitle("One to many (.ChildRelations)")
+				crtr := relTableRenderer{
+					rows: e.ChildRelations,
+				}
 
-			ui.PrintConsoleTitle("One to many (.ChildRelations)")
-			crtr := relTableRenderer{
-				rows: e.ChildRelations,
+				ui.RenderTable(&crtr, &crtr)
 			}
 
-			ui.RenderTable(&crtr, &crtr)
+			if len(e.ParentRelations) > 0 {
+				ui.PrintConsoleTitle("Many to one (.ParentRelations)")
+				crtr := relTableRenderer{
+					rows: e.ParentRelations,
+				}
+				ui.RenderTable(&crtr, &crtr)
 
-			ui.PrintConsoleTitle("Many to one (.ParentRelations)")
-			crtr.rows = e.ParentRelations
-			ui.RenderTable(&crtr, &crtr)
-
+			}
 			fmt.Println("")
 
 			showTree, _ := cmd.Flags().GetBool("tree")
@@ -200,6 +224,15 @@ var entityCmd = &cobra.Command{
 	},
 }
 
+func keyArray(input map[string]source.Connection) []string {
+	keys := []string{}
+	for k := range input {
+		keys = append(keys, k)
+	}
+
+	return keys
+}
+
 func yesNo(eval bool) string {
 	if eval {
 		return "Yes"
@@ -229,6 +262,7 @@ func init() {
 	entityCmd.Flags().Bool("is-versioned", false, "Filter only entities that is versioned")
 	entityCmd.Flags().Bool("tree", false, "Filter only entities that is versioned")
 	entityCmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
+	entityCmd.Flags().StringP("connection", "c", "", "The connection to be used, uses default connection if not provided")
 
 	// entityCmd.Flags().Bool("include-history", false, "Includes history enities in the list")
 
@@ -373,14 +407,20 @@ type indexTableRenderer struct {
 }
 
 func (r *indexTableRenderer) BuildHeader() []string {
-	return []string{"Name", "Clustered", "Primary", "Unique", "Fragmentation"}
+	return []string{
+		"Name",
+		"Clustered",
+		"Primary",
+		"Unique",
+		// "Fragmentation",
+	}
 }
 
 func (r *indexTableRenderer) ToRows() [][]string {
 	var rows [][]string
 
 	for _, i := range r.rows {
-		p := message.NewPrinter(language.English)
+		// p := message.NewPrinter(language.English)
 
 		cluster := "No"
 		primary := "No"
@@ -400,7 +440,7 @@ func (r *indexTableRenderer) ToRows() [][]string {
 			cluster,
 			primary,
 			unique,
-			p.Sprintf("%d%%", i.AvgFragmentationPercent),
+			// p.Sprintf("%d%%", i.AvgFragmentationPercent),
 		}
 
 		rows = append(rows, r)

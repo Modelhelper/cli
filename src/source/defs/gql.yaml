@@ -1,0 +1,7 @@
+key: gql
+type: api
+
+short: Read files from a folder, can be json or yaml. Content is structures as a database entity (table)
+description: |
+  Use mssql or postgres datatypes for the list of columns
+

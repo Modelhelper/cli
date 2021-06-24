@@ -35,7 +35,8 @@ var serveCmd = &cobra.Command{
 	Short: "Starts the modelhelper web server",
 	Long:  `With this command you can spin up a server`,
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := modelHelperApp.CreateContext()
+		mhApp := app.New()
+		ctx := mhApp.CreateContext()
 
 		port, _ := cmd.Flags().GetInt("port")
 		open, _ := cmd.Flags().GetBool("open")

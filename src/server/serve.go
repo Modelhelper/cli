@@ -55,6 +55,10 @@ func Serve(port int, open bool, appCtx *app.Context) {
 	mime.AddExtensionType(".js", "text/javascript")
 	mime.AddExtensionType(".css", "text/css")
 	mime.AddExtensionType(".svg", "image/svg+xml")
+	mime.AddExtensionType(".png", "image/png")
+	mime.AddExtensionType(".jpg", "image/jpeg")
+	mime.AddExtensionType(".jpeg", "image/jpeg")
+	mime.AddExtensionType(".gif", "image/gif")
 	// getRouter.HandleFunc("/api/projects", apiprojectsHandler)
 	// serve website
 	spa := spaHandler{staticPath: "build", indexPath: "index.html"}
