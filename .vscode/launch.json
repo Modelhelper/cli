@@ -12,8 +12,8 @@
             "program": "${workspaceFolder}/src",
             // "args": ["generate", "--screen", "-t", "cs-poco", "--demo", "--project", "C:\\dev\\projects\\mh\\cli\\configuration\\project\\.modelhelper\\project.yaml"]
             //"args": ["project", "--path", "D:\\projects\\ModelHelper\\.modelhelper\\project.yaml"]
-            "args": ["generate", "--screen", "--export-bykey", "-t", "cs-poco", "--demo", "--project-path", "D:\\projects\\ModelHelper\\.modelhelper\\project.yaml"]
-            // "args": ["template"]
+            // "args": ["generate", "--screen", "--export-bykey", "-t", "cs-poco", "--demo", "--project-path", "D:\\projects\\ModelHelper\\.modelhelper\\project.yaml"]
+            "args": ["entity", "--demo"]
             // "args": ["set", "defcon"]
             // "args": ["t", "cs-gql-hc-resolver", "--open"]
             // "args": ["set", "dev", "--name", "Hans-Petter Eitvet", "--email", "hpe@hpe.no"]
