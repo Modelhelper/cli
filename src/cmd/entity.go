@@ -62,26 +62,38 @@ var entityCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// fmt.Println("entity called")
+		var con source.Connection
+		var conName string
+
+		isDemo, _ := cmd.Flags().GetBool("demo")
+		conNameFlag, _ := cmd.Flags().GetString("connection")
+
 		modelHelperApp = app.New()
 		ctx := modelHelperApp.CreateContext()
 
-		if len(ctx.Connections) == 0 {
-			fmt.Println("Could not find any connections to use, please add a connection")
-			fmt.Println("to the config and/or any project file")
-			return
-		}
-		conName, _ := cmd.Flags().GetString("connection")
+		if isDemo {
+			conName = "demo"
+			con = source.Connection{Type: conName}
+		} else {
 
-		if len(conName) == 0 {
+			if len(ctx.Connections) == 0 {
+				fmt.Println("Could not find any connections to use, please add a connection")
+				fmt.Println("to the config and/or any project file")
+				return
+			}
 
-			conName = ctx.DefaultConnection
-		}
+			if len(conNameFlag) == 0 {
 
-		if len(conName) == 0 {
-			ka := keyArray(ctx.Connections)
-			conName = ka[0]
+				conName = ctx.DefaultConnection
+			}
+
+			if len(conNameFlag) == 0 {
+				ka := keyArray(ctx.Connections)
+				conName = ka[0]
+			}
+
+			con = ctx.Connections[conName]
 		}
-		con := ctx.Connections[conName]
 
 		src := con.LoadSource()
 
@@ -250,6 +262,7 @@ func isSearchPattern(input string) bool {
 }
 func init() {
 	rootCmd.AddCommand(entityCmd)
+	entityCmd.Flags().Bool("demo", false, "Uses the demo source")
 
 	entityCmd.Flags().BoolVarP(&skipDescription, "skip-description", "", false, "Does not show description")
 	// entityCmd.Flags().String("by", "", "Groups the list of entities by type (view, table), schema")
