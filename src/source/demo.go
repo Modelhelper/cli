@@ -1,6 +1,13 @@
 package source
 
-import "embed"
+import (
+	"embed"
+	"fmt"
+	"log"
+	"path"
+
+	"gopkg.in/yaml.v3"
+)
 
 //go:embed entities/*
 var entities embed.FS
@@ -9,10 +16,10 @@ type DemoSource struct{}
 
 func (server *DemoSource) Entity(name string) (*Entity, error) {
 
-	entities := server.getEntities()
+	entityFiles := server.getEntities()
 	//var entity Entity
 
-	for _, e := range entities {
+	for _, e := range entityFiles {
 		if e.Name == name {
 			return &e, nil
 		}
@@ -21,11 +28,42 @@ func (server *DemoSource) Entity(name string) (*Entity, error) {
 	return nil, nil
 }
 func (server *DemoSource) Entities(pattern string) (*[]Entity, error) {
-	e := server.getEntities()
-	return &e, nil
+	list := []Entity{}
+	root := "entities"
+	files, err := entities.ReadDir(root)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			fn := file.Name()
+			fullPath := path.Join(root, fn)
+			blob, err := entities.ReadFile(fullPath)
+
+			if err != nil {
+				return nil, err
+			}
+
+			fmt.Println(blob)
+			var fent *fileEntity
+			err = yaml.Unmarshal(blob, &fent)
+			if err != nil {
+				log.Fatalf("cannot unmarshal data: %v", err)
+			}
+			list = append(list, fent.toSourceEntity())
+			fmt.Println(fent)
+		}
+	}
+
+	return &list, nil
+	// e := server.getEntities()
+	// return &e, nil
 }
 
 func (server *DemoSource) getEntities() []Entity {
+
 	e := []Entity{
 
 		server.getOrderHeadTable(),

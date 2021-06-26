@@ -3,8 +3,17 @@ schema: dbo
 columns:
   id: 
     type: int
-    nullable: false
     identity: true
   name: 
     type: varchar
-    nullable: false
+  address:
+    type: varchar
+    nullable: true
+  zip:
+    type: varchar
+    nullable: true
+  place:
+    type: varchar
+    nullable: true
+  budget: 
+    type: decimal

@@ -1,10 +1,19 @@
 package source
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"unicode"
 )
+
+type EntityNotFoundError struct {
+	Name string
+}
+
+func (e *EntityNotFoundError) Error() string {
+	return fmt.Sprintf("Entity '%s' not found", e.Name)
+}
 
 type LanguageDef struct {
 	Definitions string

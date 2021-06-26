@@ -8,7 +8,7 @@ columns:
     nullable: false
   CustomerId:
     Type: int
-    References: Customer.yaml
+    References: customer
     Description: Points to the customer table
     nullable: false
     
