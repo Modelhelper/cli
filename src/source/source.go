@@ -264,11 +264,11 @@ func LoadSource(name string, connections map[string]Connection) Source {
 
 func Abbreviate(s string) string {
 	abr := ""
-	for _, c := range s {
-		if unicode.IsUpper(c) {
+	for i, c := range s {
+		if i == 0 || unicode.IsUpper(c) {
 			abr = abr + string(c)
 		}
 	}
 
-	return abr
+	return strings.ToLower(abr)
 }
