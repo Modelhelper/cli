@@ -2,6 +2,7 @@ package source
 
 import (
 	"io/fs"
+	"sort"
 )
 
 type Files struct {
@@ -15,22 +16,114 @@ type fileEntity struct {
 	Name        string                `yaml:"name"`
 	Schema      string                `yaml:"schema"`
 	Description string                `yaml:"description"`
+	Rows        int                   `yaml:"rows"`
 	Columns     map[string]fileColumn `yaml:"columns"`
 }
 
 type fileColumn struct {
-	Name        string `yaml:"name"`
-	Datatype    string `yaml:"type"`
-	Nullable    bool   `yaml:"nullable"`
-	References  string `yaml:"references"`
-	Identity    bool   `yaml:"identity"`
-	Description string `yaml:"description"`
+	ID          int              `yaml:"id"`
+	Name        string           `yaml:"name"`
+	Datatype    string           `yaml:"type"`
+	Nullable    bool             `yaml:"nullable"`
+	References  *columnReference `yaml:"references"`
+	Identity    bool             `yaml:"identity"`
+	IsPrimary   bool             `yaml:"primary"`
+	Description string           `yaml:"description"`
 }
 
-/*
-Entity(name string) (*Entity, error)
-	Entities(pattern string) (*[]Entity, error)
-*/
+type columnReference struct {
+	Table  string `yaml:"table"`
+	Column string `yaml:"column"`
+}
+
+type fileEntityMap map[string]fileEntity
+type fileEntityList []fileEntity
+
+func (fel *fileEntityList) toMap() map[string]fileEntity {
+	m := make(map[string]fileEntity)
+
+	for _, entity := range *fel {
+		m[entity.Name] = entity
+	}
+
+	return m
+}
+
+func (fel *fileEntity) getParentRelations(entities []fileEntity) []Relation {
+	relations := []Relation{}
+
+	for colName, col := range fel.Columns {
+		if col.References != nil {
+			for _, entity := range entities {
+				if entity.Name == col.References.Table {
+					// col.IsForeignKey = true
+					relatedCol, relcolF := entity.Columns[col.References.Column]
+					nullable := false
+					relcolDT := col.Datatype
+
+					if relcolF {
+						nullable = relatedCol.Nullable
+						relcolDT = relatedCol.Datatype
+					}
+
+					rel := Relation{
+						Schema:              entity.Schema,
+						ColumnName:          col.References.Column,
+						ColumnNullable:      nullable,
+						ColumnType:          relcolDT,
+						Name:                col.References.Table,
+						OwnerColumnName:     colName,
+						OwnerColumnNullable: col.Nullable,
+						OwnerColumnType:     col.Datatype,
+					}
+
+					relations = append(relations, rel)
+				}
+			}
+		}
+	}
+	return relations
+}
+
+func (fel *fileEntity) getChildRelations(entities []fileEntity) []Relation {
+	relations := []Relation{}
+
+	for _, entity := range entities {
+		if entity.Name != fel.Name {
+			for colName, column := range entity.Columns {
+
+				if column.References != nil {
+					if column.References.Table == fel.Name {
+						// col.IsForeignKey = true
+						relatedCol, relcolF := entity.Columns[column.References.Column]
+						nullable := false
+						relcolDT := column.Datatype
+
+						if relcolF {
+							nullable = relatedCol.Nullable
+							relcolDT = relatedCol.Datatype
+						}
+
+						rel := Relation{
+							Schema:              entity.Schema,
+							ColumnName:          column.References.Column,
+							ColumnNullable:      nullable,
+							ColumnType:          relcolDT,
+							Name:                entity.Name,
+							OwnerColumnName:     colName,
+							OwnerColumnNullable: column.Nullable,
+							OwnerColumnType:     column.Datatype,
+						}
+
+						relations = append(relations, rel)
+					}
+				}
+			}
+		}
+	}
+	return relations
+}
+
 func (f *Files) Entity(name string) (*Entity, error) {
 	entities, err := f.Entities("")
 	if err != nil {
@@ -50,15 +143,50 @@ func (f *Files) Entities(pattern string) (*[]Entity, error) {
 }
 
 func (f *fileEntity) toSourceEntity() Entity {
-	return Entity{
+	ent := Entity{
 		Name:        f.Name,
 		Schema:      f.Schema,
 		Description: f.Description,
 		Type:        "table",
-		RowCount:    0,
+		RowCount:    f.Rows,
 	}
+
+	// parents := []Relation{}
+	cols := []Column{}
+	id := 0
+
+	for colName, col := range f.Columns {
+		id++
+		colId := id
+		if col.ID > 0 {
+			colId = col.ID
+		}
+		ec := Column{
+			ID:           colId,
+			Name:         colName,
+			DataType:     col.Datatype,
+			Description:  col.Description,
+			IsNullable:   col.Nullable,
+			IsPrimaryKey: col.IsPrimary,
+			IsIdentity:   col.Identity,
+		}
+
+		if col.References != nil {
+			ec.IsForeignKey = true
+			// r := Relation{
+			// 	Schema:              ent.Schema,
+			// 	ColumnName:          col.References.Column,
+			// 	Name:                col.References.Table,
+			// 	OwnerColumnName:     colName,
+			// 	OwnerColumnNullable: col.Nullable,
+			// }
+			// parents = append(parents, r)
+		}
+
+		cols = append(cols, ec)
+	}
+	sort.Sort(SortColumnById(cols))
+
+	ent.Columns = cols
+	return ent
 }
-
-// func (f *fileEntity) Open(blob []byte) *fileEntity {
-
-// }
