@@ -37,6 +37,9 @@ func (server *MsSql) Entity(name string) (*Entity, error) {
 		return nil, err
 	}
 
+	if e == nil {
+		return nil, &EntityNotFoundError{}
+	}
 	c, err := server.getColumns(e.Schema, e.Name)
 	if err != nil {
 		return nil, err
