@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"path"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -16,11 +17,14 @@ type DemoSource struct{}
 
 func (server *DemoSource) Entity(name string) (*Entity, error) {
 
-	entityFiles := server.getEntities()
+	entityFiles, err := server.Entities("")
+	if err != nil {
+		fmt.Errorf("%v", err)
+	}
 	//var entity Entity
 
-	for _, e := range entityFiles {
-		if e.Name == name {
+	for _, e := range *entityFiles {
+		if strings.EqualFold(e.Name, name) {
 			return &e, nil
 		}
 	}
@@ -29,11 +33,34 @@ func (server *DemoSource) Entity(name string) (*Entity, error) {
 }
 func (server *DemoSource) Entities(pattern string) (*[]Entity, error) {
 	list := []Entity{}
+	baseList := getDemoEntities()
+
+	for _, fent := range baseList {
+
+		entity := fent.toSourceEntity()
+		entity.ParentRelations = fent.getParentRelations(baseList)
+		entity.ParentRelationCount = len(entity.ParentRelations)
+
+		entity.ChildRelations = fent.getChildRelations(baseList)
+		entity.ChildRelationCount = len(entity.ChildRelations)
+
+		entity.ColumnCount = len(entity.Columns)
+		entity.Alias = Abbreviate(entity.Name)
+		list = append(list, entity)
+
+	}
+
+	return &list, nil
+
+}
+
+func getDemoEntities() []fileEntity {
+	list := []fileEntity{}
 	root := "entities"
 	files, err := entities.ReadDir(root)
 
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	for _, file := range files {
@@ -43,56 +70,17 @@ func (server *DemoSource) Entities(pattern string) (*[]Entity, error) {
 			blob, err := entities.ReadFile(fullPath)
 
 			if err != nil {
-				return nil, err
+				return nil
 			}
 
-			fmt.Println(blob)
-			var fent *fileEntity
+			var fent fileEntity
 			err = yaml.Unmarshal(blob, &fent)
 			if err != nil {
 				log.Fatalf("cannot unmarshal data: %v", err)
 			}
-			list = append(list, fent.toSourceEntity())
-			fmt.Println(fent)
+			list = append(list, fent)
 		}
 	}
 
-	return &list, nil
-	// e := server.getEntities()
-	// return &e, nil
-}
-
-func (server *DemoSource) getEntities() []Entity {
-
-	e := []Entity{
-
-		server.getOrderHeadTable(),
-		server.getCustomerTable(),
-	}
-	return e
-}
-
-func (server *DemoSource) getOrderHeadTable() Entity {
-	return Entity{
-		Name: "order", Schema: "dbo", Description: "This is the order table", RowCount: 1000, Alias: "o", UsesIdentityColumn: true,
-		Columns: []Column{
-			{Name: "Id", DataType: "int", IsPrimaryKey: true, IsNullable: false, IsIdentity: true, Description: "The identifier"},
-			{Name: "Name", DataType: "varchar", IsPrimaryKey: false, IsNullable: false, IsIdentity: false, Description: "Name of the order"},
-		},
-	}
-}
-func (server *DemoSource) getCustomerTable() Entity {
-	var e = Entity{
-		Name: "customer", Schema: "dbo",
-		Description: "This is the customer table", RowCount: 1000, Alias: "c", UsesIdentityColumn: true,
-		Columns: []Column{
-			{Name: "Id", DataType: "int", IsPrimaryKey: true, IsNullable: false, IsIdentity: true, Description: "The identifier"},
-			{Name: "Name", DataType: "varchar", IsPrimaryKey: false, IsNullable: false, IsIdentity: false, Description: "Name of the customer"},
-			{Name: "Address", DataType: "varchar", IsPrimaryKey: false, IsNullable: true, IsIdentity: false, Description: "Name of the customer"},
-			{Name: "ZipCode", DataType: "varchar", IsPrimaryKey: false, IsNullable: true, IsIdentity: false, Description: "Name of the customer"},
-			{Name: "Budget", DataType: "decimal", IsPrimaryKey: false, IsNullable: true, IsIdentity: false, Description: "Name of the customer"},
-		},
-	}
-
-	return e
+	return list
 }
