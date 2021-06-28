@@ -1,0 +1,14 @@
+name: product
+schema: dbo
+columns:
+  id: 
+    type: int
+    identity: true
+  name: 
+    type: varchar
+  sku:
+    type: varchar
+    nullable: true
+  prize:
+    type: double
+    nullable: true

@@ -1,17 +1,37 @@
 name: order
 schema: dbo
+rows: 10000
+description: |
+  The order table holds information about all orders in
+  the system. 
 columns: 
   Id: 
-    Identity: true
-    Type: int
-    Description: Holds information about orders
+    id: 0
+    identity: true
+    primary: true
+    type: int
+    description: Identifier of the row
+    nullable: false
+  OrderId: 
+    id: 1
+    identity: false
+    primary: false
+    type: varchar
+    description: Unique identifier for the order.
     nullable: false
   CustomerId:
-    Type: int
-    References: customer
-    Description: Points to the customer table
+    id: 2
+    type: int
+    references: 
+      table: customer
+      column: id
+    description: Points to the customer table
     nullable: false
-    
+  TotalAmount:
+    id: 3
+    type: decimal
+    description: Total amount of order, computed from OrderLine
+    nullable: true
 index:
   IDX_BLA_BLA:
     columns:

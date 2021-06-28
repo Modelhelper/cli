@@ -6,5 +6,16 @@ columns:
     identity: true
   orderId: 
     type: int
-    references: order
+    references: 
+      table: order
+      column: id
+  productId:
+    type: int
+    references:
+      table: product
+      column: id
+  quantity:
+    type: double
+  unitAmount:
+    type: double
 
