@@ -1,5 +1,7 @@
 package source
 
+type SortColumnById []Column
+type SortColumnByName []Column
 type ColumnToTableRenderer struct {
 	IncludeDescription bool
 	Columns            *ColumnList
@@ -57,3 +59,11 @@ func (d *ColumnToTableRenderer) BuildHeader() []string {
 
 	return h
 }
+
+func (a SortColumnById) Len() int           { return len(a) }
+func (a SortColumnById) Less(i, j int) bool { return a[i].ID < a[j].ID }
+func (a SortColumnById) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+
+func (a SortColumnByName) Len() int           { return len(a) }
+func (a SortColumnByName) Less(i, j int) bool { return a[i].Name < a[j].Name }
+func (a SortColumnByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
