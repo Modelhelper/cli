@@ -1,28 +1,8 @@
-/*
-Copyright © 2020 Hans-Petter Eitvet
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
 package cmd
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"modelhelper/cli/app"
@@ -229,6 +209,25 @@ var entityCmd = &cobra.Command{
 				etr.rows = ft.filter(etr.rows, nil)
 			}
 
+			// sorting
+			sorting, _ := cmd.Flags().GetString("sort")
+			descending, _ := cmd.Flags().GetBool("descending")
+			if sorting == "name" {
+				if descending {
+					sort.Sort(source.SortTableByNameDesc(etr.rows))
+				} else {
+					sort.Sort(source.SortTableByName(etr.rows))
+
+				}
+			} else if sorting == "rows" || sorting == "row" || sorting == "rowcount" {
+				if descending {
+					sort.Sort(source.SortTableByRowsDesc(etr.rows))
+				} else {
+					sort.Sort(source.SortTableByRows(etr.rows))
+
+				}
+			}
+
 			ui.RenderTable(&etr, &etr)
 
 		}
@@ -277,6 +276,8 @@ func init() {
 	entityCmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
 	entityCmd.Flags().StringP("connection", "c", "", "The connection to be used, uses default connection if not provided")
 
+	entityCmd.Flags().String("sort", "name", "Sorts the table values [name, rows], default value: name")
+	entityCmd.Flags().Bool("descending", false, "Sorts the list of entities descending")
 	// entityCmd.Flags().Bool("include-history", false, "Includes history enities in the list")
 
 }
