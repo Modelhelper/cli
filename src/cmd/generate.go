@@ -116,28 +116,39 @@ You could also use mh template or mh t to see a list of all available templates`
 		// obsolete
 		appCtx := modelHelperApp.CreateContext()
 
-		if len(conName) == 0 {
-
-			conName = appCtx.DefaultConnection
-		}
-
-		if len(conName) == 0 {
-			ka := keyArray(appCtx.Connections)
-			conName = ka[0]
-		}
-
+		var con source.Connection
 		var prj *project.Project
 		var entities []source.Entity
 
 		cfg := loadConfig(configFile)
 
-		con := appCtx.Connections[conName]
+		if isDemo {
+			conName = "demo"
+			con = source.Connection{Type: conName}
+		} else {
+			if len(appCtx.Connections) == 0 {
+				fmt.Println("Could not find any connections to use, please add a connection")
+				fmt.Println("to the config and/or any project file")
+				return
+			}
+			if len(conName) == 0 {
+
+				conName = appCtx.DefaultConnection
+			}
+
+			if len(conName) == 0 {
+				ka := keyArray(appCtx.Connections)
+				conName = ka[0]
+			}
+
+			con = appCtx.Connections[conName]
+		}
 
 		entityList := mergedList(entityFlagArray, entitiesFromGroups(con, entityGroupFlagArray))
 
 		src := con.LoadSource()
 
-		entities = *loadEntities(src, entityList, isDemo)
+		entities = *loadEntities(src, entityList)
 
 		prj = loadProject(projectPath)
 
@@ -564,49 +575,49 @@ func loadTemplates(templatePath string) (all map[string]tpl.Template, blocks map
 	return a, b
 }
 
-func loadEntities(src source.Source, names []string, isDemo bool) *[]source.Entity {
+func loadEntities(src source.Source, names []string) *[]source.Entity {
 	var entities []source.Entity
 
-	if isDemo {
-		// load demo project
-		var ds *source.DemoSource
-		el, _ := ds.Entities("")
+	// if isDemo {
+	// 	// load demo project
+	// 	var ds *source.DemoSource
+	// 	el, _ := ds.Entities("")
 
-		for _, eitem := range *el {
-			entities = append(entities, eitem)
+	// 	for _, eitem := range *el {
+	// 		entities = append(entities, eitem)
+	// 	}
+
+	// 	// load demo tables (2)
+	// } else {
+
+	// conName := appCtx.DefaultConnection
+
+	// con := appCtx.Connections[conName]
+	// src := con.LoadSource()
+
+	if len(names) > 0 {
+		var wg sync.WaitGroup
+		var lock = sync.Mutex{}
+		for _, entityName := range names {
+
+			wg.Add(1)
+			go func(name string) {
+				defer wg.Done()
+				entity, err := src.Entity(name)
+				if err != nil {
+					log.Fatalln(err)
+				}
+
+				lock.Lock()
+				entities = append(entities, *entity)
+				lock.Unlock()
+			}(entityName)
 		}
 
-		// load demo tables (2)
-	} else {
-
-		// conName := appCtx.DefaultConnection
-
-		// con := appCtx.Connections[conName]
-		// src := con.LoadSource()
-
-		if len(names) > 0 {
-			var wg sync.WaitGroup
-			var lock = sync.Mutex{}
-			for _, entityName := range names {
-
-				wg.Add(1)
-				go func(name string) {
-					defer wg.Done()
-					entity, err := src.Entity(name)
-					if err != nil {
-						log.Fatalln(err)
-					}
-
-					lock.Lock()
-					entities = append(entities, *entity)
-					lock.Unlock()
-				}(entityName)
-			}
-
-			wg.Wait()
-		}
-
+		wg.Wait()
 	}
+
+	// }
 
 	return &entities
 }
