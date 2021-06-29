@@ -132,7 +132,7 @@ Filter the template by using on or more of the following options
 
 				fmt.Println()
 				tp.templates = tv
-				ui.RenderTable(&tp, &tp)
+				ui.RenderTable(&tp)
 
 			}
 		} else {
@@ -140,7 +140,7 @@ Filter the template by using on or more of the following options
 			fmt.Println("In the list below you will find all available templates in ModelHelper\n")
 
 			tp.templates = allTemplates
-			ui.RenderTable(&tp, &tp)
+			ui.RenderTable(&tp)
 		}
 
 		fmt.Println()
@@ -165,7 +165,7 @@ type templatePrinter struct {
 	templates map[string]tpl.Template
 }
 
-func (t *templatePrinter) ToRows() [][]string {
+func (t *templatePrinter) Rows() [][]string {
 	var rows [][]string
 
 	for name, t := range t.templates {
@@ -186,7 +186,7 @@ func (t *templatePrinter) ToRows() [][]string {
 	return rows
 }
 
-func (t *templatePrinter) BuildHeader() []string {
+func (t *templatePrinter) Header() []string {
 
 	row := []string{
 		"Name",

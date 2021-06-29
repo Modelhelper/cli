@@ -31,25 +31,25 @@ type DefaultEntitiesTableRenderer []Entity
 type DescriptiveEntitiesRenderer []Entity
 type SimpleEntitiesRenderer []Entity
 
-func (d *DefaultEntitiesTableRenderer) ToRows() [][]string {
+func (d *DefaultEntitiesTableRenderer) Rows() [][]string {
 	return toRows(*d, false, true)
 }
 
-func (d *DefaultEntitiesTableRenderer) BuildHeader() []string {
+func (d *DefaultEntitiesTableRenderer) Header() []string {
 	return buildHeader(false, true)
 }
-func (d *DescriptiveEntitiesRenderer) ToRows() [][]string {
+func (d *DescriptiveEntitiesRenderer) Rows() [][]string {
 	return toRows(*d, true, false)
 }
 
-func (d *DescriptiveEntitiesRenderer) BuildHeader() []string {
+func (d *DescriptiveEntitiesRenderer) Header() []string {
 	return buildHeader(true, false)
 }
-func (d *SimpleEntitiesRenderer) ToRows() [][]string {
+func (d *SimpleEntitiesRenderer) Rows() [][]string {
 	return toRows(*d, false, false)
 }
 
-func (d *SimpleEntitiesRenderer) BuildHeader() []string {
+func (d *SimpleEntitiesRenderer) Header() []string {
 	return buildHeader(false, false)
 }
 

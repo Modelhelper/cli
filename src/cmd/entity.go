@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"modelhelper/cli/app"
+	"modelhelper/cli/slice"
 	"modelhelper/cli/source"
 	"modelhelper/cli/ui"
 
@@ -131,7 +132,7 @@ var entityCmd = &cobra.Command{
 					rows: e.Indexes,
 				}
 
-				ui.RenderTable(&itr, &itr)
+				ui.RenderTable(&itr)
 			}
 
 			if len(e.ChildRelations) > 0 {
@@ -140,7 +141,7 @@ var entityCmd = &cobra.Command{
 					rows: e.ChildRelations,
 				}
 
-				ui.RenderTable(&crtr, &crtr)
+				ui.RenderTable(&crtr)
 			}
 
 			if len(e.ParentRelations) > 0 {
@@ -148,7 +149,7 @@ var entityCmd = &cobra.Command{
 				crtr := relTableRenderer{
 					rows: e.ParentRelations,
 				}
-				ui.RenderTable(&crtr, &crtr)
+				ui.RenderTable(&crtr)
 
 			}
 			fmt.Println("")
@@ -156,16 +157,24 @@ var entityCmd = &cobra.Command{
 			showTree, _ := cmd.Flags().GetBool("tree")
 			if showTree {
 				treeLoader := con.LoadRelationTree()
-				flat, err := treeLoader.GetParentRelationTree(e.Schema, e.Name)
-				if err != nil {
 
+				if treeLoader != nil {
+
+					flat, err := treeLoader.GetParentRelationTree(e.Schema, e.Name)
+					// flatChild, err := treeLoader.GetChildRelationTree(e.Schema, e.Name)
+					if err != nil {
+
+					}
+
+					for _, node := range *flat {
+						add(node.ID, node.ParentID, node.TableName, node.ColumnName, node.RelatedTable, node.RelatedColumnName)
+					}
+					// for _, node := range *flatChild {
+					// 	add(node.ID, node.ParentID, node.TableName, node.ColumnName, node.RelatedTable, node.RelatedColumnName)
+					// }
+
+					show()
 				}
-
-				for _, node := range *flat {
-					add(node.ID, node.ParentID, node.TableName, node.ColumnName, node.RelatedTable, node.RelatedColumnName)
-				}
-
-				show()
 
 			}
 		} else {
@@ -228,7 +237,7 @@ var entityCmd = &cobra.Command{
 				}
 			}
 
-			ui.RenderTable(&etr, &etr)
+			ui.RenderTable(&etr)
 
 		}
 
@@ -291,7 +300,7 @@ func renderColumns(cl *source.ColumnList) {
 		Columns:            cl,
 	}
 
-	ui.RenderTable(&colr, &colr)
+	ui.RenderTable(&colr)
 }
 
 type filterEntityByType struct{}
@@ -351,7 +360,7 @@ func (f *filterEntityBySchema) filter(e []source.Entity, filter []string) []sour
 	return output
 }
 
-func (d *entitiesTableRenderer) ToRows() [][]string {
+func (d *entitiesTableRenderer) Rows() [][]string {
 	var rows [][]string
 
 	for _, e := range d.rows {
@@ -383,7 +392,7 @@ func (d *entitiesTableRenderer) ToRows() [][]string {
 
 }
 
-func (d *entitiesTableRenderer) BuildHeader() []string {
+func (d *entitiesTableRenderer) Header() []string {
 	h := []string{"Name", "Schema"}
 
 	if !d.withDesc {
@@ -410,7 +419,7 @@ type indexTableRenderer struct {
 	rows []source.Index
 }
 
-func (r *indexTableRenderer) BuildHeader() []string {
+func (r *indexTableRenderer) Header() []string {
 	return []string{
 		"Name",
 		"Clustered",
@@ -420,7 +429,7 @@ func (r *indexTableRenderer) BuildHeader() []string {
 	}
 }
 
-func (r *indexTableRenderer) ToRows() [][]string {
+func (r *indexTableRenderer) Rows() [][]string {
 	var rows [][]string
 
 	for _, i := range r.rows {
@@ -458,11 +467,11 @@ type relTableRenderer struct {
 	rows []source.Relation
 }
 
-func (r *relTableRenderer) BuildHeader() []string {
+func (r *relTableRenderer) Header() []string {
 	return []string{"Schema", "Name", "ChildCol", "ParentCol", "Constraint"}
 }
 
-func (r *relTableRenderer) ToRows() [][]string {
+func (r *relTableRenderer) Rows() [][]string {
 	var rows [][]string
 
 	for _, i := range r.rows {

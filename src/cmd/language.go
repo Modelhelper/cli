@@ -44,7 +44,7 @@ var languageCmd = &cobra.Command{
 This is a list of all available languages defined for model helper			
 			`)
 			renderer := languageTableRenderer{defs}
-			ui.RenderTable(&renderer, &renderer)
+			ui.RenderTable(&renderer)
 		}
 
 	},
@@ -68,21 +68,21 @@ func presentLanguage(def *code.LanguageDefinition) {
 	if def.DataTypes != nil {
 		ui.PrintConsoleTitle("Datatypes")
 		dtr := datatypeTableRenderer{def.Language, def.DataTypes}
-		ui.RenderTable(&dtr, &dtr)
+		ui.RenderTable(&dtr)
 	}
 
 	if def.Keys != nil {
 
 		ui.PrintConsoleTitle("Keys")
 		kr := keyRenderer{def.Keys}
-		ui.RenderTable(&kr, &kr)
+		ui.RenderTable(&kr)
 	}
 
 	if def.Inject != nil {
 		ui.PrintConsoleTitle("Injects")
 
 		ir := injectRenderer{def.Inject}
-		ui.RenderTable(&ir, &ir)
+		ui.RenderTable(&ir)
 	}
 
 	fmt.Println("")
@@ -97,12 +97,12 @@ type languageTableRenderer struct {
 	rows map[string]code.LanguageDefinition
 }
 
-func (d *languageTableRenderer) BuildHeader() []string {
+func (d *languageTableRenderer) Header() []string {
 	h := []string{"Language", "Version", "Datatypes", "Imports", "Keys", "Injects", "Description"}
 
 	return h
 }
-func (d *languageTableRenderer) ToRows() [][]string {
+func (d *languageTableRenderer) Rows() [][]string {
 	var rows [][]string
 
 	p := message.NewPrinter(language.English)
@@ -131,7 +131,7 @@ type datatypeTableRenderer struct {
 	datatypes map[string]code.Datatype
 }
 
-func (l *datatypeTableRenderer) BuildHeader() []string {
+func (l *datatypeTableRenderer) Header() []string {
 	return []string{
 		"DB Datatype",
 		fmt.Sprintf("%s not null", l.language),
@@ -140,7 +140,7 @@ func (l *datatypeTableRenderer) BuildHeader() []string {
 	}
 }
 
-func (d *datatypeTableRenderer) ToRows() [][]string {
+func (d *datatypeTableRenderer) Rows() [][]string {
 	var rows [][]string
 
 	for key, val := range d.datatypes {
@@ -161,7 +161,7 @@ type keyRenderer struct {
 	keys map[string]code.Key
 }
 
-func (l *keyRenderer) BuildHeader() []string {
+func (l *keyRenderer) Header() []string {
 	return []string{
 		"Key",
 		"Namespace",
@@ -172,7 +172,7 @@ func (l *keyRenderer) BuildHeader() []string {
 	}
 }
 
-func (d *keyRenderer) ToRows() [][]string {
+func (d *keyRenderer) Rows() [][]string {
 	var rows [][]string
 	p := message.NewPrinter(language.English)
 
@@ -201,7 +201,7 @@ type injectRenderer struct {
 	keys map[string]code.Inject
 }
 
-func (l *injectRenderer) BuildHeader() []string {
+func (l *injectRenderer) Header() []string {
 	return []string{
 		"Key",
 		"Name",
@@ -210,7 +210,7 @@ func (l *injectRenderer) BuildHeader() []string {
 	}
 }
 
-func (d *injectRenderer) ToRows() [][]string {
+func (d *injectRenderer) Rows() [][]string {
 	var rows [][]string
 	p := message.NewPrinter(language.English)
 

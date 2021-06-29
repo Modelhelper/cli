@@ -7,7 +7,7 @@ type ColumnToTableRenderer struct {
 	Columns            *ColumnList
 }
 
-func (d *ColumnToTableRenderer) ToRows() [][]string {
+func (d *ColumnToTableRenderer) Rows() [][]string {
 	var rows [][]string
 
 	for _, c := range *d.Columns {
@@ -50,7 +50,7 @@ func (d *ColumnToTableRenderer) ToRows() [][]string {
 
 }
 
-func (d *ColumnToTableRenderer) BuildHeader() []string {
+func (d *ColumnToTableRenderer) Header() []string {
 	h := []string{"Name", "Type", "Nullable", "Identity", "PK", "FK"}
 
 	if d.IncludeDescription {

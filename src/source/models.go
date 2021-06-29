@@ -37,7 +37,7 @@ type Entity struct {
 	HistoryTable        string
 }
 
-func (d *EntityList) ToRows() [][]string {
+func (d *EntityList) Rows() [][]string {
 	var rows [][]string
 
 	for _, e := range *d {
@@ -66,7 +66,7 @@ func (d *EntityList) ToRows() [][]string {
 
 }
 
-func (d *EntityList) BuildHeader() []string {
+func (d *EntityList) Header() []string {
 	h := []string{"Name", "Schema", "Alias", "Rows", "Col Cnt", "P Relations", "C Relations"}
 
 	// if withDesc {

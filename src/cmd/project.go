@@ -98,7 +98,7 @@ func printProjectInfo(projectFile string, renderTables bool) {
 		fmt.Printf("\n")
 
 		cr := connectionRenderer{cons, p.DefaultSource}
-		ui.RenderTable(&cr, &cr)
+		ui.RenderTable(&cr)
 		fmt.Printf("\n")
 	}
 	if renderTables {
@@ -108,7 +108,7 @@ func printProjectInfo(projectFile string, renderTables bool) {
 			if len(langVal.Keys) > 0 {
 				ui.PrintConsoleTitle("Keys")
 				kr := keyRenderer{keys: langVal.Keys}
-				ui.RenderTable(&kr, &kr)
+				ui.RenderTable(&kr)
 			} else {
 				fmt.Printf(`No keys is defined for this project
 Using keys will enable the templates to render correct namespace, package etc
@@ -122,7 +122,7 @@ use the command 'mh project key <name> --namespace 'namespace'
 			if len(langVal.Inject) > 0 {
 				ui.PrintConsoleTitle("Inject")
 				ir := injectRenderer{langVal.Inject}
-				ui.RenderTable(&ir, &ir)
+				ui.RenderTable(&ir)
 			} else {
 				showTemplateKey = true
 			}
@@ -130,7 +130,7 @@ use the command 'mh project key <name> --namespace 'namespace'
 				ui.PrintConsoleTitle("Locations")
 
 				lr := locationRenderer{langVal.Locations}
-				ui.RenderTable(&lr, &lr)
+				ui.RenderTable(&lr)
 
 			} else {
 				fmt.Printf(`Locations is not defined for this project
@@ -165,14 +165,14 @@ type locationRenderer struct {
 	rows map[string]string
 }
 
-func (l *locationRenderer) BuildHeader() []string {
+func (l *locationRenderer) Header() []string {
 	return []string{
 		"Key",
 		"Path",
 	}
 }
 
-func (d *locationRenderer) ToRows() [][]string {
+func (d *locationRenderer) Rows() [][]string {
 	var rows [][]string
 	// p := message.NewPrinter(language.English)
 
@@ -194,7 +194,7 @@ type connectionRenderer struct {
 	defcon string
 }
 
-func (l *connectionRenderer) BuildHeader() []string {
+func (l *connectionRenderer) Header() []string {
 	return []string{
 		"Key",
 		"Default",
@@ -203,7 +203,7 @@ func (l *connectionRenderer) BuildHeader() []string {
 	}
 }
 
-func (d *connectionRenderer) ToRows() [][]string {
+func (d *connectionRenderer) Rows() [][]string {
 	var rows [][]string
 	// p := message.NewPrinter(language.English)
 
