@@ -8,17 +8,15 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-type RowsConverter interface {
-	ToRows() [][]string
+type TableConverter interface {
+	Rows() [][]string
+	Header() []string
 }
 
-type HeaderBuilder interface {
-	BuildHeader() []string
-}
+func RenderTable(tc TableConverter) {
 
-func RenderTable(header HeaderBuilder, data RowsConverter) {
-	table := CreateTableWithColumnSeparator(header.BuildHeader())
-	table.AppendBulk(data.ToRows())
+	table := CreateTableWithColumnSeparator(tc.Header())
+	table.AppendBulk(tc.Rows())
 
 	table.Render()
 }
@@ -26,7 +24,6 @@ func RenderTable(header HeaderBuilder, data RowsConverter) {
 func CreateStandardTable(header []string) *tablewriter.Table {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(header)
-	// table.SetFooter([]string{"", "", "Total", "$146.93"}) // Add Footer
 	table.SetBorder(false) // Set Border to false
 	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 	table.SetRowLine(false)
@@ -46,9 +43,6 @@ func CreateTableWithColumnSeparator(header []string) *tablewriter.Table {
 	table.SetAutoWrapText(false)
 	table.SetCenterSeparator("+")
 	table.SetColumnSeparator("|")
-
-	// table.SetTablePadding("\t") // pad with tabs
-	// table.SetNoWhiteSpace(true)
 
 	return table
 }
