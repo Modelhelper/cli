@@ -31,6 +31,7 @@ type Source interface {
 
 type RelationTree interface {
 	GetParentRelationTree(schema string, entityName string) (*[]RelationTreeItem, error)
+	GetChildRelationTree(schema string, entityName string) (*[]RelationTreeItem, error)
 	// Entities(pattern string) (*[]Entity, error)
 }
 
