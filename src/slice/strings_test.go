@@ -2,7 +2,6 @@ package slice_test
 
 import (
 	"modelhelper/cli/slice"
-	"modelhelper/cli/strstat"
 	"testing"
 )
 
@@ -38,7 +37,7 @@ func TestMaxLen(t *testing.T) {
 
 	for idx, test := range tests {
 
-		a := strstat.MaxLen(test.list)
+		a := slice.MaxLen(test.list)
 		e := test.expected
 
 		if a != e {
