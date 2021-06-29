@@ -333,7 +333,7 @@ func (f *filterVersionedEntity) filter(e []source.Entity, filter []string) []sou
 func (f *filterEntityByType) filter(e []source.Entity, filter []string) []source.Entity {
 	output := []source.Entity{}
 	for _, entity := range e {
-		if contains(filter, entity.Type) {
+		if slice.Contains(filter, entity.Type) {
 			output = append(output, entity)
 		}
 	}
@@ -343,22 +343,12 @@ func (f *filterEntityByType) filter(e []source.Entity, filter []string) []source
 func (f *filterEntityBySchema) filter(e []source.Entity, filter []string) []source.Entity {
 	output := []source.Entity{}
 	for _, entity := range e {
-		if contains(filter, entity.Schema) {
+		if slice.Contains(filter, entity.Schema) {
 			output = append(output, entity)
 		}
 	}
 
 	return output
-}
-
-func contains(s []string, str string) bool {
-	for _, v := range s {
-		if strings.ToLower(v) == strings.ToLower(str) {
-			return true
-		}
-	}
-
-	return false
 }
 
 func (d *entitiesTableRenderer) ToRows() [][]string {
