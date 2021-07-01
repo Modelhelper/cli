@@ -9,6 +9,10 @@ type TreeBuilder interface {
 	Build() Node
 }
 
+type NodeDescriber interface {
+	Describe() string
+}
+
 type Node struct {
 	// ID          int
 	Name        string
@@ -21,6 +25,20 @@ type Node struct {
 func (n *Node) Add(child Node) {
 	n.Nodes = append(n.Nodes, child)
 }
+
+func Print(tb TreeBuilder, withDescription bool) {
+	root := tb.Build()
+
+	root.Print(withDescription)
+}
+
+func (n *Node) Print(withDescription bool) {
+	PrintTree(*n, "", withDescription)
+}
+
+// func (n *Node) ToString() string {
+
+// }
 
 func PrintTree(root Node, prefix string, printDescription bool) {
 	if prefix == "" {

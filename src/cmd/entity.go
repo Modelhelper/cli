@@ -8,6 +8,7 @@ import (
 	"modelhelper/cli/app"
 	"modelhelper/cli/slice"
 	"modelhelper/cli/source"
+	"modelhelper/cli/tree"
 	"modelhelper/cli/ui"
 
 	"github.com/gookit/color"
@@ -166,14 +167,17 @@ var entityCmd = &cobra.Command{
 
 					}
 
-					for _, node := range *flat {
-						add(node.ID, node.ParentID, node.TableName, node.ColumnName, node.RelatedTable, node.RelatedColumnName)
-					}
-					// for _, node := range *flatChild {
+					tb := relationTreeBuilder{*flat}
+					tree.Print(&tb, true)
+
+					// for _, node := range *flat {
 					// 	add(node.ID, node.ParentID, node.TableName, node.ColumnName, node.RelatedTable, node.RelatedColumnName)
 					// }
+					// // for _, node := range *flatChild {
+					// // 	add(node.ID, node.ParentID, node.TableName, node.ColumnName, node.RelatedTable, node.RelatedColumnName)
+					// // }
 
-					show()
+					// show()
 				}
 
 			}
@@ -242,6 +246,10 @@ var entityCmd = &cobra.Command{
 		}
 
 	},
+}
+
+type relationTreeBuilder struct {
+	items []source.RelationTreeItem
 }
 
 func keyArray(input map[string]source.Connection) []string {
@@ -515,26 +523,62 @@ type Node struct {
 	Nodes     map[int]Node
 }
 
-func add(id, parentId int, name, column, relName, relCol string) {
-	// fmt.Printf("add: id=%v name=%v parentId=%v\n", id, name, parentId)
+func (tb *relationTreeBuilder) Build() tree.Node {
+	root := tree.Node{}
+	nodeTable := map[int]tree.Node{}
 
-	node := &Node{Name: name, ID: id, Column: column, RelName: relName, RelColumn: relCol, Nodes: make(map[int]Node)}
+	add := func(id, parentId int, name, column, relName, relCol string) {
+		// internalTable := map[int]tree.Node{}
+		desc := color.FgDarkGray.Sprintf("connection: (%s.%s => %s.%s)", name, column, relName, relCol)
+		node := tree.Node{Name: name, Description: desc}
 
-	if parentId == -1 {
-		root = node
-	} else {
+		if parentId == -1 {
+			root = node
+		} else {
+			parent, ok := nodeTable[parentId]
+			if !ok {
+				return
+			}
 
-		parent, ok := nodeTable[parentId]
-		if !ok {
-			// fmt.Printf("add: parentId=%v: not found\n", parentId)
-			return
+			parent.Nodes = append(parent.Nodes, node)
+			//parent.Nodes[id] = node
+			// parent.Add(node)
 		}
 
-		parent.Nodes[id] = *node
+		nodeTable[id] = node
 	}
 
-	nodeTable[id] = node
+	for _, item := range tb.items {
+		add(item.ID, item.ParentID, item.TableName, item.ColumnName, item.RelatedTable, item.RelatedColumnName)
+	}
+
+	return root
 }
+
+// func (tb *relationTreeBuilder) Describe() string {
+// 	desc := color.FgDarkGray.Sprintf("connection: (%s.%s => %s.%s)", name, column, relName, relCol)
+
+// }
+// func add(id, parentId int, name, column, relName, relCol string) {
+// 	// fmt.Printf("add: id=%v name=%v parentId=%v\n", id, name, parentId)
+
+// 	node := &Node{Name: name, ID: id, Column: column, RelName: relName, RelColumn: relCol, Nodes: make(map[int]Node)}
+
+// 	if parentId == -1 {
+// 		root = node
+// 	} else {
+
+// 		parent, ok := nodeTable[parentId]
+// 		if !ok {
+// 			// fmt.Printf("add: parentId=%v: not found\n", parentId)
+// 			return
+// 		}
+
+// 		parent.Nodes[id] = *node
+// 	}
+
+// 	nodeTable[id] = node
+// }
 
 func show() {
 

@@ -14,8 +14,8 @@
             //  "args": ["generate", "--screen", "-t", "cs-poco", "--demo", "-e", "order"]
             //"args": ["project", "--path", "D:\\projects\\ModelHelper\\.modelhelper\\project.yaml"]
             // "args": ["generate", "--screen", "--export-bykey", "-t", "cs-poco", "--demo", "--project-path", "D:\\projects\\ModelHelper\\.modelhelper\\project.yaml"]
-            "args": ["entity", "order", "--demo", "--tree"]
-            // "args": ["set", "defcon"]
+            //"args": ["entity", "Batch", "--tree"]
+            "args": ["set", "defcon"]
             // "args": ["t", "cs-gql-hc-resolver", "--open"]
             // "args": ["set", "dev", "--name", "Hans-Petter Eitvet", "--email", "hpe@hpe.no"]
             // "args": ["language", "cs"], 
