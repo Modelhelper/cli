@@ -167,7 +167,10 @@ var entityCmd = &cobra.Command{
 
 					}
 
-					tb := relationTreeBuilder{*flat}
+					tb := source.RelationTreeBuilder{
+						Items: *flat,
+					}
+
 					tree.Print(&tb, true)
 
 					// for _, node := range *flat {

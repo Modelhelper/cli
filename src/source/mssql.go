@@ -684,7 +684,7 @@ func (server *MsSql) GetParentRelationTree(schema string, entityName string) (*[
 	ctx := context.Background()
 
 	query := `
-	;with track_parent as (
+    ;with track_parent as (
 
 		-- select lvl = 1, p.name, p.parent_object_id, referenced_object_id, family = p.parent_object_id, path = cast(object_name(referenced_object_id) + ' > ' + object_name(parent_object_id) as nvarchar(1000) )
 		select 
@@ -724,8 +724,11 @@ func (server *MsSql) GetParentRelationTree(schema string, entityName string) (*[
 		--join sys.objects o on o.object_id = fk.parent_object_id
 		join track_parent t on t.referenced_object_id = fk.parent_object_id
 		
-		)
+		), data as (
+
+        
 			select 
+                    
 					-- direction = 0
 					-- , lvl = 0
 					  KeyName = ''
@@ -735,13 +738,19 @@ func (server *MsSql) GetParentRelationTree(schema string, entityName string) (*[
 					, ParentColumn = ''
 					, Name =  p.name
 					, ColumnName = ''
+                    , idx = 1
 					-- , family =p.object_id
 					-- , path = p.name
 				from sys.tables p
 				where p.object_id = object_id(@tablename)
 			union all
-			select * from track_parent
+			select * , idx = row_number() over (partition by parent_object_id, referenced_object_id order by parent_object_id) from track_parent
 			-- order by lvl, family
+        ) 
+		select 
+			keyname, parentid, id, relatedtable, relatedcolumnname, tablename, columnname 
+		from data 
+		where idx = 1;
 		;
 	`
 

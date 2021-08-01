@@ -3,6 +3,7 @@ package source
 import (
 	"modelhelper/cli/tree"
 
+	"github.com/gookit/color"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -116,53 +117,39 @@ func buildHeader(withDesc, withStat bool) []string {
 // var nodeTable map[int]tree.Node
 
 func (tb *RelationTreeBuilder) Build() tree.Node {
-	root := tree.Node{}
+	var root tree.Node
 
-	// add := func(id, parentId int, name, column, relName, relCol string) {
-	// 	// internalTable := map[int]tree.Node{}
-	// 	desc := color.FgDarkGray.Sprintf("connection: (%s.%s => %s.%s)", name, column, relName, relCol)
-	// 	node := tree.Node{Name: name, Description: desc}
+	for _, item := range tb.Items {
+		if item.ParentID == -1 {
+			root = tree.Node{
+				ID:          item.ID,
+				Name:        item.TableName,
+				Description: "",
+				Nodes:       []tree.Node{},
+			}
 
-	// 	if parentId == -1 {
-	// 		root = node
-	// 	} else {
-	// 		parent, ok := nodeTable[parentId]
-	// 		if !ok {
-	// 			return
-	// 		}
-
-	// 		parent.Nodes = append(parent.Nodes, node)
-	// 		//parent.Nodes[id] = node
-	// 		// parent.Add(node)
-	// 	}
-
-	// 	nodeTable[id] = node
-	// }
-
-	// for _, item := range tb.Items {
-	// 	add(nodeTable, item.ID, item.ParentID, item.TableName, item.ColumnName, item.RelatedTable, item.RelatedColumnName)
-	// }
+			addChildNodes(&root, tb.Items)
+		} else {
+			break
+		}
+	}
 
 	return root
 }
 
-func add(items []RelationTreeItem, id, parentId int, name, column, relName, relCol string) {
-	// internalTable := map[int]tree.Node{}
-	// desc := color.FgDarkGray.Sprintf("connection: (%s.%s => %s.%s)", name, column, relName, relCol)
-	// node := tree.Node{Name: name, Description: desc}
+func addChildNodes(n *tree.Node, nodes []RelationTreeItem) {
+	for _, item := range nodes {
+		if n.ID == item.ParentID {
+			desc := color.FgDarkGray.Sprintf("connection: (%s.%s => %s.%s)", item.TableName, item.ColumnName, item.RelatedTable, item.RelatedColumnName)
+			child := tree.Node{
+				ID:          item.ID,
+				Name:        item.TableName,
+				Description: desc,
+				Nodes:       []tree.Node{},
+			}
+			addChildNodes(&child, nodes)
+			n.Nodes = append(n.Nodes, child)
 
-	// if parentId == -1 {
-	// 	// root = node
-	// } else {
-	// 	// parent, ok := nodeTable[parentId]
-	// 	// if !ok {
-	// 	// 	return
-	// 	// }
-
-	// 	parent.Nodes = append(parent.Nodes, node)
-	// 	//parent.Nodes[id] = node
-	// 	// parent.Add(node)
-	// }
-
-	// nodeTable[id] = node
+		}
+	}
 }

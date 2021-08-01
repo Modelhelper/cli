@@ -14,7 +14,7 @@ type NodeDescriber interface {
 }
 
 type Node struct {
-	// ID          int
+	ID          int
 	Name        string
 	Description string
 	Nodes       []Node
