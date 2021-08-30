@@ -41,7 +41,7 @@ var setConnectionCmd = &cobra.Command{
 
 		key := args[0]
 		conType, _ := cmd.Flags().GetString("type")
-		conString, _ := cmd.Flags().GetString("connectionString")
+		conString, _ := cmd.Flags().GetString("constr")
 		conDesc, _ := cmd.Flags().GetString("description")
 		conSchema, _ := cmd.Flags().GetString("schema")
 		merge, _ := cmd.Flags().GetBool("merge")
