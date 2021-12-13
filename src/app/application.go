@@ -43,7 +43,7 @@ func SetConfig(config config.Config) {
 var Configuration *config.Config
 
 // version shows the current application version
-var version = "3.0.0-beta1"
+var version = "3.0.0-beta1.1"
 var isBeta = true
 
 // Logo returns the logo to be printed on root command
