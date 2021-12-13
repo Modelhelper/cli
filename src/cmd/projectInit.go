@@ -28,14 +28,13 @@ import (
 	"modelhelper/cli/ui"
 
 	"github.com/gookit/color"
-	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
 
 // projectInitCmd represents the projectInit command
 var projectInitCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Initialize a new project in the current working directory",
+	Use:   "create",
+	Short: "Creates a new project in the current working directory",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		p := *&project.Project{}
