@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"modelhelper/cli/config"
 	"modelhelper/cli/project"
+	"modelhelper/cli/ui"
 
 	"github.com/gookit/color"
 	"github.com/manifoldco/promptui"
@@ -44,18 +45,18 @@ var projectInitCmd = &cobra.Command{
 		if project.Exists(project.DefaultLocation()) {
 			color.Red.Println("NB!!")
 			color.Red.Println("A project already exists in this location")
-			init = promptForYesNo("Overwrite current project file? ")
+			init = ui.PromptForYesNo("Overwrite current project file? [y/N]", "n")
 		}
 
 		if init {
 			p.Version = "3.0"
-			p.Name = promptForString("Enter the name of the project")
+			p.Name = ui.PromptForString("Enter the name of the project")
 			p.DefaultSource = promptForConnectionKey()
-			p.Language = promptForLanguage()
+			p.Language = ui.PromptForLanguage("Select the primary code language")
 			p.Options = make(map[string]string)
 			// p.OwnerName = promptForString("Enter the owner (company name) for this project")
 
-			if promptForYesNo("Clone connections from config? ") {
+			if ui.PromptForYesNo("Clone connections from config? [Y/n]", "y") {
 				cfg := config.Load()
 				p.Connections = cfg.Connections
 				// clone
