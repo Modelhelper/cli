@@ -1,8 +1,9 @@
 build_linux:
+	
 	go get
 
 
-	env GOOS=linux go build -o ./bin/linux/mh ./main.go
+	env GOOS=linux go build -o ./bin/linux/mh src/main.go
 ## build for linux
 
 build_win:
