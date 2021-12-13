@@ -27,6 +27,7 @@ type ConnectionProvider interface {
 type Source interface {
 	Entity(name string) (*Entity, error)
 	Entities(pattern string) (*[]Entity, error)
+	EntitiesFromColumn(column string) (*[]Entity, error)
 }
 
 type RelationTree interface {

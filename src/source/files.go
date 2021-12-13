@@ -141,6 +141,9 @@ func (f *Files) Entity(name string) (*Entity, error) {
 func (f *Files) Entities(pattern string) (*[]Entity, error) {
 	return nil, nil
 }
+func (f *Files) EntitiesFromColumn(column string) (*[]Entity, error) {
+	return nil, nil
+}
 
 func (f *fileEntity) toSourceEntity() Entity {
 	ent := Entity{

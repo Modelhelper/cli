@@ -185,7 +185,17 @@ var entityCmd = &cobra.Command{
 
 			}
 		} else {
-			ents, err := src.Entities(pattern)
+
+			columnFilter, _ := cmd.Flags().GetString("column")
+			var ents *[]source.Entity
+			var err error
+
+			if len(columnFilter) > 0 {
+				ents, err = src.EntitiesFromColumn(columnFilter)
+			} else {
+
+				ents, err = src.Entities(pattern)
+			}
 
 			if err != nil {
 				fmt.Println(err)
@@ -292,8 +302,11 @@ func init() {
 	entityCmd.Flags().Bool("with-relations", false, "Filter only entities with relations")
 	entityCmd.Flags().Bool("no-relations", false, "Filter only entities without relations")
 	entityCmd.Flags().Bool("is-versioned", false, "Filter only entities that is versioned")
-	entityCmd.Flags().Bool("tree", false, "Filter only entities that is versioned")
+
+	// entityCmd.Flags().Bool("tree", false, "Filter only entities that is versioned")
+
 	entityCmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
+	entityCmd.Flags().String("column", "", "List entities based on a column name")
 	entityCmd.Flags().StringP("connection", "c", "", "The connection to be used, uses default connection if not provided")
 
 	entityCmd.Flags().String("sort", "name", "Sorts the table values [name, rows], default value: name")

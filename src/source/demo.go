@@ -53,6 +53,28 @@ func (server *DemoSource) Entities(pattern string) (*[]Entity, error) {
 	return &list, nil
 
 }
+func (server *DemoSource) EntitiesFromColumn(column string) (*[]Entity, error) {
+	list := []Entity{}
+	baseList := getDemoEntities()
+
+	for _, fent := range baseList {
+
+		entity := fent.toSourceEntity()
+		entity.ParentRelations = fent.getParentRelations(baseList)
+		entity.ParentRelationCount = len(entity.ParentRelations)
+
+		entity.ChildRelations = fent.getChildRelations(baseList)
+		entity.ChildRelationCount = len(entity.ChildRelations)
+
+		entity.ColumnCount = len(entity.Columns)
+		entity.Alias = Abbreviate(entity.Name)
+		list = append(list, entity)
+
+	}
+
+	return &list, nil
+
+}
 
 func getDemoEntities() []fileEntity {
 	list := []fileEntity{}

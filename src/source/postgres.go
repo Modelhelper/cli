@@ -10,3 +10,6 @@ func (server *Postgres) Entity(name string) (*Entity, error) {
 func (server *Postgres) Entities(pattern string) (*[]Entity, error) {
 	return nil, nil
 }
+func (server *Postgres) EntitiesFromColumn(column string) (*[]Entity, error) {
+	return nil, nil
+}
