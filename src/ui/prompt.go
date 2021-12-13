@@ -6,17 +6,30 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/manifoldco/promptui"
 )
 
 func PromptForString(question string) (answer string) {
 
-	reader := bufio.NewReader(os.Stdin)
+	// reader := bufio.NewReader(os.Stdin)
 
-	fmt.Print(question)
-	text, _ := reader.ReadString('\n')
-	text = strings.ReplaceAll(text, "\r\n", "")
+	// fmt.Print(question)
+	// text, _ := reader.ReadString('\n')
+	// text = strings.ReplaceAll(text, "\r\n", "")
 
-	return text
+	// return text
+	prompt := promptui.Prompt{
+		Label: question,
+	}
+
+	result, err := prompt.Run()
+
+	if err != nil {
+		return ""
+	}
+
+	return result
 }
 func PromptForMultilineString(question string) (answer string) {
 
@@ -66,4 +79,95 @@ func PromptForInt(question string) (answer int) {
 	}
 
 	return res
+}
+
+func PromptForEditor(question string) (answer string) {
+	return question
+}
+
+func PromptForLanguage(question string) (answer string) {
+	lang := make(map[string]string)
+	lang["C#"] = "cs"
+	lang["Go"] = "go"
+	lang["TypeScript"] = "ts"
+	lang["JavaScript"] = "js"
+	lang["Python"] = "py"
+	lang["Java"] = "java"
+
+	items := []string{}
+
+	for k, _ := range lang {
+		items = append(items, k)
+	}
+
+	index := -1
+	var result string
+	var err error
+
+	for index < 0 {
+		prompt := promptui.SelectWithAdd{
+			Label:    question,
+			Items:    items,
+			AddLabel: "Other",
+		}
+
+		index, result, err = prompt.Run()
+
+		if index == -1 {
+			items = append(items, result)
+		}
+	}
+
+	if err != nil {
+		// fmt.Printf("Prompt failed %v\n", err)
+		return ""
+	}
+
+	selected, found := lang[result]
+	if found {
+		return selected
+	}
+
+	return result
+}
+
+func PromptForYesNoList(question string) bool {
+	answers := make(map[string]bool)
+	answers["Yes"] = true
+	answers["No"] = false
+
+	items := []string{}
+
+	for k, _ := range answers {
+		items = append(items, k)
+	}
+
+	index := -1
+	var key string
+	var err error
+
+	for index < 0 {
+		prompt := promptui.Select{
+			Label: question,
+			Items: items,
+		}
+
+		index, key, err = prompt.Run()
+
+		if index == -1 {
+			items = append(items, key)
+		}
+	}
+
+	if err != nil {
+		// fmt.Printf("Prompt failed %v\n", err)
+		return false
+	}
+
+	selected, found := answers[key]
+	if found {
+		return selected
+	}
+
+	return false
 }
