@@ -67,14 +67,17 @@ var entityCmd = &cobra.Command{
 			if len(conNameFlag) == 0 {
 
 				conName = ctx.DefaultConnection
+			} else {
+				conName = conNameFlag
 			}
 
-			if len(conNameFlag) == 0 {
+			if len(conName) == 0 {
 				ka := keyArray(ctx.Connections)
 				conName = ka[0]
 			}
 
 			con = ctx.Connections[conName]
+
 		}
 
 		src := con.LoadSource()
