@@ -7,6 +7,7 @@
         {
             "name": "Launch Package",
             "type": "go",
+            "args": ["e", "-c", "gt"],
             "request": "launch",
             "mode": "auto",
             "program": "${fileDirname}"
