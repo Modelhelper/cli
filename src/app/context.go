@@ -8,17 +8,19 @@ import (
 	"modelhelper/cli/source"
 )
 
+// Templates         *[]tpl.Template
+// Blocks            *[]tpl.Template
 type Context struct {
-	ProjectExists  bool
-	CurrentProject *project.Project
-	// Templates         *[]tpl.Template
-	// Blocks            *[]tpl.Template
+	ProjectExists     bool
+	CurrentProject    *project.Project
 	Connections       map[string]source.Connection
 	DefaultConnection string
 	Languages         *map[string]code.LanguageDefinition
 	Options           *map[string]interface{}
 	CurrentLanguage   code.LanguageDefinition
 	CurrentConnection source.Connection
+	IsDemo            bool
+	InputConnection   string
 }
 
 func (a *Application) CreateContext() *Context {
