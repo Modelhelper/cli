@@ -534,6 +534,10 @@ func (server *MsSql) getColumns(schema string, entityName string) (*ColumnList, 
 	if err != nil {
 		return nil, err
 	}
+
+	if len(schema) > 0 {
+		entityName = fmt.Sprintf("%s.%s", schema, entityName)
+	}
 	// Execute query
 	rows, err := stmt.Query(query, sql.Named("entityName", entityName))
 	if err != nil {
@@ -629,6 +633,10 @@ where fkc.parent_object_id = OBJECT_ID(@entityName)
 	if err != nil {
 		return nil, err
 	}
+
+	if len(schema) > 0 {
+		entityName = fmt.Sprintf("%s.%s", schema, entityName)
+	}
 	// Execute query
 	rows, err := stmt.Query(query, sql.Named("entityName", entityName))
 	if err != nil {
@@ -708,6 +716,10 @@ where fkc.referenced_object_id = OBJECT_ID(@entityName)
 	if err != nil {
 		return nil, err
 	}
+
+	if len(schema) > 0 {
+		entityName = fmt.Sprintf("%s.%s", schema, entityName)
+	}
 	// Execute query
 	rows, err := stmt.Query(query, sql.Named("entityName", entityName))
 	if err != nil {
@@ -777,6 +789,9 @@ JOIN sys.indexes AS b ON a.object_id = b.object_id AND a.index_id = b.index_id
 
 	if err != nil {
 		return nil, err
+	}
+	if len(schema) > 0 {
+		entityName = fmt.Sprintf("%s.%s", schema, entityName)
 	}
 
 	database := server.Connection.ConnectionStringPart("database")
@@ -948,6 +963,10 @@ func (server *MsSql) GetParentRelationTree(schema string, entityName string) (*[
 	if err != nil {
 		return nil, err
 	}
+
+	if len(schema) > 0 {
+		entityName = fmt.Sprintf("%s.%s", schema, entityName)
+	}
 	// Execute query
 	rows, err := stmt.Query(query, sql.Named("tablename", entityName))
 	if err != nil {
@@ -1055,6 +1074,10 @@ func (server *MsSql) GetChildRelationTree(schema string, entityName string) (*[]
 
 	if err != nil {
 		return nil, err
+	}
+
+	if len(schema) > 0 {
+		entityName = fmt.Sprintf("%s.%s", schema, entityName)
 	}
 	// Execute query
 	rows, err := stmt.Query(query, sql.Named("tablename", entityName))
