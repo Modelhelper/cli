@@ -4,11 +4,14 @@ type: sql
 status: dev
 language: TSQL
 vendor: Microsoft
+notation: pascal
 short: MS SQL server is a database technology from Microsoft. This can be hosted on your computer, server or cloud.
 description: |
   MS SQL server is a database technology from Microsoft. This can be hosted on your computer, server or cloud.
 
 parameter:
+  supported: true
+  declaration: named # position
   prefix: "@"
   postfix: 
 
@@ -20,7 +23,9 @@ functions:
   spacing: SPACE
   addDate: DATEADD
   textposition: CHARINDEX(%TEST%, %INPUT%)
-  now: GETDATE()
+  now: GETUTCDATE()
+  epochNow: DATEDIFF(SECOND,'1970-01-01', GETUTCDATE())
+  epochDate: DATEDIFF(SECOND,'1970-01-01', %INPUT%)
 
 datatypes:
   varchar:
@@ -36,4 +41,5 @@ queries:
   indexes:
     query: |
       select * from sys.indexes where object_id = @object_id
-  
+
+connection:
