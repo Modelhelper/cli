@@ -1,0 +1,144 @@
+﻿language: go # must be the same as template e.g cs, go, java (normally this should be the language file extension e.g startup.cs )
+version: 3.0
+
+short: Language defintion for Go (Golang from Google)
+description: |
+  The go language definition defines a setup with datatypes and a common 
+  set of keys
+
+  The tooling in go will set correct imports, so there is no need to 
+  define a set of default imports in this file.
+
+  In go it is possible to use two different methods of making a property 
+  nullable (in this lang def you can use either nullable or nullableAlternative). 
+  This can be mapped in the config or project by specifing the property use
+  
+  This definition also uses a set of keys that is common in a go project 
+  e.g struct, interface, resolver etc. These keys is used in the templates 
+  to get a proper namespace, prefix and/or postfix. The key is also used 
+  in a project file to export the template to a proper location.
+
+  Nullability in go can be tricky, If you think something won’t be null, 
+  but you’re wrong, your program will crash, perhaps rarely enough that 
+  you won’t catch errors before you ship them.
+  Nullable types in go from a database could be handled by the sql- package. 
+  (There is no official alternative way to describe a nullable type, 
+  so the nullableAlternative is omitted)
+  a NULL value is different from 0, NULL != 0, and NULL can have a meaning, 
+  escpessiallyu if int is used as a foreign key and the value is NULL, 
+  this means that there is no connection between this data row and 
+  the parent or child table that is referenceden.
+
+  If handling null is of no interest it is possible to set the "disableNullableTypes" 
+  for the current project to true. This will use the COALESCE method 
+  in sql to get the default value instead of NULL.
+  If 'disableNullableTypes' is set to true, modelhelper will interpret 
+  every column as 'IsNullable=true' and therefor use the notNull 
+  value of the datatype mapping
+  
+
+usesNamespace: false
+canInject: false
+
+datatypes: 
+  string: 
+    notNull: string
+    nullable: sql.NullString    
+    defaultValue: ""
+    notnullValue: ''
+  bigint: 
+    notNull: Int64
+    nullable: sql.NullInt64
+    defaultValue: 0
+    notnullValue: 0
+  binary: 
+    notNull: string
+    nullable: string
+  bit: 
+    notNull: bool
+    nullable: sql.NullBool
+    defaultValue: false
+  char: 
+    notNull: char
+    nullable: sql.NullChar    
+  date: 
+    notNull: time.Time
+    nullable: sql.NullTime    
+  datetime: 
+    notNull: time.Time
+    nullable: sql.NullTime    
+  datetime2: 
+    notNull: time.Time
+    nullable: sql.NullTime    
+  datetimeoffset: 
+    notNull: time.Time
+    nullable: sql.NullTime    
+  decimal: 
+    notNull: decimal
+    nullable: sql.NullDecimal
+  float: 
+    notNull: float
+    nullable: sql.NullFloat    
+  geography: 
+    notNull: string
+    nullable: string    
+  geometry: 
+    notNull: string
+    nullable: string    
+  image: 
+    notNull: string
+    nullable: string    
+  int: 
+    notNull: int
+    nullable: sql.NullInt32    
+  money: 
+    notNull: decimal
+    nullable: sql.NullDecimal    
+  nchar: 
+    notNull: string
+    nullable: sql.NullString    
+  ntext: 
+    notNull: string
+    nullable: sql.NullString    
+  numeric: 
+    notNull: decimal
+    nullable: sql.NullDecimal    
+  nvarchar: 
+    notNull: string
+    nullable: sql.NullString     
+  real: 
+    notNull: decimal
+    nullable: decimal?    
+  smalldatetime: 
+    notNull: time.Time
+    nullable: sql.NullTime    
+  smallint: 
+    notNull: Int8
+    nullable: sql.NullInt8
+  smallmoney: 
+    notNull: string
+    nullable: string    
+  text: 
+    notNull: string
+    nullable: sql.NullString     
+  time: 
+    notNull: time.Time
+    nullable: sql.NullTime    
+  timestamp: 
+    notNull: string
+    nullable: string    
+  tinyint: 
+    notNull: Int16
+    nullable: Int16?    
+  uniqueidentifier: 
+    notNull: string
+    nullable: sql.NullString   
+  varbinary: 
+    notNull: Byte[]
+    nullable: Byte[]    
+  varchar: 
+    notNull: string
+    nullable: sql.NullString     
+  xml: 
+    notNull: string
+    nullable: sql.NullString    

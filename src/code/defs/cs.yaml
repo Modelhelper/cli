@@ -1,0 +1,197 @@
+﻿language: cs # must be the same as template e.g cs, go, java (normally this should be the language file extension e.g startup.cs )
+version: 3.0
+
+short: Language defintion for Microsoft CSharp (C#)
+description: |
+  The cs (Microsoft C#) language definition defines a setup with datatypes 
+  default imports (imports you normally add to code).
+   
+  In C# it is possible to use two different methods of making a property 
+  nullable (in this lang def you can use either nullable or nullableAlternativ). 
+  This can be mapped in the config or project by specifing the property 
+  'useNullableAlternative' in the code section to true or false - default 
+  value is false (empty == false)
+  
+  This definition also uses a set of keys that is common in a C# project 
+  e.g model, interface, resolver etc. These keys is used in the templates 
+  to get a proper namespace, prefix and/or postfix. The key is also 
+  used in a project file to export the template to a proper location.
+
+  In C# (or .Net) it is possible to inject code in a constructor or method. 
+
+defaultImports: 
+  - "using System;"
+  - "using System.Linq;"
+  - "using System.Threading;"
+  - "using System.Collections.Generic;"
+
+
+keys:
+  interface:
+    postfix: Repository
+    prefix: I
+  model:
+    postfix: Model
+  repository:   
+    postfix: Repository
+    inject:
+      - logging
+    imports: [
+      "using {{ .Code.RootNamespace }}.Extensions"
+    ]
+  service:
+    postfix: "Service"
+  controller:
+    postfix: "Controller" 
+    imports: [
+      "using {{ .Code.RootNamespace }}.Extensions"
+    ]
+  extension:
+    postfix: "Extension"      
+    namespace: "{{ .Code.RootNamespace }}.Extensions"
+
+inject:  
+  logging:
+    name: ILogger<{{ .Name }}>
+    propertyName: logger
+    imports: [
+      "using Microsoft.Logging"
+    ]
+  config:
+    name: IConfiguration<{{ .Name }}>
+    propertyName: config
+    imports: [
+      "using Microsoft.Extensions.Configuration;"
+    ]
+
+## maps datatype to language type
+## can be a mix of mssql, postgres, mysql etc
+datatypes: 
+  string: 
+    notNull: string
+    nullable: string
+    nullableAlternative: string    
+  bigint: 
+    notNull: Int64
+    nullable: Int64?
+    nullableAlternative: nullable<Int64> # Int64
+  binary: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # Byte[]
+  bit: 
+    notNull: bool
+    nullable: bool?
+    nullableAlternative: nullable<bool> # bool
+  char: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # char
+  date: 
+    notNull: DateTimeOffset
+    nullable: DateTimeOffset?
+    nullableAlternative: nullable<DateTimeOffset> # DateTime
+  datetime: 
+    notNull: DateTimeOffset
+    nullable: DateTimeOffset?
+    nullableAlternative: nullable<DateTimeOffset> # DateTime
+  datetime2: 
+    notNull: DateTimeOffset
+    nullable: DateTimeOffset?
+    nullableAlternative: nullable<DateTimeOffset> # DateTime
+  datetimeoffset: 
+    notNull: DateTimeOffset
+    nullable: DateTimeOffset?
+    nullableAlternative: nullable<DateTimeOffset> # DateTime
+  decimal: 
+    notNull: decimal
+    nullable: decimal?
+    nullableAlternative: nullable<decimal> # decimal
+  float: 
+    notNull: float
+    nullable: float?
+    nullableAlternative: nullable<float> # decimal
+  geography: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  geometry: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  image: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  int: 
+    notNull: int
+    nullable: int?
+    nullableAlternative: nullable<int> # int
+  money: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # decimal
+  nchar: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  ntext: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  numeric: 
+    notNull: decimal
+    nullable: decimal?
+    nullableAlternative: nullable<decimal> # decimal
+  nvarchar: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  real: 
+    notNull: decimal
+    nullable: decimal?
+    nullableAlternative: nullable<decimal> # decimal
+  smalldatetime: 
+    notNull: DateTimeOffset
+    nullable: DateTimeOffset?
+    nullableAlternative: nullable<DateTimeOffset> # decimal
+  smallint: 
+    notNull: Int16
+    nullable: Int16?
+    nullableAlternative: nullable<Int16> # decimal
+  smallmoney: 
+    notNull: decimal
+    nullable: decimal
+    nullableAlternative: nullable<decimal> # decimal
+  text: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  time: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # DateTime
+  timestamp: 
+    notNull: string
+    nullable: string
+    nullableAlternative: nullable<decimal> # string
+  tinyint: 
+    notNull: Int16
+    nullable: Int16?
+    nullableAlternative: nullable<Int16> # number
+  uniqueidentifier: 
+    notNull: Guid
+    nullable: Guid
+    nullableAlternative: nullable<Guid> # Guid
+  varbinary: 
+    notNull: Byte[]
+    nullable: Byte[]
+    nullableAlternative: Byte[] # Byte[]
+  varchar: 
+    notNull: string
+    nullable: string
+    nullableAlternative: string
+  xml: 
+    notNull: XElement
+    nullable: XElement?
+    nullableAlternative: nullable<XElement> 

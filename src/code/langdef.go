@@ -1,6 +1,9 @@
 package code
 
 import (
+	"embed"
+	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
@@ -9,6 +12,9 @@ import (
 
 	"gopkg.in/yaml.v3"
 )
+
+//go:embed defs
+var langDefFs embed.FS
 
 type LanguageDefinition struct {
 	Version        string              `json:"version" yaml:"version"`
@@ -76,6 +82,32 @@ type Global struct {
 // 	return LoadFromPath(cfg.Languages.Definitions)
 // }
 
+func Load() (map[string]LanguageDefinition, error) {
+
+	defs := make(map[string]LanguageDefinition)
+
+	files, _ := langDefFs.ReadDir("defs")
+
+	for _, ff := range files {
+
+		var langDef *LanguageDefinition
+		fname := fmt.Sprintf("defs/%s", ff.Name())
+		bytes, _ := fs.ReadFile(langDefFs, fname) // langDefFs.ReadFile(ff.Name())
+		err := yaml.Unmarshal(bytes, &langDef)
+		if err != nil {
+			log.Fatalf("cannot unmarshal data: %v", err)
+			// return nil, err
+		}
+
+		if langDef != nil {
+			defs[langDef.Language] = *langDef
+		}
+
+	}
+
+	return defs, nil
+
+}
 func LoadFromPath(dir string) (map[string]LanguageDefinition, error) {
 
 	defs := make(map[string]LanguageDefinition)
