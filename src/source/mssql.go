@@ -526,6 +526,7 @@ func (server *MsSql) getColumns(schema string, entityName string) (*ColumnList, 
 	left join ForeignKeyColumns fkc on fkc.ColumnId = c.column_id and c.object_id = fkc.ObjectId
 	left join sys.extended_properties ep on c.object_id = ep.major_id and minor_id = c.column_id and ep.name = 'MS_description'
 	where object_id = object_id(@entityName)
+		and genrated_always_type = 0
 	order by c.column_id
 	`
 
