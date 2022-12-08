@@ -49,13 +49,18 @@ type Connection struct {
 	Entities         []string                   `json:"entities" yaml:"entities"`
 	Groups           map[string]ConnectionGroup `json:"groups" yaml:"groups"`
 	Options          map[string]interface{}     `json:"options" yaml:"options"`
+	Synonyms         map[string]string          `json:"synonyms" yaml:"synonyms,omitempty"`
 }
 
 // should be renamed
 // should this be in the input source package, since it's shared among project, config and other input sources
 type ConnectionGroup struct {
-	Items   []string               `yaml:"items" yaml:"items"`
-	Options map[string]interface{} `yaml:"options" yaml:"options"`
+	Items   []string               `json:"items" yaml:"items"`
+	Options map[string]interface{} `json:"options" yaml:"options"`
+}
+
+type Synonym struct {
+	Name string
 }
 
 type DatabaseOptimizer interface {
@@ -135,9 +140,9 @@ func MergeConnections(providers ...ConnectionProvider) (*map[string]Connection, 
 	return &output, nil
 }
 
-//JoinConnections will merge or replace all the connections it is given
-//It works from left to right
-//joiner = merge | replace | empty | mergereplace
+// JoinConnections will merge or replace all the connections it is given
+// It works from left to right
+// joiner = merge | replace | empty | mergereplace
 func JoinConnections(joinMethod string, connections ...ConnectionProvider) map[string]Connection {
 	switch joinMethod {
 	case "merge":

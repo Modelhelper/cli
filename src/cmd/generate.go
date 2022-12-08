@@ -695,6 +695,9 @@ func ToEntityModel(key, language string, project *project.Project, entity *sourc
 		ForeignKeys:               entityBase.ForeignKeys,
 		UsedAsColumns:             entityBase.UsedAsColumns,
 		UsesIdentityColumn:        entityBase.UsesIdentityColumn,
+		HasSynonym:                entityBase.HasSynonym,
+		Synonym:                   entityBase.Synonym,
+		ModelName:                 entityBase.ModelName,
 	}
 
 	return out
@@ -812,7 +815,12 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 		HasPrefix:          false,
 		NameWithoutPrefix:  "",
 		UsesIdentityColumn: from.UsesIdentityColumn,
+		HasSynonym:         from.HasSynonym,
 	}
+
+	out.Synonym = from.Synonym
+
+	out.ModelName = coalesceString(from.Synonym, from.Name)
 
 	for _, column := range from.Columns {
 
@@ -848,8 +856,15 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 
 		out.Children = append(out.Children, child)
 		// children = append(children)
-		out.NameWithoutPrefix = strings.TrimPrefix(cr.Name, out.Name)
-		out.HasPrefix = strings.HasPrefix(cr.Name, out.Name)
+		child.NameWithoutPrefix = strings.TrimPrefix(cr.Name, out.Name)
+		child.HasPrefix = strings.HasPrefix(cr.Name, out.Name)
+
+		child.HasSynonym = cr.HasSynonym
+		if child.HasSynonym {
+			child.Synonym = cr.Synonym
+		}
+
+		child.ModelName = coalesceString(cr.Synonym, cr.Name)
 	}
 
 	for _, pr := range from.ParentRelations {
@@ -858,8 +873,16 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 		parent.Schema = pr.Schema
 
 		parent.HasDescription = false
-		out.NameWithoutPrefix = strings.TrimPrefix(pr.Name, out.Name)
-		out.HasPrefix = strings.HasPrefix(pr.Name, out.Name)
+
+		parent.HasSynonym = pr.HasSynonym
+		if parent.HasSynonym {
+			parent.Synonym = pr.Synonym
+		}
+
+		parent.ModelName = coalesceString(pr.Synonym, pr.Name)
+
+		parent.NameWithoutPrefix = strings.TrimPrefix(pr.Name, out.Name)
+		parent.HasPrefix = strings.HasPrefix(pr.Name, out.Name)
 	}
 
 	return out
@@ -955,4 +978,16 @@ func testTypes() map[string]tpl.CodeTypeImportModel {
 		Key:         "key",
 	}
 	return tl
+}
+
+func coalesceString(name ...string) string {
+	output := ""
+	for _, n := range name {
+		if len(n) > 0 {
+			output = n
+			break
+		}
+	}
+
+	return output
 }

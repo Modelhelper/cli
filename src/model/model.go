@@ -31,22 +31,24 @@ type EntityModel struct {
 	Developer                 DeveloperSection
 	Options                   map[string]string
 	PageHeader                string
-	// special for the entity
-	Name               string
-	Schema             string
-	Type               string
-	Alias              string
-	Description        string
-	HasDescription     bool
-	HasPrefix          bool
-	NameWithoutPrefix  string
-	Columns            []EntityColumnViewModel
-	Parents            []EntityRelationViewModel
-	Children           []EntityRelationViewModel
-	PrimaryKeys        []EntityColumnViewModel
-	ForeignKeys        []EntityColumnViewModel
-	UsedAsColumns      []EntityColumnViewModel
-	UsesIdentityColumn bool
+	Name                      string
+	Schema                    string
+	Type                      string
+	Alias                     string
+	Synonym                   string
+	HasSynonym                bool
+	ModelName                 string
+	Description               string
+	HasDescription            bool
+	HasPrefix                 bool
+	NameWithoutPrefix         string
+	Columns                   []EntityColumnViewModel
+	Parents                   []EntityRelationViewModel
+	Children                  []EntityRelationViewModel
+	PrimaryKeys               []EntityColumnViewModel
+	ForeignKeys               []EntityColumnViewModel
+	UsedAsColumns             []EntityColumnViewModel
+	UsesIdentityColumn        bool
 	// NonIgnoredColumns  []EntityColumnViewModel
 	// IgnoredColumns     []EntityColumnViewModel
 }
@@ -90,6 +92,9 @@ type EntityRelationViewModel struct {
 	Schema            string
 	Type              string
 	Alias             string
+	Synonym           string
+	HasSynonym        bool
+	ModelName         string
 	Description       string
 	HasDescription    bool
 	HasPrefix         bool

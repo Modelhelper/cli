@@ -304,6 +304,13 @@ func (server *MsSql) entites(filter string) (*[]Entity, error) {
 			return nil, err
 		} else {
 			e.Alias = strings.ToLower(Abbreviate(e.Name))
+
+			syn, ok := server.Connection.Synonyms[e.Name]
+			e.HasSynonym = ok
+			if ok {
+				e.Synonym = syn //.Name
+			}
+
 			list = append(list, e)
 
 		}
@@ -444,7 +451,11 @@ where o.object_id = object_id(@entityName)
 	}
 
 	e.Alias = Abbreviate(e.Name)
-
+	syn, ok := server.Connection.Synonyms[e.Name]
+	e.HasSynonym = ok
+	if ok {
+		e.Synonym = syn //.Name
+	}
 	return &e, nil
 }
 
@@ -526,7 +537,7 @@ func (server *MsSql) getColumns(schema string, entityName string) (*ColumnList, 
 	left join ForeignKeyColumns fkc on fkc.ColumnId = c.column_id and c.object_id = fkc.ObjectId
 	left join sys.extended_properties ep on c.object_id = ep.major_id and minor_id = c.column_id and ep.name = 'MS_description'
 	where object_id = object_id(@entityName)
-		and genrated_always_type = 0
+		and generated_always_type = 0
 	order by c.column_id
 	`
 
@@ -670,6 +681,13 @@ where fkc.parent_object_id = OBJECT_ID(@entityName)
 				return nil, err
 			}
 		} else {
+
+			syn, ok := server.Connection.Synonyms[r.Name]
+			r.HasSynonym = ok
+			if ok {
+				r.Synonym = syn //.Name
+			}
+
 			list = append(list, r)
 		}
 	}
@@ -753,6 +771,11 @@ where fkc.referenced_object_id = OBJECT_ID(@entityName)
 				return nil, err
 			}
 		} else {
+			syn, ok := server.Connection.Synonyms[r.Name]
+			r.HasSynonym = ok
+			if ok {
+				r.Synonym = syn //.Name
+			}
 			list = append(list, r)
 		}
 	}

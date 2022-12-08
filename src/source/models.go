@@ -18,6 +18,8 @@ type Entity struct {
 	Type                string `json:"type" yaml:"type"`
 	Schema              string `json:"schema" yaml:"schema"`
 	Alias               string `json:"alias" yaml:"alias"`
+	Synonym             string
+	HasSynonym          bool
 	RowCount            int
 	UsesIdentityColumn  bool
 	UsesDeletedColumn   bool
@@ -173,6 +175,8 @@ type Relation struct {
 	ColumnNullable      bool
 	ContraintName       string
 	IsSelfJoin          bool
+	HasSynonym          bool
+	Synonym             string
 	// Level               int
 	// FullPath            string
 	// ReferenceName       string

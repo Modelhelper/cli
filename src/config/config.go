@@ -88,7 +88,7 @@ func LoadFromFile(path string) *Config {
 	return cfg
 }
 
-//ConfigFolder returns the root path of ModelHelper
+// ConfigFolder returns the root path of ModelHelper
 func Location() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
