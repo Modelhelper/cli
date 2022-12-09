@@ -774,8 +774,8 @@ func ToBasicModel(key, language string, project *project.Project) model.BasicMod
 	return b
 }
 
-func toColumnSection(from source.Column, entityName string) model.EntityColumnViewModel {
-	col := model.EntityColumnViewModel{
+func toColumnSection(from source.Column, entityName string) model.EntityColumnModel {
+	col := model.EntityColumnModel{
 		Description:       from.Description,
 		IsForeignKey:      from.IsForeignKey,
 		IsPrimaryKey:      from.IsPrimaryKey,
@@ -838,11 +838,11 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 	}
 
 	for _, cr := range from.ChildRelations {
-		child := model.EntityRelationViewModel{}
+		child := model.EntityRelationModel{}
 
 		child.Name = cr.Name
 		child.Schema = cr.Schema
-		child.ReleatedColumn = model.EntityColumnProps{
+		child.RelatedColumn = model.EntityColumnProps{
 			Name:       cr.ColumnName,
 			DataType:   cr.ColumnType,
 			IsNullable: cr.ColumnNullable,
@@ -868,7 +868,7 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 	}
 
 	for _, pr := range from.ParentRelations {
-		parent := model.EntityRelationViewModel{}
+		parent := model.EntityRelationModel{}
 		parent.Name = pr.Name
 		parent.Schema = pr.Schema
 

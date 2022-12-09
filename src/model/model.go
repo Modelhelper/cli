@@ -42,12 +42,12 @@ type EntityModel struct {
 	HasDescription            bool
 	HasPrefix                 bool
 	NameWithoutPrefix         string
-	Columns                   []EntityColumnViewModel
-	Parents                   []EntityRelationViewModel
-	Children                  []EntityRelationViewModel
-	PrimaryKeys               []EntityColumnViewModel
-	ForeignKeys               []EntityColumnViewModel
-	UsedAsColumns             []EntityColumnViewModel
+	Columns                   []EntityColumnModel
+	Parents                   []EntityRelationModel
+	Children                  []EntityRelationModel
+	PrimaryKeys               []EntityColumnModel
+	ForeignKeys               []EntityColumnModel
+	UsedAsColumns             []EntityColumnModel
 	UsesIdentityColumn        bool
 	// NonIgnoredColumns  []EntityColumnViewModel
 	// IgnoredColumns     []EntityColumnViewModel
@@ -84,9 +84,9 @@ type ProjectSection struct {
 	Owner string
 }
 
-type EntityRelationViewModel struct {
+type EntityRelationModel struct {
 	IsSelfJoin        bool
-	ReleatedColumn    EntityColumnProps // this is either the child or parent in the relation
+	RelatedColumn     EntityColumnProps // this is either the child or parent in the relation
 	OwnerColumn       EntityColumnProps // this is always the current entity
 	Name              string
 	Schema            string
@@ -113,7 +113,7 @@ type EntityColumnProps struct {
 	DataType   string
 	IsNullable bool
 }
-type EntityColumnViewModel struct {
+type EntityColumnModel struct {
 	Description       string
 	IsForeignKey      bool
 	IsPrimaryKey      bool
