@@ -27,27 +27,39 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// configSourceGroupAddCmd represents the configSourceGroupAdd command
-var configSourceGroupAddCmd = &cobra.Command{
-	Use: "add",
-
-	Args: cobra.MinimumNArgs(1),
+// setCmd represents the set command
+var getCmd = &cobra.Command{
+	Use:   "get",
+	Short: "Root command to get a parameter from the config",
 	Run: func(cmd *cobra.Command, args []string) {
-		name := args[0]
-		fmt.Println(name)
 
-		source, _ := cmd.Flags().GetString("source")
-		fmt.Println(source)
+		m := `This is the root command for getting values from the config file. 
+		
+Please use one of the following sub commands to get correct information:
 
-		items, _ := cmd.Flags().GetStringArray("item")
+templatelocation | tl    : to get a template location
+developer | dev          : to get developer params
+ 
+samples:
 
-		fmt.Println(items)
+-- Template location
+usage:
+mh get template location
+
+-- Developer info
+usage:
+mh get developer 
+mh get dev 
+
+		`
+
+		fmt.Println(m)
+		fmt.Println("")
+		fmt.Println("Please use one of the sub commands to get correct information")
 	},
 }
 
 func init() {
-	configSourceGroupCmd.AddCommand(configSourceGroupAddCmd)
-	configSourceGroupAddCmd.Flags().StringArrayP("item", "i", []string{}, "A list of items to add to the group")
-	configSourceGroupAddCmd.Flags().StringP("source", "s", "", "The source to add the group")
-
+	// rootCmd.AddCommand(getCmd)
+	// configCmd.AddCommand(getCmd)
 }

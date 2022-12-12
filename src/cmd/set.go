@@ -70,5 +70,5 @@ mh set dev --name name --email email
 
 func init() {
 	rootCmd.AddCommand(setCmd)
-	configCmd.AddCommand(setCmd)
+	// configCmd.AddCommand(setCmd)
 }

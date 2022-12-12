@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 
@@ -12,6 +13,9 @@ import (
 
 func PromptForString(question string) (answer string) {
 
+	validate := func(input string) error {
+		return nil
+	}
 	// reader := bufio.NewReader(os.Stdin)
 
 	// fmt.Print(question)
@@ -20,7 +24,8 @@ func PromptForString(question string) (answer string) {
 
 	// return text
 	prompt := promptui.Prompt{
-		Label: question,
+		Label:    question,
+		Validate: validate,
 	}
 
 	result, err := prompt.Run()
@@ -42,6 +47,7 @@ func PromptForMultilineString(question string) (answer string) {
 	return text
 }
 func PromptForYesNo(question string, defaultVal string) (answer bool) {
+
 	text := PromptForString(question)
 
 	if len(text) == 0 {
@@ -53,6 +59,27 @@ func PromptForYesNo(question string, defaultVal string) (answer bool) {
 	}
 	// strconv.ParseBool(text)
 	return false
+}
+func PromptForPassword(question string) string {
+	validate := func(input string) error {
+		return nil
+	}
+
+	prompt := promptui.Prompt{
+		Label:       "Password",
+		Validate:    validate,
+		Mask:        '*',
+		HideEntered: true,
+	}
+
+	result, err := prompt.Run()
+
+	if err != nil {
+		fmt.Printf("Prompt failed %v\n", err)
+		return ""
+	}
+
+	return result
 }
 
 func PromptForBool(question string) (answer bool) {
@@ -170,4 +197,17 @@ func PromptForYesNoList(question string) bool {
 	}
 
 	return false
+}
+
+func ClearScreen() {
+
+	cmd := "cls"
+	// switch runtime.GOOS {
+	// case "winddows":
+	// }
+
+	runner := exec.Command(cmd)
+	runner.Stdout = os.Stdout
+	runner.Run()
+
 }

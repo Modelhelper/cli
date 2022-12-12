@@ -39,17 +39,17 @@ type RelationTree interface {
 // should be renamed
 type Connection struct {
 	Name             string                     `json:"name" yaml:"name"`
-	Description      string                     `json:"description" yaml:"description"`
+	Description      string                     `json:"description" yaml:"description,omitempty"`
 	ConnectionString string                     `json:"connectionString" yaml:"connectionString"`
 	Schema           string                     `json:"schema" yaml:"schema"`
-	Database         string                     `json:"database" yaml:"database"`
-	Server           string                     `json:"server" yaml:"server"`
+	Database         string                     `json:"database,omitempty" yaml:"database,omitempty"`
+	Server           string                     `json:"server,omitempty" yaml:"server,omitempty"`
 	Type             string                     `json:"type" yaml:"type"`
-	Port             int                        `json:"port" yaml:"port"`
-	Entities         []string                   `json:"entities" yaml:"entities"`
-	Groups           map[string]ConnectionGroup `json:"groups" yaml:"groups"`
-	Options          map[string]interface{}     `json:"options" yaml:"options"`
-	Synonyms         map[string]string          `json:"synonyms" yaml:"synonyms,omitempty"`
+	Port             int                        `json:"port,omitempty" yaml:"port,omitempty"`
+	Entities         []string                   `json:"entities,omitempty" yaml:"entities,omitempty"`
+	Groups           map[string]ConnectionGroup `json:"groups,omitempty" yaml:"groups,omitempty"`
+	Options          map[string]interface{}     `json:"options,omitempty" yaml:"options,omitempty"`
+	Synonyms         map[string]string          `json:"synonyms,omitempty" yaml:"synonyms,omitempty"`
 }
 
 // should be renamed
@@ -65,6 +65,15 @@ type Synonym struct {
 
 type DatabaseOptimizer interface {
 	RebuildIndexes()
+}
+
+func BuildConnectionstring(dbtype, server, database, username, password string) string {
+	constr := ""
+	if dbtype == "mssql" {
+		return fmt.Sprintf("sqlserver://%s:%s@%s?database=%s", username, password, server, database)
+	}
+
+	return constr
 }
 
 func SplitConnectionString(connectionString string) map[string]string {

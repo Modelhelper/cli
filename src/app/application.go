@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"modelhelper/cli/config"
+	"modelhelper/cli/ui"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -43,7 +44,7 @@ func SetConfig(config config.Config) {
 var Configuration *config.Config
 
 // version shows the current application version
-var version = "3.0.0-beta1.2"
+var version = "3.0.0-beta2"
 var isBeta = true
 
 // Logo returns the logo to be printed on root command
@@ -148,8 +149,15 @@ func PrintWelcomeMessage() {
 		color.Red.Println(BetaWarning())
 	}
 
-	fmt.Println("ModelHelper needs answers to a few questions do you wish to continue? (Y/n) ")
+	// fmt.Println("ModelHelper needs answers to a few questions do you wish to continue? (Y/n) ")
 }
+
+func PromptForContinue() bool {
+
+	fmt.Printf("\nModelHelper will need to create a configuration file.")
+	return ui.PromptForYesNo("Do you want to continue [Y/n]? ", "Y")
+}
+
 func Welcome() string {
 	usersName := ""
 
@@ -161,23 +169,21 @@ func Welcome() string {
 	return fmt.Sprintf(`
 Welcome%s to ModelHelper CLI v.%s
 
-NEED MORE TEXT
-  
+Code
+ModelHelper is a CLI tool to generate code based on input sources
+like a database table
+
+Templates
+Templates are made with the Golang template language. Each template is specified in a
+yaml- file and placed in a folder structure.
+
+Data
+Understand MS SQL tables and perform some database tasks.
+
+
+
 `, usersName, version)
-
 	/*
-	   Code
-	   ModelHelper CLI is a Command Line Interface tool to generate code based on an input source
-	   like a database table, REST api endpoint, a GraphQL endpoint or a proto file.
-
-	   Templates
-	   You can create your own templates based on Golang template ... each template is specified in a
-	   yaml- file and placed in a folder structure.
-
-	   Data
-	   This CLI can also help you understand database tables and perform some database tasks
-	   It works with MS SQL and Postgres.
-
 	   Other input sources
 	   An input source can be either a database table or a set of tables. But it can also be a REST endpoint or graphql
 	   endpoint

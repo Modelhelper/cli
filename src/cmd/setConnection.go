@@ -88,12 +88,13 @@ func init() {
 	setCmd.AddCommand(setConnectionCmd)
 
 	setConnectionCmd.Flags().StringP("type", "t", "mssql", "The type of connection to add, default mssql")
-	setConnectionCmd.Flags().StringP("constr", "c", "", "Sets the connection string for the type.")
+	setConnectionCmd.Flags().StringP("constr", "c", "", "Sets the connection string for the type. For ms sql use this format \n'sqlserver://<user>:<password>@<server>?database=<databasename>'")
 	setConnectionCmd.Flags().StringP("description", "d", "", "Sets a description")
 	setConnectionCmd.Flags().String("schema", "", "Sets the schema or owner for the collection of entities")
 	// setConnectionCmd.Flags().BoolP("groups", "d", false, "If true, the cli will ask for groups to be added")
-	setConnectionCmd.Flags().Bool("merge", false, "If true and the connection exists, empty properties will be replaced with the incoming.")
+	// setConnectionCmd.Flags().Bool("merge", false, "If true and the connection exists, empty properties will be replaced with the incoming.")
 	setConnectionCmd.Flags().Bool("default", false, "If true set this connection to the default connection (default value is false)")
 
-	setCmd.MarkFlagRequired("type")
+	setConnectionCmd.MarkFlagRequired("type")
+	setConnectionCmd.MarkFlagRequired("constr")
 }
