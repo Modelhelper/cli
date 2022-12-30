@@ -44,7 +44,9 @@ type EntityModel struct {
 	NameWithoutPrefix         string
 	Columns                   []EntityColumnModel
 	Parents                   []EntityRelationModel
+	HasParents                bool
 	Children                  []EntityRelationModel
+	HasChildren               bool
 	PrimaryKeys               []EntityColumnModel
 	ForeignKeys               []EntityColumnModel
 	UsedAsColumns             []EntityColumnModel
