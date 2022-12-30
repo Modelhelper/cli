@@ -43,6 +43,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type codeGenerateOptions struct {
+	templates         []string
+	templateGroups    []string
+	templatePath      string
+	canUseTemplates   bool
+	entityGroups      []string
+	entities          []string
+	exportToScreen    bool
+	exportByKey       bool
+	exportPath        string
+	connection        string
+	exportToClipboard bool
+	overwrite         bool
+	relations         string
+	codeOnly          bool
+	useDemo           bool
+	configFilePath    string
+	projectFilePath   string
+}
+
 func init() {
 	rootCmd.AddCommand(generateCmd)
 
@@ -59,7 +79,7 @@ func init() {
 	generateCmd.Flags().Bool("screen", false, "List the output to the screen, default false")
 	generateCmd.Flags().Bool("copy", false, "Copies the generated code to the clipboard (ctrl + v), default false")
 	generateCmd.Flags().String("export-path", "", "Exports to a directory")
-	generateCmd.Flags().Bool("export-bykey", false, "Exports the code using the template keys, default false")
+	// generateCmd.Flags().Bool("export-bykey", false, "Exports the code using the template keys, default false")
 	generateCmd.Flags().Bool("overwrite", false, "Overwrite any existing file when exporting to file on disk")
 
 	generateCmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code, default false")
@@ -78,6 +98,45 @@ func init() {
 
 }
 
+func newGenerateOptions(cmd *cobra.Command, args []string) *codeGenerateOptions {
+	options := codeGenerateOptions{}
+
+	codeOnly, _ := cmd.Flags().GetBool("code-only")
+	isDemo, _ := cmd.Flags().GetBool("demo")
+	entityFlagArray, _ := cmd.Flags().GetStringArray("entity")
+	entityGroupFlagArray, _ := cmd.Flags().GetStringArray("entity-group")
+	tempPath, _ := cmd.Flags().GetString("template-path")
+	projectPath, _ := cmd.Flags().GetString("project-path")
+	configFile, _ := cmd.Flags().GetString("config-path")
+	exportFile, _ := cmd.Flags().GetString("export-path")
+	inputTemplates, _ := cmd.Flags().GetStringArray("template")
+	inputGroupTemplates, _ := cmd.Flags().GetStringArray("template-group")
+	printScreen, _ := cmd.Flags().GetBool("screen")
+	toClipBoard, _ := cmd.Flags().GetBool("copy")
+	// exportByKey, _ := cmd.Flags().GetBool("export-bykey")
+	conName, _ := cmd.Flags().GetString("connection")
+	overwriteAll, _ := cmd.Flags().GetBool("overwrite")
+
+	options.codeOnly = codeOnly
+	options.useDemo = isDemo
+	options.entities = entityFlagArray
+	options.entityGroups = entityGroupFlagArray
+	options.templatePath = tempPath
+	options.configFilePath = configFile
+	options.projectFilePath = projectPath
+	options.templates = inputTemplates
+	options.templateGroups = inputGroupTemplates
+	options.exportToScreen = printScreen
+	options.exportToClipboard = toClipBoard
+	options.exportByKey = false
+	options.exportPath = exportFile
+	options.connection = conName
+	options.overwrite = overwriteAll
+
+	options.canUseTemplates = len(options.templates) > 0 || len(options.templateGroups) > 0
+	return &options
+}
+
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:     "generate",
@@ -85,22 +144,10 @@ var generateCmd = &cobra.Command{
 	Short:   "Generates code based on language, template and source",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		codeOnly, _ := cmd.Flags().GetBool("code-only")
-		isDemo, _ := cmd.Flags().GetBool("demo")
-		entityFlagArray, _ := cmd.Flags().GetStringArray("entity")
-		entityGroupFlagArray, _ := cmd.Flags().GetStringArray("entity-group")
-		tempPath, _ := cmd.Flags().GetString("template-path")
-		projectPath, _ := cmd.Flags().GetString("project-path")
-		configFile, _ := cmd.Flags().GetString("config-path")
-		inputTemplates, err := cmd.Flags().GetStringArray("template")
-		inputGroupTemplates, err := cmd.Flags().GetStringArray("template-group")
-		printScreen, _ := cmd.Flags().GetBool("screen")
-		toClipBoard, _ := cmd.Flags().GetBool("copy")
-		exportByKey, _ := cmd.Flags().GetBool("export-bykey")
-		conName, _ := cmd.Flags().GetString("connection")
-		overwriteAll, _ := cmd.Flags().GetBool("overwrite")
 
-		if len(inputTemplates) == 0 && len(inputGroupTemplates) == 0 {
+		options := newGenerateOptions(cmd, args)
+
+		if len(options.templates) == 0 && len(options.templateGroups) == 0 {
 			// no point to continue if no templates is given
 			fmt.Printf(`No templates or template groups are provided resulting in nothing to create
 please use mh generate with the -t or --template [templatename] to set at template
@@ -120,51 +167,51 @@ You could also use mh template or mh t to see a list of all available templates`
 		var prj *project.Project
 		var entities []source.Entity
 
-		cfg := loadConfig(configFile)
+		cfg := loadConfig(options.templatePath)
 
-		if isDemo {
-			conName = "demo"
-			con = source.Connection{Type: conName}
+		if options.useDemo {
+			options.connection = "demo"
+			con = source.Connection{Type: options.connection}
 		} else {
 			if len(appCtx.Connections) == 0 {
 				fmt.Println("Could not find any connections to use, please add a connection")
 				fmt.Println("to the config and/or any project file")
 				return
 			}
-			if len(conName) == 0 {
+			if len(options.connection) == 0 {
 
-				conName = appCtx.DefaultConnection
+				options.connection = appCtx.DefaultConnection
 			}
 
-			if len(conName) == 0 {
+			if len(options.connection) == 0 {
 				ka := keyArray(appCtx.Connections)
-				conName = ka[0]
+				options.connection = ka[0]
 			}
 
-			con = appCtx.Connections[conName]
+			con = appCtx.Connections[options.connection]
 		}
 
-		entityList := mergedList(entityFlagArray, entitiesFromGroups(con, entityGroupFlagArray))
+		entityList := mergedList(options.entities, entitiesFromGroups(con, options.entityGroups))
 
 		src := con.LoadSource()
 
 		entities = *loadEntities(src, entityList)
 
-		prj = loadProject(projectPath)
+		prj = loadProject(options.projectFilePath)
 
 		languages, _ := code.LoadFromPath(cfg.Languages.Definitions)
 
-		if len(tempPath) == 0 {
-			tempPath = cfg.Templates.Location
+		if len(options.templatePath) == 0 {
+			options.templatePath = cfg.Templates.Location
 		}
 
-		allTemplates, blocks := loadTemplates(tempPath)
+		allTemplates, blocks := loadTemplates(options.templatePath)
 
-		if err != nil {
-			panic(err)
-		}
+		// if err != nil {
+		// 	panic(err)
+		// }
 
-		inputTemplates = selectTemplates(allTemplates, inputTemplates, inputGroupTemplates)
+		options.templates = selectTemplates(allTemplates, options.templates, options.templateGroups)
 
 		start := time.Now()
 		var cstat = codegen.Statistics{}
@@ -174,7 +221,7 @@ You could also use mh template or mh t to see a list of all available templates`
 		ctxVal := codegen.CodeContextValue{}
 		ctxVal.Blocks = blocks
 
-		for _, tname := range inputTemplates {
+		for _, tname := range options.templates {
 
 			// var tt *tpl.Template
 			// fmt.Println(tname)
@@ -182,7 +229,7 @@ You could also use mh template or mh t to see a list of all available templates`
 
 			if found {
 				var codeSection code.Code
-				var csFound = false
+				// var csFound = false
 				// obsolete when context is completed
 				tplMap := make(map[string]string)
 
@@ -210,7 +257,8 @@ You could also use mh template or mh t to see a list of all available templates`
 
 				// if len(prj.Code. {
 				if prj != nil && prj.Code != nil {
-					codeSection, csFound = prj.Code[currentTemplate.Language]
+					// codeSection, csFound = prj.Code[currentTemplate.Language]
+					codeSection = prj.Code[currentTemplate.Language]
 				}
 				// }
 				generator := codegen.GoLangGenerator{}
@@ -261,21 +309,23 @@ You could also use mh template or mh t to see a list of all available templates`
 
 							o, _ := generator.Generate(ctx, model)
 
-							fullPath := ""
+							// fullPath := ""
+							fileName := ""
 							if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
 								cstat.FilesCreated += 1
 
-								filen := codegen.Generate("filename", currentTemplate.FileName, model)
+								fileName = codegen.Generate("filename", currentTemplate.FileName, model)
 
-								if csFound {
-
-									fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
-								}
+								// if csFound {
+								// 	if options.exportPath
+								// 	fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+								// }
 							}
 
 							f := codeFile{
 								result:   o,
-								filename: fullPath,
+								filename: fileName,
+								filePath: codeSection.Locations[currentTemplate.Key],
 							}
 
 							generatedCode = append(generatedCode, f)
@@ -307,19 +357,20 @@ You could also use mh template or mh t to see a list of all available templates`
 
 						o, _ := generator.Generate(ctx, model)
 
-						fullPath := ""
+						fileName := ""
 						if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
 							cstat.FilesCreated += 1
-							filen := codegen.Generate("filename", currentTemplate.FileName, model)
-							if csFound {
+							fileName = codegen.Generate("filename", currentTemplate.FileName, model)
+							// if csFound {
 
-								fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
-							}
+							// 	fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+							// }
 						}
 
 						f := codeFile{
 							result:   o,
-							filename: fullPath,
+							filename: fileName,
+							filePath: codeSection.Locations[currentTemplate.Key],
 						}
 
 						generatedCode = append(generatedCode, f)
@@ -337,28 +388,28 @@ You could also use mh template or mh t to see a list of all available templates`
 		sb := strings.Builder{}
 		var fwg sync.WaitGroup
 		var flock = sync.Mutex{}
-		for _, s := range generatedCode {
-			cstat.AppendStat(s.result.Stat)
-			content := []byte(s.result.Content)
-			if printScreen {
+		for _, codeBody := range generatedCode {
+			cstat.AppendStat(codeBody.result.Stat)
+			content := []byte(codeBody.result.Content)
+			if options.exportToScreen {
 				screenWriter := tpl.ScreenExporter{}
 				screenWriter.Write([]byte(content))
 			}
 
-			if toClipBoard {
-				sb.WriteString(s.result.Content)
+			if options.exportToClipboard {
+				sb.WriteString(codeBody.result.Content)
 			}
 
-			if exportByKey && len(s.filename) > 0 {
+			if options.exportByKey && len(codeBody.filename) > 0 {
 				fwg.Add(1)
 				go func(filename string, rootPath string, content []byte) {
 					defer fwg.Done()
 					keyExporter := tpl.FileExporter{
 						Filename:  filepath.Join(rootPath, filename),
-						Overwrite: overwriteAll,
+						Overwrite: options.overwrite,
 					}
 
-					_, err = keyExporter.Write([]byte(content))
+					_, err := keyExporter.Write([]byte(content))
 					if err != nil {
 						fmt.Println(filepath.ErrBadPattern)
 					}
@@ -366,21 +417,46 @@ You could also use mh template or mh t to see a list of all available templates`
 					flock.Lock()
 					cstat.FilesExported += 1
 					flock.Unlock()
-				}(s.filename, "D:/projects/ModelHelper", content)
+				}(codeBody.filename, "D:/projects/ModelHelper", content)
 
 			}
 			// TODO: export to file
+			if len(options.exportPath) > 0 {
+				fwg.Add(1)
+				go func(filename string, rootPath string, content []byte) {
+					defer fwg.Done()
+
+					if len(filename) > 0 {
+
+						fileExporter := tpl.FileExporter{
+							Filename:  filepath.Join(rootPath, filename),
+							Overwrite: options.overwrite,
+						}
+
+						_, err := fileExporter.Write([]byte(content))
+						if err != nil {
+							fmt.Printf("%s, err: \n%v", filepath.ErrBadPattern, err)
+						}
+						// fmt.Println("*** FILENAME::", s.filename)
+						flock.Lock()
+						cstat.FilesExported += 1
+						flock.Unlock()
+					} else {
+						fmt.Println("Filename empty...")
+					}
+				}(codeBody.filename, options.exportPath, content)
+			}
 		}
 
 		fwg.Wait()
-		if toClipBoard {
+		if options.exportToClipboard {
 			fmt.Printf("\nGenerated code is copied to the \033[37mclipboard\033[0m. Use \033[34mctrl+v\033[0m to paste it where you like")
 			clipboard.WriteAll(sb.String())
 		}
 
 		cstat.Duration = time.Since(start)
 		// stat["total.time"] = int(cstat.duration.Milliseconds())
-		if !codeOnly {
+		if !options.codeOnly {
 			wpm := 30.0
 			cpm := 250.0
 
@@ -506,6 +582,7 @@ func mergedList(lists ...[]string) []string {
 
 type codeFile struct {
 	filename        string
+	filePath        string
 	result          codegen.Result
 	exists          bool
 	existingContent string
@@ -700,6 +777,8 @@ func ToEntityModel(key, language string, project *project.Project, entity *sourc
 		ModelName:                 entityBase.ModelName,
 	}
 
+	out.HasChildren = len(entityBase.Children) > 0
+	out.HasParents = len(entityBase.Parents) > 0
 	return out
 }
 func ToEntitiesModel(key, language string, project *project.Project, entities *[]source.Entity) model.EntityListModel {
@@ -879,10 +958,24 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 			parent.Synonym = pr.Synonym
 		}
 
+		parent.OwnerColumn = model.EntityColumnProps{
+			Name:       pr.ColumnName,
+			DataType:   pr.ColumnType,
+			IsNullable: pr.ColumnNullable,
+		}
+
+		parent.RelatedColumn = model.EntityColumnProps{
+			Name:       pr.OwnerColumnName,
+			DataType:   pr.OwnerColumnType,
+			IsNullable: pr.OwnerColumnNullable,
+		}
+
 		parent.ModelName = coalesceString(pr.Synonym, pr.Name)
 
 		parent.NameWithoutPrefix = strings.TrimPrefix(pr.Name, out.Name)
 		parent.HasPrefix = strings.HasPrefix(pr.Name, out.Name)
+
+		out.Parents = append(out.Parents, parent)
 	}
 
 	return out
