@@ -2,11 +2,12 @@ package source
 
 import (
 	"io/fs"
+	"modelhelper/cli/modelhelper"
 	"sort"
 )
 
 type Files struct {
-	Connection Connection
+	Connection modelhelper.Connection
 	Path       string
 	FileType   string
 	FileSystem fs.ReadDirFS
@@ -49,8 +50,8 @@ func (fel *fileEntityList) toMap() map[string]fileEntity {
 	return m
 }
 
-func (fel *fileEntity) getParentRelations(entities []fileEntity) []Relation {
-	relations := []Relation{}
+func (fel *fileEntity) getParentRelations(entities []fileEntity) []modelhelper.Relation {
+	relations := []modelhelper.Relation{}
 
 	for colName, col := range fel.Columns {
 		if col.References != nil {
@@ -66,7 +67,7 @@ func (fel *fileEntity) getParentRelations(entities []fileEntity) []Relation {
 						relcolDT = relatedCol.Datatype
 					}
 
-					rel := Relation{
+					rel := modelhelper.Relation{
 						Schema:              entity.Schema,
 						ColumnName:          col.References.Column,
 						ColumnNullable:      nullable,
@@ -85,8 +86,8 @@ func (fel *fileEntity) getParentRelations(entities []fileEntity) []Relation {
 	return relations
 }
 
-func (fel *fileEntity) getChildRelations(entities []fileEntity) []Relation {
-	relations := []Relation{}
+func (fel *fileEntity) getChildRelations(entities []fileEntity) []modelhelper.Relation {
+	relations := []modelhelper.Relation{}
 
 	for _, entity := range entities {
 		if entity.Name != fel.Name {
@@ -104,7 +105,7 @@ func (fel *fileEntity) getChildRelations(entities []fileEntity) []Relation {
 							relcolDT = relatedCol.Datatype
 						}
 
-						rel := Relation{
+						rel := modelhelper.Relation{
 							Schema:              entity.Schema,
 							ColumnName:          column.References.Column,
 							ColumnNullable:      nullable,
@@ -124,7 +125,7 @@ func (fel *fileEntity) getChildRelations(entities []fileEntity) []Relation {
 	return relations
 }
 
-func (f *Files) Entity(name string) (*Entity, error) {
+func (f *Files) Entity(name string) (*modelhelper.Entity, error) {
 	entities, err := f.Entities("")
 	if err != nil {
 		return nil, err
@@ -138,15 +139,15 @@ func (f *Files) Entity(name string) (*Entity, error) {
 
 	return nil, &EntityNotFoundError{name}
 }
-func (f *Files) Entities(pattern string) (*[]Entity, error) {
+func (f *Files) Entities(pattern string) (*[]modelhelper.Entity, error) {
 	return nil, nil
 }
-func (f *Files) EntitiesFromColumn(column string) (*[]Entity, error) {
+func (f *Files) EntitiesFromColumn(column string) (*[]modelhelper.Entity, error) {
 	return nil, nil
 }
 
-func (f *fileEntity) toSourceEntity() Entity {
-	ent := Entity{
+func (f *fileEntity) toSourceEntity() modelhelper.Entity {
+	ent := modelhelper.Entity{
 		Name:        f.Name,
 		Schema:      f.Schema,
 		Description: f.Description,
@@ -155,7 +156,7 @@ func (f *fileEntity) toSourceEntity() Entity {
 	}
 
 	// parents := []Relation{}
-	cols := []Column{}
+	cols := []modelhelper.Column{}
 	id := 0
 
 	for colName, col := range f.Columns {
@@ -164,7 +165,7 @@ func (f *fileEntity) toSourceEntity() Entity {
 		if col.ID > 0 {
 			colId = col.ID
 		}
-		ec := Column{
+		ec := modelhelper.Column{
 			ID:           colId,
 			Name:         colName,
 			DataType:     col.Datatype,
@@ -192,4 +193,10 @@ func (f *fileEntity) toSourceEntity() Entity {
 
 	ent.Columns = cols
 	return ent
+}
+
+func (server *fileEntity) ConnectionStringPart(part string) string {
+	return ""
+}
+func (server *fileEntity) ParseConnectionString() {
 }

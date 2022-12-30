@@ -4,21 +4,21 @@ import (
 	"log"
 	"modelhelper/cli/code"
 	"modelhelper/cli/config"
+	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/project"
-	"modelhelper/cli/source"
 )
 
 // Templates         *[]tpl.Template
 // Blocks            *[]tpl.Template
 type Context struct {
 	ProjectExists     bool
-	CurrentProject    *project.Project
-	Connections       map[string]source.Connection
+	CurrentProject    *modelhelper.ProjectConfig
+	Connections       map[string]modelhelper.Connection
 	DefaultConnection string
 	Languages         *map[string]code.LanguageDefinition
 	Options           *map[string]interface{}
 	CurrentLanguage   code.LanguageDefinition
-	CurrentConnection source.Connection
+	CurrentConnection modelhelper.Connection
 	IsDemo            bool
 	InputConnection   string
 }
@@ -26,7 +26,7 @@ type Context struct {
 func (a *Application) CreateContext() *Context {
 	c := Context{}
 
-	con := make(map[string]source.Connection)
+	con := make(map[string]modelhelper.Connection)
 
 	if a.Configuration == nil {
 		a.Configuration = config.Load()
@@ -54,14 +54,14 @@ func (a *Application) CreateContext() *Context {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		c.CurrentProject = pr
+		c.CurrentProject = &pr.Config
 
-		for pk, pv := range pr.Connections {
+		for pk, pv := range c.CurrentProject.Connections {
 			con[pk] = pv
 		}
 
-		if len(pr.DefaultSource) > 0 {
-			c.DefaultConnection = pr.DefaultSource
+		if len(c.CurrentProject.DefaultSource) > 0 {
+			c.DefaultConnection = c.CurrentProject.DefaultSource
 		}
 	}
 

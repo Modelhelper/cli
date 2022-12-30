@@ -61,7 +61,8 @@ func init() {
 }
 
 func promptForConnectionKey() string {
-	cfg := config.Load()
+	cloader := config.NewConfigLoader()
+	cfg, _ := cloader.Load()
 	items := []string{}
 
 	for k, _ := range cfg.Connections {

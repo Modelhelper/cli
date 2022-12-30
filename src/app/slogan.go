@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func Slogan() string {
+func (a *Application) Slogan() string {
 	out := `
 %s
 `

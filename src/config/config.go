@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"modelhelper/cli/code"
-	"modelhelper/cli/source"
+	"modelhelper/cli/modelhelper"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -13,42 +12,34 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Config struct {
-
-	// ConfigVersion gets the version that this configuration file is using.
-	ConfigVersion     string                       `json:"configVersion" yaml:"configVersion"`
-	AppVersion        string                       `json:"appVersion" yaml:"appVersion"`
-	Connections       map[string]source.Connection `json:"connections" yaml:"connections"`
-	DefaultConnection string                       `json:"defaultConnection" yaml:"defaultConnection"`
-	DefaultEditor     string                       `json:"editor" yaml:"editor"`
-	Developer         Developer                    `json:"developer" yaml:"developer"`
-	Port              int                          `json:"port" yaml:"port"`
-	Code              code.Code                    `json:"code" yaml:"code"`
-	Templates         struct {
-		Location string `json:"location" yaml:"location"`
-	} `json:"templates" yaml:"templates"`
-	Languages struct {
-		Definitions string `json:"definitions" yaml:"definitions"`
-	} `json:"languages" yaml:"languages"`
-	Logging struct {
-		Enabled bool `json:"enabled" yaml:"enabled"`
-	} `json:"logging" yaml:"logging"`
+type rootConfigLoader struct {
+	path   string
+	config *modelhelper.Config
 }
 
-type Developer struct {
-	Name          string `json:"name" yaml:"name"`
-	Email         string `json:"email" yaml:"email"`
-	GitHubAccount string `json:"github" yaml:"github"`
+func Load() *modelhelper.Config {
+	loader := NewConfigLoader()
+	cfg, err := loader.Load()
+
+	if err != nil {
+		// handle error
+	}
+
+	return cfg
 }
 
-func New() *Config {
+func NewConfigLoader() modelhelper.ConfigLoader {
+	return &rootConfigLoader{}
+}
+
+func New() *modelhelper.Config {
 
 	usr, err := user.Current()
 	if err != nil {
 
 	}
 
-	c := Config{
+	c := modelhelper.Config{
 		Port:          3003,
 		ConfigVersion: "3.0",
 	}
@@ -60,32 +51,32 @@ func New() *Config {
 }
 
 // Load returns a new default configuration
-func Load() *Config {
+func (c *rootConfigLoader) Load() (*modelhelper.Config, error) {
 	path := filepath.Join(Location(), "config.yaml")
-	return LoadFromFile(path)
+	return c.LoadFromFile(path)
 
 }
 
-func (c *Config) GetConnections() (*map[string]source.Connection, error) {
-	return &c.Connections, nil
+func (c *rootConfigLoader) GetConnections() (*map[string]modelhelper.Connection, error) {
+	return &c.config.Connections, nil
 }
 
-func LoadFromFile(path string) *Config {
-	var cfg *Config
+func (c *rootConfigLoader) LoadFromFile(path string) (*modelhelper.Config, error) {
+	var cfg *modelhelper.Config
 
 	dat, e := ioutil.ReadFile(path)
 	if e != nil {
 		log.Fatalf("cannot load file: %v", e)
-		return nil
+		return nil, e
 	}
 
 	err := yaml.Unmarshal(dat, &cfg)
 	if err != nil {
 		log.Fatalf("cannot unmarshal data: %v", err)
-		return nil
+		return nil, e
 	}
 
-	return cfg
+	return cfg, nil
 }
 
 // ConfigFolder returns the root path of ModelHelper
@@ -111,10 +102,10 @@ func LocationExists() bool {
 	}
 }
 
-func (cfg *Config) Save(path string) error {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.Mkdir(path, 0755)
+func (cfg *rootConfigLoader) Save() error {
+	if _, err := os.Stat(cfg.path); os.IsNotExist(err) {
+		os.Mkdir(cfg.path, 0755)
 	}
 
-	return update(cfg)
+	return update(cfg.config)
 }

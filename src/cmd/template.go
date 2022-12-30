@@ -34,7 +34,7 @@ import (
 
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{
-	Use:     "template",
+	Use:     "template_old",
 	Aliases: []string{"t", "tpl"},
 	Args:    cobra.MaximumNArgs(1),
 	Short:   "List all templates or view content of a single template",
@@ -61,8 +61,8 @@ Filter the template by using on or more of the following options
 	Run: func(cmd *cobra.Command, args []string) {
 
 		open, _ := cmd.Flags().GetBool("open")
-
-		cfg := config.Load()
+		cloader := config.NewConfigLoader()
+		cfg, _ := cloader.Load()
 
 		tl := tpl.TemplateLoader{
 			Directory: app.TemplateFolder(cfg.Templates.Location),

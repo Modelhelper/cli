@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"modelhelper/cli/config"
+	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/ui"
 	"os"
 	"os/user"
@@ -13,9 +14,13 @@ import (
 	"github.com/gookit/color"
 )
 
+func NewModelhelperCli() modelhelper.AppService {
+	return &Application{}
+}
+
 type Application struct {
 	Version       string
-	Configuration *config.Config
+	Configuration *modelhelper.Config
 	ProjectPath   string
 	IsBeta        bool
 	Versions      map[string]string
@@ -37,18 +42,24 @@ func New() *Application {
 	return &a
 }
 
-func SetConfig(config config.Config) {
+func (a *Application) LoadConfig() *modelhelper.Config {
+	loader := config.NewConfigLoader()
+	cfg, _ := loader.Load()
+	return cfg
+}
+
+func SetConfig(config modelhelper.Config) {
 	Configuration = &config
 }
 
-var Configuration *config.Config
+var Configuration *modelhelper.Config
 
 // version shows the current application version
 var version = "3.0.0-beta2"
 var isBeta = true
 
 // Logo returns the logo to be printed on root command
-func Logo() string {
+func (app *Application) Logo() string {
 	var logo = `
 888b     d888               888          888 888    888          888                           
 8888b   d8888               888          888 888    888          888                           
@@ -70,7 +81,7 @@ func Version() string {
 }
 
 // Info returns information about this application
-func Info() string {
+func (app *Application) About() string {
 	infoElement := `
   Code
   ModelHelper CLI is a Command Line Interface tool to generate code based on an input source
@@ -141,8 +152,8 @@ func TemplateFolder(templateLocation string) string {
 
 }
 
-func PrintWelcomeMessage() {
-	color.Green.Print(Logo())
+func (a *Application) PrintWelcomeMessage() {
+	color.Green.Print(a.Logo())
 	fmt.Println(Welcome())
 
 	if isBeta {

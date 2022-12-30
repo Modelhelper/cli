@@ -1,35 +1,17 @@
-package generate
+package code
 
 import (
+	"context"
 	"fmt"
+	"modelhelper/cli/code/generator"
 
 	"github.com/spf13/cobra"
 )
 
-type codeGenerateOptions struct {
-	templates         []string
-	templateGroups    []string
-	templatePath      string
-	canUseTemplates   bool
-	entityGroups      []string
-	entities          []string
-	exportToScreen    bool
-	exportByKey       bool
-	exportPath        string
-	connection        string
-	exportToClipboard bool
-	overwrite         bool
-	relations         string
-	codeOnly          bool
-	useDemo           bool
-	configFilePath    string
-	projectFilePath   string
-}
-
 func NewGenerateCodeCommand() *cobra.Command {
 
 	generateCmd := &cobra.Command{
-		Use:   "code",
+		Use:   "generate",
 		Short: "Generate code",
 		Long:  "",
 		Run:   codeCommandHandler,
@@ -70,11 +52,22 @@ func NewGenerateCodeCommand() *cobra.Command {
 
 func codeCommandHandler(cmd *cobra.Command, args []string) {
 	options := parseCodeOptions(cmd, args)
-	fmt.Println(options.connection)
+	cg := generator.NewCodeGenerator(options, nil)
+	ctx := context.Background()
+
+	result, err := cg.Generate(ctx)
+
+	if err != nil {
+		// handle error
+	}
+
+	for _, res := range result {
+		fmt.Printf("Printing the generated result:\n%s", string(res.Result.Body))
+	}
 }
 
-func parseCodeOptions(cmd *cobra.Command, args []string) *codeGenerateOptions {
-	options := codeGenerateOptions{}
+func parseCodeOptions(cmd *cobra.Command, args []string) *generator.CodeGeneratorOptions {
+	options := generator.CodeGeneratorOptions{}
 
 	codeOnly, _ := cmd.Flags().GetBool("code-only")
 	isDemo, _ := cmd.Flags().GetBool("demo")
@@ -91,22 +84,22 @@ func parseCodeOptions(cmd *cobra.Command, args []string) *codeGenerateOptions {
 	conName, _ := cmd.Flags().GetString("connection")
 	overwriteAll, _ := cmd.Flags().GetBool("overwrite")
 
-	options.codeOnly = codeOnly
-	options.useDemo = isDemo
-	options.entities = entityFlagArray
-	options.entityGroups = entityGroupFlagArray
-	options.templatePath = tempPath
-	options.configFilePath = configFile
-	options.projectFilePath = projectPath
-	options.templates = inputTemplates
-	options.templateGroups = inputGroupTemplates
-	options.exportToScreen = printScreen
-	options.exportToClipboard = toClipBoard
-	options.exportByKey = false
-	options.connection = conName
-	options.overwrite = overwriteAll
+	options.CodeOnly = codeOnly
+	options.UseDemo = isDemo
+	options.Entities = entityFlagArray
+	options.EntityGroups = entityGroupFlagArray
+	options.TemplatePath = tempPath
+	options.ConfigFilePath = configFile
+	options.ProjectFilePath = projectPath
+	options.Templates = inputTemplates
+	options.TemplateGroups = inputGroupTemplates
+	options.ExportToScreen = printScreen
+	options.ExportToClipboard = toClipBoard
+	options.ExportByKey = false
+	options.Connection = conName
+	options.Overwrite = overwriteAll
 
-	options.canUseTemplates = len(options.templates) > 0 || len(options.templateGroups) > 0
+	options.CanUseTemplates = len(options.Templates) > 0 || len(options.TemplateGroups) > 0
 	return &options
 }
 

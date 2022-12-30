@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"modelhelper/cli/app"
+	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/slice"
 	"modelhelper/cli/source"
 	"modelhelper/cli/tree"
@@ -22,13 +23,13 @@ var skipDescription bool
 
 type entityHeader []string
 type entitiesTableRenderer struct {
-	rows     []source.Entity
+	rows     []modelhelper.Entity
 	withDesc bool
 	withStat bool
 }
 
 type entityFilter interface {
-	Filter(t []source.Entity, filter []string) []source.Entity
+	Filter(t []modelhelper.Entity, filter []string) []modelhelper.Entity
 }
 
 var (
@@ -44,7 +45,7 @@ var entityCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// fmt.Println("entity called")
-		var con source.Connection
+		var con modelhelper.Connection
 		var conName string
 
 		isDemo, _ := cmd.Flags().GetBool("demo")
@@ -55,7 +56,7 @@ var entityCmd = &cobra.Command{
 
 		if isDemo {
 			conName = "demo"
-			con = source.Connection{Type: conName}
+			con = modelhelper.Connection{Type: conName}
 		} else {
 
 			if len(ctx.Connections) == 0 {
@@ -80,7 +81,7 @@ var entityCmd = &cobra.Command{
 
 		}
 
-		src := con.LoadSource()
+		src := source.SourceFactory(&con)
 
 		pattern := ""
 
@@ -160,37 +161,37 @@ var entityCmd = &cobra.Command{
 
 			showTree, _ := cmd.Flags().GetBool("tree")
 			if showTree {
-				treeLoader := con.LoadRelationTree()
+				// treeLoader := con.LoadRelationTree()
 
-				if treeLoader != nil {
+				// if treeLoader != nil {
 
-					flat, err := treeLoader.GetParentRelationTree(e.Schema, e.Name)
-					// flatChild, err := treeLoader.GetChildRelationTree(e.Schema, e.Name)
-					if err != nil {
+				// 	flat, err := treeLoader.GetParentRelationTree(e.Schema, e.Name)
+				// 	// flatChild, err := treeLoader.GetChildRelationTree(e.Schema, e.Name)
+				// 	if err != nil {
 
-					}
+				// 	}
 
-					tb := source.RelationTreeBuilder{
-						Items: *flat,
-					}
+				// 	tb := source.RelationTreeBuilder{
+				// 		Items: *flat,
+				// 	}
 
-					tree.Print(&tb, true)
+				// 	tree.Print(&tb, true)
 
-					// for _, node := range *flat {
-					// 	add(node.ID, node.ParentID, node.TableName, node.ColumnName, node.RelatedTable, node.RelatedColumnName)
-					// }
-					// // for _, node := range *flatChild {
-					// // 	add(node.ID, node.ParentID, node.TableName, node.ColumnName, node.RelatedTable, node.RelatedColumnName)
-					// // }
+				// 	// for _, node := range *flat {
+				// 	// 	add(node.ID, node.ParentID, node.TableName, node.ColumnName, node.RelatedTable, node.RelatedColumnName)
+				// 	// }
+				// 	// // for _, node := range *flatChild {
+				// 	// // 	add(node.ID, node.ParentID, node.TableName, node.ColumnName, node.RelatedTable, node.RelatedColumnName)
+				// 	// // }
 
-					// show()
-				}
+				// 	// show()
+				// }
 
 			}
 		} else {
 
 			columnFilter, _ := cmd.Flags().GetString("column")
-			var ents *[]source.Entity
+			var ents *[]modelhelper.Entity
 			var err error
 
 			if len(columnFilter) > 0 {
@@ -268,7 +269,7 @@ type relationTreeBuilder struct {
 	items []source.RelationTreeItem
 }
 
-func keyArray(input map[string]source.Connection) []string {
+func keyArray(input map[string]modelhelper.Connection) []string {
 	keys := []string{}
 	for k := range input {
 		keys = append(keys, k)
@@ -318,7 +319,7 @@ func init() {
 
 }
 
-func renderColumns(cl *source.ColumnList) {
+func renderColumns(cl *modelhelper.ColumnList) {
 
 	ui.PrintConsoleTitle("Columns")
 
@@ -336,8 +337,8 @@ type filterVersionedEntity struct{}
 type filterEntitiesWithRows struct{}
 type filterEntitiesWithRelations struct{}
 
-func (f *filterEntitiesWithRows) filter(e []source.Entity, filter []string) []source.Entity {
-	output := []source.Entity{}
+func (f *filterEntitiesWithRows) filter(e []modelhelper.Entity, filter []string) []modelhelper.Entity {
+	output := []modelhelper.Entity{}
 	for _, entity := range e {
 		if entity.RowCount > 0 {
 			output = append(output, entity)
@@ -346,8 +347,8 @@ func (f *filterEntitiesWithRows) filter(e []source.Entity, filter []string) []so
 
 	return output
 }
-func (f *filterEntitiesWithRelations) filter(e []source.Entity, filter []string) []source.Entity {
-	output := []source.Entity{}
+func (f *filterEntitiesWithRelations) filter(e []modelhelper.Entity, filter []string) []modelhelper.Entity {
+	output := []modelhelper.Entity{}
 	for _, entity := range e {
 		if (entity.ParentRelationCount + entity.ChildRelationCount) > 0 {
 			output = append(output, entity)
@@ -356,8 +357,8 @@ func (f *filterEntitiesWithRelations) filter(e []source.Entity, filter []string)
 
 	return output
 }
-func (f *filterVersionedEntity) filter(e []source.Entity, filter []string) []source.Entity {
-	output := []source.Entity{}
+func (f *filterVersionedEntity) filter(e []modelhelper.Entity, filter []string) []modelhelper.Entity {
+	output := []modelhelper.Entity{}
 	for _, entity := range e {
 		if entity.IsVersioned {
 			output = append(output, entity)
@@ -366,8 +367,8 @@ func (f *filterVersionedEntity) filter(e []source.Entity, filter []string) []sou
 
 	return output
 }
-func (f *filterEntityByType) filter(e []source.Entity, filter []string) []source.Entity {
-	output := []source.Entity{}
+func (f *filterEntityByType) filter(e []modelhelper.Entity, filter []string) []modelhelper.Entity {
+	output := []modelhelper.Entity{}
 	for _, entity := range e {
 		if slice.Contains(filter, entity.Type) {
 			output = append(output, entity)
@@ -376,8 +377,8 @@ func (f *filterEntityByType) filter(e []source.Entity, filter []string) []source
 
 	return output
 }
-func (f *filterEntityBySchema) filter(e []source.Entity, filter []string) []source.Entity {
-	output := []source.Entity{}
+func (f *filterEntityBySchema) filter(e []modelhelper.Entity, filter []string) []modelhelper.Entity {
+	output := []modelhelper.Entity{}
 	for _, entity := range e {
 		if slice.Contains(filter, entity.Schema) {
 			output = append(output, entity)
@@ -443,7 +444,7 @@ func (d *entitiesTableRenderer) Header() []string {
 }
 
 type indexTableRenderer struct {
-	rows []source.Index
+	rows []modelhelper.Index
 }
 
 func (r *indexTableRenderer) Header() []string {
@@ -491,7 +492,7 @@ func (r *indexTableRenderer) Rows() [][]string {
 }
 
 type relTableRenderer struct {
-	rows []source.Relation
+	rows []modelhelper.Relation
 }
 
 func (r *relTableRenderer) Header() []string {

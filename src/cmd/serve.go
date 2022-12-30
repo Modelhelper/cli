@@ -35,9 +35,9 @@ var serveCmd = &cobra.Command{
 	Short: "Starts the modelhelper web server",
 	Long:  `With this command you can spin up a server`,
 	Run: func(cmd *cobra.Command, args []string) {
-		mhApp := app.New()
-		ctx := mhApp.CreateContext()
-
+		// mhApp := app.New()
+		// ctx := mhApp.CreateContext()
+		a := app.NewModelhelperCli()
 		port, _ := cmd.Flags().GetInt("port")
 		open, _ := cmd.Flags().GetBool("open")
 		message := fmt.Sprintf(`
@@ -49,11 +49,11 @@ You may also access the ModelHelper API here: http://localhost:%v/api
 
 And read the API documentation here: http://localhost:%v/api/docs.
 
-To exit and stop the service, press ctrl + c`, app.Logo(), port, port, port)
+To exit and stop the service, press ctrl + c`, a.Logo(), port, port, port)
 
 		fmt.Println(message)
 
-		server.Serve(port, open, ctx)
+		server.Serve(port, open)
 	},
 }
 

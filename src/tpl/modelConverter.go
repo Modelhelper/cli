@@ -1,12 +1,12 @@
 package tpl
 
 import (
-	"modelhelper/cli/source"
+	"modelhelper/cli/modelhelper"
 	"strings"
 )
 
 type EntityToModel struct {
-	Entity *source.Entity
+	Entity *modelhelper.Entity
 }
 
 func (e *EntityToModel) Convert() interface{} {

@@ -1,4 +1,4 @@
-package generate
+package code
 
 import "github.com/spf13/cobra"
 
@@ -9,8 +9,8 @@ func NewGenerateCommand() *cobra.Command {
 	}
 
 	rootCmd := &cobra.Command{
-		Use:     "generate",
-		Aliases: []string{"g", "gen"},
+		Use:     "code",
+		Aliases: []string{"c"},
 		Short:   "Generates code based on language, template and source",
 	}
 

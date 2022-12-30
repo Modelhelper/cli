@@ -1,24 +1,3 @@
-/*
-Copyright © 2020 Hans-Petter Eitvet
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
 package cmd
 
 import (
@@ -30,7 +9,7 @@ import (
 	"modelhelper/cli/code"
 	"modelhelper/cli/codegen"
 	"modelhelper/cli/config"
-	"modelhelper/cli/model"
+	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/project"
 	"modelhelper/cli/source"
 	"modelhelper/cli/tpl"
@@ -163,15 +142,18 @@ You could also use mh template or mh t to see a list of all available templates`
 		// obsolete
 		appCtx := modelHelperApp.CreateContext()
 
-		var con source.Connection
-		var prj *project.Project
-		var entities []source.Entity
+		var con modelhelper.Connection
+		var prj *modelhelper.ProjectConfig
+		var entities []modelhelper.Entity
 
-		cfg := loadConfig(options.templatePath)
+		cfg, err := loadConfig(options.configFilePath)
+		if err != nil {
+			// handle error
+		}
 
 		if options.useDemo {
 			options.connection = "demo"
-			con = source.Connection{Type: options.connection}
+			con = modelhelper.Connection{Type: options.connection}
 		} else {
 			if len(appCtx.Connections) == 0 {
 				fmt.Println("Could not find any connections to use, please add a connection")
@@ -193,7 +175,7 @@ You could also use mh template or mh t to see a list of all available templates`
 
 		entityList := mergedList(options.entities, entitiesFromGroups(con, options.entityGroups))
 
-		src := con.LoadSource()
+		src := source.SourceFactory(&con)
 
 		entities = *loadEntities(src, entityList)
 
@@ -214,8 +196,8 @@ You could also use mh template or mh t to see a list of all available templates`
 		options.templates = selectTemplates(allTemplates, options.templates, options.templateGroups)
 
 		start := time.Now()
-		var cstat = codegen.Statistics{}
-		var generatedCode []codeFile
+		var cstat = modelhelper.CodeGeneratorStatistics{}
+		var generatedCode []modelhelper.CodeFileResult
 
 		// creates the root context to be passed to each sub routine
 		ctxVal := codegen.CodeContextValue{}
@@ -228,7 +210,7 @@ You could also use mh template or mh t to see a list of all available templates`
 			currentTemplate, found := allTemplates[tname]
 
 			if found {
-				var codeSection code.Code
+				var codeSection modelhelper.Code
 				// var csFound = false
 				// obsolete when context is completed
 				tplMap := make(map[string]string)
@@ -272,9 +254,9 @@ You could also use mh template or mh t to see a list of all available templates`
 						model := ToBasicModel(currentTemplate.Key, currentTemplate.Language, prj)
 						o, _ := generator.Generate(ctx, model)
 
-						f := codeFile{
-							result:   o,
-							filename: "",
+						f := modelhelper.CodeFileResult{
+							Result:   o,
+							Filename: "",
 						}
 
 						generatedCode = append(generatedCode, f)
@@ -322,10 +304,10 @@ You could also use mh template or mh t to see a list of all available templates`
 								// }
 							}
 
-							f := codeFile{
-								result:   o,
-								filename: fileName,
-								filePath: codeSection.Locations[currentTemplate.Key],
+							f := modelhelper.CodeFileResult{
+								Result:   o,
+								Filename: fileName,
+								FilePath: codeSection.Locations[currentTemplate.Key],
 							}
 
 							generatedCode = append(generatedCode, f)
@@ -367,10 +349,10 @@ You could also use mh template or mh t to see a list of all available templates`
 							// }
 						}
 
-						f := codeFile{
-							result:   o,
-							filename: fileName,
-							filePath: codeSection.Locations[currentTemplate.Key],
+						f := modelhelper.CodeFileResult{
+							Result:   o,
+							Filename: fileName,
+							FilePath: codeSection.Locations[currentTemplate.Key],
 						}
 
 						generatedCode = append(generatedCode, f)
@@ -389,18 +371,20 @@ You could also use mh template or mh t to see a list of all available templates`
 		var fwg sync.WaitGroup
 		var flock = sync.Mutex{}
 		for _, codeBody := range generatedCode {
-			cstat.AppendStat(codeBody.result.Stat)
-			content := []byte(codeBody.result.Content)
+			cstat.Chars += codeBody.Result.Statistics.Chars
+			cstat.Lines += codeBody.Result.Statistics.Lines
+			cstat.Words += codeBody.Result.Statistics.Words
+			content := []byte(codeBody.Result.Body)
 			if options.exportToScreen {
 				screenWriter := tpl.ScreenExporter{}
 				screenWriter.Write([]byte(content))
 			}
 
 			if options.exportToClipboard {
-				sb.WriteString(codeBody.result.Content)
+				sb.WriteString(string(codeBody.Result.Body))
 			}
 
-			if options.exportByKey && len(codeBody.filename) > 0 {
+			if options.exportByKey && len(codeBody.Filename) > 0 {
 				fwg.Add(1)
 				go func(filename string, rootPath string, content []byte) {
 					defer fwg.Done()
@@ -417,7 +401,7 @@ You could also use mh template or mh t to see a list of all available templates`
 					flock.Lock()
 					cstat.FilesExported += 1
 					flock.Unlock()
-				}(codeBody.filename, "D:/projects/ModelHelper", content)
+				}(codeBody.Filename, "D:/projects/ModelHelper", content)
 
 			}
 			// TODO: export to file
@@ -444,7 +428,7 @@ You could also use mh template or mh t to see a list of all available templates`
 					} else {
 						fmt.Println("Filename empty...")
 					}
-				}(codeBody.filename, options.exportPath, content)
+				}(codeBody.Filename, options.exportPath, content)
 			}
 		}
 
@@ -546,7 +530,7 @@ func defaultNullDatatype() map[string]string {
 }
 
 // func templatesFromGroups()
-func entitiesFromGroups(con source.Connection, groups []string) []string {
+func entitiesFromGroups(con modelhelper.Connection, groups []string) []string {
 	list := []string{}
 
 	for _, group := range groups {
@@ -580,18 +564,18 @@ func mergedList(lists ...[]string) []string {
 
 }
 
-type codeFile struct {
-	filename        string
-	filePath        string
-	result          codegen.Result
-	exists          bool
-	existingContent string
-}
+// type codeFile struct {
+// 	filename        string
+// 	filePath        string
+// 	result          codegen.Result
+// 	exists          bool
+// 	existingContent string
+// }
 
 func completeRelations(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return []string{"direct", "all", "complete", "children", "parents"}, cobra.ShellCompDirectiveDefault
 }
-func printStat(stat codegen.Statistics) {
+func printStat(stat modelhelper.CodeGeneratorStatistics) {
 	fmt.Printf(`
 
 Statistics:
@@ -613,21 +597,21 @@ Statistics:
 }
 
 type basicModel struct {
-	project  *project.Project
+	project  *modelhelper.ProjectConfig
 	key      string
 	language string
 }
 
 type entityModel struct {
-	entity   *source.Entity
-	project  *project.Project
+	entity   *modelhelper.Entity
+	project  *modelhelper.ProjectConfig
 	key      string
 	language string
 }
 
 type entitiesModel struct {
-	entities *[]source.Entity
-	project  *project.Project
+	entities *[]modelhelper.Entity
+	project  *modelhelper.ProjectConfig
 	key      string
 	// generator *codegen.SimpleGenerator
 }
@@ -652,8 +636,8 @@ func loadTemplates(templatePath string) (all map[string]tpl.Template, blocks map
 	return a, b
 }
 
-func loadEntities(src source.Source, names []string) *[]source.Entity {
-	var entities []source.Entity
+func loadEntities(src source.Source, names []string) *[]modelhelper.Entity {
+	var entities []modelhelper.Entity
 
 	// if isDemo {
 	// 	// load demo project
@@ -699,19 +683,23 @@ func loadEntities(src source.Source, names []string) *[]source.Entity {
 	return &entities
 }
 
-func loadConfig(configPath string) *config.Config {
+func loadConfig(configPath string) (*modelhelper.Config, error) {
+	cfg := config.NewConfigLoader()
+
 	if len(configPath) > 0 {
-		return config.LoadFromFile(configPath)
+		return cfg.LoadFromFile(configPath)
 	} else {
-		return config.Load()
+		return cfg.Load()
 	}
 }
-func loadProject(projectPath string) *project.Project {
+func loadProject(projectPath string) *modelhelper.ProjectConfig {
+	p := project.NewModelhelperProject()
+
 	if len(projectPath) == 0 {
 		if project.Exists(project.DefaultLocation()) {
 			projectPath = project.DefaultLocation()
 		} else {
-			fp, foundProject := project.FindNearestProjectDir()
+			fp, foundProject := p.FindNearestProjectDir()
 			if foundProject && project.Exists(fp) {
 				projectPath = fp
 
@@ -722,30 +710,30 @@ func loadProject(projectPath string) *project.Project {
 	if len(projectPath) > 0 {
 
 		prj, _ := project.Load(projectPath)
-		return prj
+		return &prj.Config
 	}
 
 	return nil
 }
 
-func toProjectModel(input project.Project) model.ProjectSection {
-	return model.ProjectSection{
+func toProjectModel(input modelhelper.ProjectConfig) modelhelper.ProjectSection {
+	return modelhelper.ProjectSection{
 		Owner: input.OwnerName,
 		Name:  input.Name,
 	}
 
 }
 
-func ToEntityModel(key, language string, project *project.Project, entity *source.Entity) model.EntityModel {
+func ToEntityModel(key, language string, project *modelhelper.ProjectConfig, entity *modelhelper.Entity) modelhelper.EntityModel {
 
-	entityBase := model.EntityModel{}
+	entityBase := modelhelper.EntityModel{}
 
 	base := ToBasicModel(key, language, project)
 	if entity != nil {
 		entityBase = toEntitySection(entity)
 	}
 
-	out := model.EntityModel{
+	out := modelhelper.EntityModel{
 		RootNamespace:             base.RootNamespace,
 		Namespace:                 base.Namespace,
 		Postfix:                   base.Postfix,
@@ -781,9 +769,9 @@ func ToEntityModel(key, language string, project *project.Project, entity *sourc
 	out.HasParents = len(entityBase.Parents) > 0
 	return out
 }
-func ToEntitiesModel(key, language string, project *project.Project, entities *[]source.Entity) model.EntityListModel {
+func ToEntitiesModel(key, language string, project *modelhelper.ProjectConfig, entities *[]modelhelper.Entity) modelhelper.EntityListModel {
 
-	entitylist := []model.EntityModel{}
+	entitylist := []modelhelper.EntityModel{}
 
 	base := ToBasicModel(key, language, project)
 	if entities != nil && len(*entities) > 0 {
@@ -794,7 +782,7 @@ func ToEntitiesModel(key, language string, project *project.Project, entities *[
 		}
 	}
 
-	out := model.EntityListModel{
+	out := modelhelper.EntityListModel{
 		Namespace:                 base.Namespace,
 		Postfix:                   base.Postfix,
 		Prefix:                    base.Prefix,
@@ -811,8 +799,8 @@ func ToEntitiesModel(key, language string, project *project.Project, entities *[
 	return out
 }
 
-func ToBasicModel(key, language string, project *project.Project) model.BasicModel {
-	b := model.BasicModel{}
+func ToBasicModel(key, language string, project *modelhelper.ProjectConfig) modelhelper.BasicModel {
+	b := modelhelper.BasicModel{}
 	imports := []string{}
 
 	// inject := map[]
@@ -833,7 +821,7 @@ func ToBasicModel(key, language string, project *project.Project) model.BasicMod
 				b.RootNamespace = code.RootNamespace
 				imports = append(imports, val.Imports...)
 
-				b.Inject = []model.InjectSection{}
+				b.Inject = []modelhelper.InjectSection{}
 				for _, injectKey := range val.Inject {
 					injItem, foundInj := code.Inject[injectKey]
 					if foundInj {
@@ -853,8 +841,8 @@ func ToBasicModel(key, language string, project *project.Project) model.BasicMod
 	return b
 }
 
-func toColumnSection(from source.Column, entityName string) model.EntityColumnModel {
-	col := model.EntityColumnModel{
+func toColumnSection(from modelhelper.Column, entityName string) modelhelper.EntityColumnModel {
+	col := modelhelper.EntityColumnModel{
 		Description:       from.Description,
 		IsForeignKey:      from.IsForeignKey,
 		IsPrimaryKey:      from.IsPrimaryKey,
@@ -883,8 +871,8 @@ func toColumnSection(from source.Column, entityName string) model.EntityColumnMo
 
 	return col
 }
-func toEntitySection(from *source.Entity) model.EntityModel {
-	out := model.EntityModel{
+func toEntitySection(from *modelhelper.Entity) modelhelper.EntityModel {
+	out := modelhelper.EntityModel{
 		Name:               from.Name,
 		Schema:             from.Schema,
 		Type:               from.Type,
@@ -917,17 +905,17 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 	}
 
 	for _, cr := range from.ChildRelations {
-		child := model.EntityRelationModel{}
+		child := modelhelper.EntityRelationModel{}
 
 		child.Name = cr.Name
 		child.Schema = cr.Schema
-		child.RelatedColumn = model.EntityColumnProps{
+		child.RelatedColumn = modelhelper.EntityColumnProps{
 			Name:       cr.ColumnName,
 			DataType:   cr.ColumnType,
 			IsNullable: cr.ColumnNullable,
 		}
 
-		child.OwnerColumn = model.EntityColumnProps{
+		child.OwnerColumn = modelhelper.EntityColumnProps{
 			Name:       cr.OwnerColumnName,
 			DataType:   cr.OwnerColumnType,
 			IsNullable: cr.OwnerColumnNullable,
@@ -947,7 +935,7 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 	}
 
 	for _, pr := range from.ParentRelations {
-		parent := model.EntityRelationModel{}
+		parent := modelhelper.EntityRelationModel{}
 		parent.Name = pr.Name
 		parent.Schema = pr.Schema
 
@@ -958,13 +946,13 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 			parent.Synonym = pr.Synonym
 		}
 
-		parent.OwnerColumn = model.EntityColumnProps{
+		parent.OwnerColumn = modelhelper.EntityColumnProps{
 			Name:       pr.ColumnName,
 			DataType:   pr.ColumnType,
 			IsNullable: pr.ColumnNullable,
 		}
 
-		parent.RelatedColumn = model.EntityColumnProps{
+		parent.RelatedColumn = modelhelper.EntityColumnProps{
 			Name:       pr.OwnerColumnName,
 			DataType:   pr.OwnerColumnType,
 			IsNullable: pr.OwnerColumnNullable,
@@ -980,9 +968,9 @@ func toEntitySection(from *source.Entity) model.EntityModel {
 
 	return out
 }
-func toInjectSection(from code.Inject, m interface{}) model.InjectSection {
+func toInjectSection(from modelhelper.Inject, m interface{}) modelhelper.InjectSection {
 	// name, _ := codegen.Generate("fileName", from.Name, m)
-	code := model.InjectSection{
+	code := modelhelper.InjectSection{
 		Name:         from.Name,
 		PropertyName: from.PropertyName,
 	}
@@ -995,7 +983,7 @@ func testTable() *tpl.EntityImportModel {
 	table := tpl.EntityImportModel{
 		Code: tpl.CodeImportModel{
 			Language: "cs",
-			Creator:  tpl.CreatorImportModel{CompanyName: "Patogen", DeveloperName: "Hans-Petter Eitvet"},
+			Creator:  tpl.CreatorImportModel{CompanyName: "FooBar inc", DeveloperName: "Dev E. Loper"},
 			Types:    testTypes(),
 			Imports: []string{
 				"using Microsoft.Logging;",

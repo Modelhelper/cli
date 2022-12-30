@@ -1,10 +1,7 @@
 package codegen
 
 import (
-	"context"
-	"modelhelper/cli/model"
-	"modelhelper/cli/project"
-	"time"
+	"modelhelper/cli/modelhelper"
 )
 
 // var datatypeMap map[string]code.LangDefDataType
@@ -13,9 +10,9 @@ import (
 // 	Generate(model interface{}) (string, error)
 // }
 
-type CodeGen interface {
-	Generate(ctx context.Context, m model.ModelConverter) (Result, error)
-}
+// type CodeGen interface {
+// 	Generate(ctx context.Context, m model.ModelConverter) (modelhelper.CodeGeneratorResult, error)
+// }
 
 type CodeContextValue struct {
 	TemplateName  string
@@ -23,27 +20,27 @@ type CodeContextValue struct {
 	Blocks        map[string]string
 	Datatypes     map[string]string
 	NullableTypes map[string]string
-	Project       project.Project
+	Project       modelhelper.ProjectConfig
 
 	// AlternativeNullableTypes map[string]string
 	// Templates                map[string]string // is this really needed
 }
 
-type Statistics struct {
-	FilesExported    int
-	TemplatesUsed    int
-	EntitiesUsed     int
-	SnippetsInserted int
-	FilesCreated     int
-	SnippetsCreated  int
-	Chars            int
-	Lines            int
-	Words            int
-	Duration         time.Duration
-	TimeSaved        int
-}
+// type Statistics struct {
+// 	FilesExported    int
+// 	TemplatesUsed    int
+// 	EntitiesUsed     int
+// 	SnippetsInserted int
+// 	FilesCreated     int
+// 	SnippetsCreated  int
+// 	Chars            int
+// 	Lines            int
+// 	Words            int
+// 	Duration         time.Duration
+// 	TimeSaved        int
+// }
 
-type Result struct {
-	Stat    Statistics
-	Content string
-}
+// type Result struct {
+// 	Stat    Statistics
+// 	Content string
+// }

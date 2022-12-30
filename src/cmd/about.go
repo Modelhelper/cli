@@ -31,29 +31,33 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// aboutCmd represents the about command
-var aboutCmd = &cobra.Command{
-	Use:   "about",
-	Short: "Show information about the modelhelper CLI",
-	Run: func(cmd *cobra.Command, args []string) {
-		printLogoInfo()
-	},
+func NewAboutCommand() *cobra.Command {
+
+	// aboutCmd represents the about command
+	return &cobra.Command{
+		Use:   "about",
+		Short: "Show information about the modelhelper CLI",
+		Run: func(cmd *cobra.Command, args []string) {
+			printLogoInfo()
+		},
+	}
 }
 
-func init() {
-	rootCmd.AddCommand(aboutCmd)
-}
+// func init() {
+// 	rootCmd.AddCommand(aboutCmd)
+// }
 
 func printLogoInfo() {
-	color.Green.Print(app.Logo())
+	a := app.NewModelhelperCli()
+	color.Green.Print(a.Logo())
 
 	dir := project.DefaultLocation()
 
 	if project.Exists(dir) {
-		printProjectInfo(project.DefaultLocation(), true)
+		// printProjectInfo(project.DefaultLocation(), true)
 
 	} else {
-		fmt.Println(app.Info())
+		fmt.Println(a.About())
 	}
 
 }

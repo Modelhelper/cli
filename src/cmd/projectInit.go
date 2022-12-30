@@ -37,7 +37,7 @@ var projectInitCmd = &cobra.Command{
 	Short: "Creates a new project in the current working directory",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		p := *&project.Project{}
+		p := project.NewModelhelperProject()
 
 		init := true
 
@@ -48,16 +48,17 @@ var projectInitCmd = &cobra.Command{
 		}
 
 		if init {
-			p.Version = "3.0"
-			p.Name = ui.PromptForString("Enter the name of the project")
-			p.DefaultSource = promptForConnectionKey()
-			p.Language = ui.PromptForLanguage("Select the primary code language")
-			p.Options = make(map[string]string)
+			p.Config.Version = "3.0"
+			p.Config.Name = ui.PromptForString("Enter the name of the project")
+			p.Config.DefaultSource = promptForConnectionKey()
+			p.Config.Language = ui.PromptForLanguage("Select the primary code language")
+			p.Config.Options = make(map[string]string)
 			// p.OwnerName = promptForString("Enter the owner (company name) for this project")
 
 			if ui.PromptForYesNo("Clone connections from config? [Y/n]", "y") {
-				cfg := config.Load()
-				p.Connections = cfg.Connections
+				cloader := config.NewConfigLoader()
+				cfg, _ := cloader.Load()
+				p.Config.Connections = cfg.Connections
 				// clone
 			}
 
@@ -72,7 +73,7 @@ var projectInitCmd = &cobra.Command{
 			if project.Exists(project.DefaultLocation()) {
 
 				if open {
-					openProjectInEditor()
+					// openProjectInEditor()
 				}
 			}
 		}

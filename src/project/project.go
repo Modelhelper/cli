@@ -3,8 +3,7 @@ package project
 import (
 	"io/ioutil"
 	"log"
-	"modelhelper/cli/code"
-	"modelhelper/cli/source"
+	"modelhelper/cli/modelhelper"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,22 +13,24 @@ import (
 
 const dirname string = ".modelhelper"
 
-type Project struct {
-	Version       string                       `yaml:"version"`
-	Name          string                       `yaml:"name"`
-	Language      string                       `yaml:"language"`
-	Description   string                       `yaml:"description"`
-	DefaultSource string                       `yaml:"defaultSource,omitempty"`
-	DefaultKey    string                       `yaml:"defaultKey,omitempty"`
-	Connections   map[string]source.Connection `yaml:"connections,omitempty"`
-	Code          map[string]code.Code         `yaml:"code,omitempty"`
-	OwnerName     string                       `yaml:"ownerName,omitempty"`
-	Options       map[string]string            `yaml:"options,omitempty"`
-	Custom        interface{}                  `yaml:"custom,omitempty"`
-	Header        string                       `yaml:"header,omitempty"`
+type defaultProject struct {
+	path   string
+	Config modelhelper.ProjectConfig
 }
 
-func (p *Project) Save() error {
+func NewModelhelperProject() *defaultProject {
+	return &defaultProject{}
+}
+func (p *defaultProject) Load() (*modelhelper.ProjectConfig, error) {
+	return nil, nil
+}
+func (p *defaultProject) LoadFromFile(path string) (*modelhelper.ProjectConfig, error) {
+	return nil, nil
+}
+func (p *defaultProject) New() (*modelhelper.ProjectConfig, error) {
+	return nil, nil
+}
+func (p *defaultProject) Save() error {
 
 	d, err := yaml.Marshal(&p)
 
@@ -71,9 +72,9 @@ func DefaultLocation() string {
 	return filepath.Join(DefaultDir(), "project.yaml")
 }
 
-func (P *Project) Exists(path string) bool {
+func (p *defaultProject) Exists() bool {
 
-	pathInfo, err := os.Stat(path)
+	pathInfo, err := os.Stat(p.path)
 
 	if os.IsNotExist(err) || pathInfo.IsDir() {
 		return false
@@ -93,8 +94,8 @@ func Exists(path string) bool {
 	return true
 }
 
-func LoadProjects(path ...string) []Project {
-	l := []Project{}
+func LoadProjects(path ...string) []defaultProject {
+	l := []defaultProject{}
 
 	for _, p := range path {
 		project, _ := loadProjectFromFile(p)
@@ -102,7 +103,7 @@ func LoadProjects(path ...string) []Project {
 	}
 	return l
 }
-func Load(path string) (*Project, error) {
+func Load(path string) (*defaultProject, error) {
 	if len(path) > 0 {
 		pathInfo, err := os.Stat(path)
 		if os.IsNotExist(err) || pathInfo.IsDir() {
@@ -124,8 +125,8 @@ func Load(path string) (*Project, error) {
 
 }
 
-func loadProjectFromFile(fileName string) (*Project, error) {
-	var p *Project
+func loadProjectFromFile(fileName string) (*defaultProject, error) {
+	var p *defaultProject
 
 	dat, e := ioutil.ReadFile(fileName)
 	if e != nil {
@@ -142,13 +143,13 @@ func loadProjectFromFile(fileName string) (*Project, error) {
 	return p, nil
 }
 
-func (p *Project) GetConnections() (*map[string]source.Connection, error) {
-	return &p.Connections, nil
+func (p *defaultProject) GetConnections() (*map[string]modelhelper.Connection, error) {
+	return &p.Config.Connections, nil
 }
 
-//FindRelatedProjects gets a list of all the related projects by following the path from DefaultDir() to the volumeroot
-//The returning list is in correct importance from least to most (the project nearest to DefaultDir())
-func FindReleatedProjects(startPath string) []string {
+// FindRelatedProjects gets a list of all the related projects by following the path from DefaultDir() to the volumeroot
+// The returning list is in correct importance from least to most (the project nearest to DefaultDir())
+func (p *defaultProject) FindReleatedProjects(startPath string) []string {
 	basePath, _ := filepath.Split(startPath)
 	list := []string{}
 
@@ -188,7 +189,7 @@ func FindReleatedProjects(startPath string) []string {
 
 }
 
-func FindNearestProjectDir() (string, bool) {
+func (p *defaultProject) FindNearestProjectDir() (string, bool) {
 	basePath := "./"
 	root := DefaultDir()
 	updir := "../"
@@ -216,69 +217,69 @@ func FindNearestProjectDir() (string, bool) {
 	return "", false
 }
 
-func JoinProject(joinType string, projects ...Project) Project {
-	switch joinType {
-	case "merge":
-		return mergeProject(projects...)
+// func JoinProject(joinType string, projects ...project) project {
+// 	switch joinType {
+// 	case "merge":
+// 		return mergeProject(projects...)
 
-	case "smart":
-		return smartMergeProject(projects...)
+// 	case "smart":
+// 		return smartMergeProject(projects...)
 
-	case "replace":
-		return replaceProject(projects...)
-	default:
-		return smartMergeProject(projects...)
+// 	case "replace":
+// 		return replaceProject(projects...)
+// 	default:
+// 		return smartMergeProject(projects...)
 
-	}
-}
-func mergeProject(projects ...Project) Project {
-	current := Project{}
+// 	}
+// }
+// func mergeProject(projects ...project) project {
+// 	current := project{}
 
-	conProv := []source.ConnectionProvider{}
-	for _, p := range projects {
-		conProv = append(conProv, &p)
-	}
+// 	conProv := []project{}
+// 	for _, p := range projects {
+// 		conProv = append(conProv, p)
+// 	}
 
-	current.Connections = source.JoinConnections("merge", conProv...)
+// 	current.Connections = source.JoinConnections("merge", conProv...)
 
-	for _, proj := range projects {
+// 	for _, proj := range projects {
 
-		current.Code = proj.Code
-	}
+// 		current.Code = proj.Code
+// 	}
 
-	return current
-}
+// 	return current
+// }
 
-func smartMergeProject(projects ...Project) Project {
-	current := Project{}
-	current.Options = make(map[string]string)
-	conProv := []source.ConnectionProvider{}
-	for _, p := range projects {
-		conProv = append(conProv, &p)
-	}
+// func smartMergeProject(projects ...project) project {
+// 	current := project{}
+// 	current.Options = make(map[string]string)
+// 	conProv := []modelhelper.ConnectionProvider{}
+// 	for _, p := range projects {
+// 		conProv = append(conProv, &p)
+// 	}
 
-	current.Connections = source.JoinConnections("smart", conProv...)
+// 	current.Connections = source.JoinConnections("smart", conProv...)
 
-	for _, proj := range projects {
-		current.Name = mergeString(current.Name, proj.Name)
-		// if len(proj.Name) > 0 {
-		// 	current.Name = proj.Name
-		// }
-		current.Description = mergeString(current.Description, proj.Description)
-		current.DefaultKey = mergeString(current.DefaultKey, proj.DefaultKey)
-		current.DefaultSource = mergeString(current.DefaultSource, proj.DefaultSource)
-		current.OwnerName = mergeString(current.OwnerName, proj.OwnerName)
-		current.Language = mergeString(current.Language, proj.Language)
+// 	for _, proj := range projects {
+// 		current.Name = mergeString(current.Name, proj.Name)
+// 		// if len(proj.Name) > 0 {
+// 		// 	current.Name = proj.Name
+// 		// }
+// 		current.Description = mergeString(current.Description, proj.Description)
+// 		current.DefaultKey = mergeString(current.DefaultKey, proj.DefaultKey)
+// 		current.DefaultSource = mergeString(current.DefaultSource, proj.DefaultSource)
+// 		current.OwnerName = mergeString(current.OwnerName, proj.OwnerName)
+// 		current.Language = mergeString(current.Language, proj.Language)
 
-		for optKey, optVal := range proj.Options {
-			current.Options[optKey] = optVal
-		}
+// 		for optKey, optVal := range proj.Options {
+// 			current.Options[optKey] = optVal
+// 		}
 
-		current.Code = proj.Code
-	}
+// 		current.Code = proj.Code
+// 	}
 
-	return current
-}
+// 	return current
+// }
 
 func mergeString(current string, target string) string {
 	if len(target) > 0 {
@@ -287,8 +288,8 @@ func mergeString(current string, target string) string {
 
 	return current
 }
-func replaceProject(projects ...Project) Project {
-	current := Project{}
+func replaceProject(projects ...defaultProject) defaultProject {
+	current := defaultProject{}
 
 	l := len(projects)
 

@@ -22,31 +22,29 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-	"modelhelper/cli/config"
+	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/project"
-	"modelhelper/cli/source"
-	"modelhelper/cli/ui"
 
 	"github.com/spf13/cobra"
 )
 
 // projectCmd represents the project command
 var projectCmd = &cobra.Command{
-	Use:   "project",
+	Use:   "project_old",
 	Short: "Manage the current project in the working directory",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		open, _ := cmd.Flags().GetBool("open")
-		path, _ := cmd.Flags().GetString("path")
+		// path, _ := cmd.Flags().GetString("path")
 		// projects := project.LoadProjects(project.FindReleatedProjects()...)
+		p := project.NewModelhelperProject()
 
-		if project.Exists(path) {
+		if p.Exists() {
 
 			if open {
-				openProjectInEditor()
+				// openProjectInEditor()
 			} else {
-				printProjectInfo(path, true)
+				// printProjectInfo(path, true)
 			}
 		}
 	},
@@ -59,107 +57,107 @@ func init() {
 
 }
 
-func printProjectInfo(projectFile string, renderTables bool) {
+// func printProjectInfo(projectFile string, renderTables bool) {
 
-	paths := project.FindReleatedProjects(projectFile)
-	ps := project.LoadProjects(paths...)
+// 	paths := project.FindReleatedProjects(projectFile)
+// 	ps := project.LoadProjects(paths...)
 
-	p := project.JoinProject("smart", ps...)
-	// p, err := project.Load(projectFile)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
+// 	p := project.JoinProject("smart", ps...)
+// 	// p, err := project.Load(projectFile)
+// 	// if err != nil {
+// 	// 	fmt.Println(err)
+// 	// 	return
+// 	// }
 
-	cfg := config.Load()
-	cons := source.JoinConnections("smart", cfg, &p)
+// 	cfg := config.Load()
+// 	cons := source.JoinConnections("smart", cfg, &p)
 
-	ui.PrintConsoleTitle("Project information")
+// 	ui.PrintConsoleTitle("Project information")
 
-	fmt.Printf("\n%-20s%20s", "Name", p.Name)
-	// fmt.Printf("\n%-20s%20s", "Version", p.Version)
-	fmt.Printf("\n%-20s%20s", "Owner", p.OwnerName)
-	fmt.Printf("\n%-20s%20s", "Primary language", p.Language)
-	fmt.Printf("\n\n")
-	fmt.Println(p.Description)
+// 	fmt.Printf("\n%-20s%20s", "Name", p.Name)
+// 	// fmt.Printf("\n%-20s%20s", "Version", p.Version)
+// 	fmt.Printf("\n%-20s%20s", "Owner", p.OwnerName)
+// 	fmt.Printf("\n%-20s%20s", "Primary language", p.Language)
+// 	fmt.Printf("\n\n")
+// 	fmt.Println(p.Description)
 
-	fmt.Println()
-	fmt.Println("OPTIONS....")
-	for k, v := range p.Options {
-		fmt.Printf("\n%-20s%20s", k, v)
-	}
-	// fmt.Println("Defaults:")
-	// fmt.Printf("%-20s%8s", "Connection", p.DefaultSource)
-	// fmt.Printf("\n%-20s%8s", "Key", p.DefaultKey)
+// 	fmt.Println()
+// 	fmt.Println("OPTIONS....")
+// 	for k, v := range p.Options {
+// 		fmt.Printf("\n%-20s%20s", k, v)
+// 	}
+// 	// fmt.Println("Defaults:")
+// 	// fmt.Printf("%-20s%8s", "Connection", p.DefaultSource)
+// 	// fmt.Printf("\n%-20s%8s", "Key", p.DefaultKey)
 
-	if len(cons) > 0 {
-		fmt.Printf("\n\n")
-		fmt.Println("Available Connections:")
-		fmt.Printf("\n")
+// 	if len(cons) > 0 {
+// 		fmt.Printf("\n\n")
+// 		fmt.Println("Available Connections:")
+// 		fmt.Printf("\n")
 
-		cr := connectionRenderer{cons, p.DefaultSource}
-		ui.RenderTable(&cr)
-		fmt.Printf("\n")
-	}
-	if renderTables {
-		for _, langVal := range p.Code {
+// 		cr := connectionRenderer{cons, p.DefaultSource}
+// 		ui.RenderTable(&cr)
+// 		fmt.Printf("\n")
+// 	}
+// 	if renderTables {
+// 		for _, langVal := range p.Code {
 
-			showTemplateKey := false
-			if len(langVal.Keys) > 0 {
-				ui.PrintConsoleTitle("Keys")
-				kr := keyRenderer{keys: langVal.Keys}
-				ui.RenderTable(&kr)
-			} else {
-				fmt.Printf(`No keys is defined for this project
-Using keys will enable the templates to render correct namespace, package etc
+// 			showTemplateKey := false
+// 			if len(langVal.Keys) > 0 {
+// 				ui.PrintConsoleTitle("Keys")
+// 				kr := keyRenderer{keys: langVal.Keys}
+// 				ui.RenderTable(&kr)
+// 			} else {
+// 				fmt.Printf(`No keys is defined for this project
+// Using keys will enable the templates to render correct namespace, package etc
 
-use the command 'mh project key <name> --namespace 'namespace'
-`)
+// use the command 'mh project key <name> --namespace 'namespace'
+// `)
 
-				showTemplateKey = true
-			}
+// 				showTemplateKey = true
+// 			}
 
-			if len(langVal.Inject) > 0 {
-				ui.PrintConsoleTitle("Inject")
-				ir := injectRenderer{langVal.Inject}
-				ui.RenderTable(&ir)
-			} else {
-				showTemplateKey = true
-			}
-			if len(langVal.Locations) > 0 {
-				ui.PrintConsoleTitle("Locations")
+// 			if len(langVal.Inject) > 0 {
+// 				ui.PrintConsoleTitle("Inject")
+// 				ir := injectRenderer{langVal.Inject}
+// 				ui.RenderTable(&ir)
+// 			} else {
+// 				showTemplateKey = true
+// 			}
+// 			if len(langVal.Locations) > 0 {
+// 				ui.PrintConsoleTitle("Locations")
 
-				lr := locationRenderer{langVal.Locations}
-				ui.RenderTable(&lr)
+// 				lr := locationRenderer{langVal.Locations}
+// 				ui.RenderTable(&lr)
 
-			} else {
-				fmt.Printf(`Locations is not defined for this project
-Connecting keys to a location will enable the templates export generated code to a path relative to this project
+// 			} else {
+// 				fmt.Printf(`Locations is not defined for this project
+// Connecting keys to a location will enable the templates export generated code to a path relative to this project
 
-use the command 'mh project location <name> <path>
-`)
-				showTemplateKey = true
-			}
+// use the command 'mh project location <name> <path>
+// `)
+// 				showTemplateKey = true
+// 			}
 
-			if showTemplateKey {
-				fmt.Println()
-				fmt.Println("Where to find keys to use in project")
-				fmt.Println("use 'mh template' to see which keys that each template implement")
-			}
-		}
-	}
-}
+// 			if showTemplateKey {
+// 				fmt.Println()
+// 				fmt.Println("Where to find keys to use in project")
+// 				fmt.Println("use 'mh template' to see which keys that each template implement")
+// 			}
+// 		}
+// 	}
+// }
 
-func openProjectInEditor() {
-	cfg := config.Load()
-	editor := cfg.DefaultEditor
+// func openProjectInEditor() {
+// 	cfg := config.Load()
+// 	editor := cfg.DefaultEditor
 
-	if len(cfg.DefaultEditor) == 0 {
-		editor = promptForEditorKey("Please select a editor to open the project file")
-	}
+// 	if len(cfg.DefaultEditor) == 0 {
+// 		editor = promptForEditorKey("Please select a editor to open the project file")
+// 	}
 
-	openPathInEditor(editor, project.DefaultLocation())
-}
+// 	openPathInEditor(editor, project.DefaultLocation())
+// }
 
 type locationRenderer struct {
 	rows map[string]string
@@ -190,7 +188,7 @@ func (d *locationRenderer) Rows() [][]string {
 }
 
 type connectionRenderer struct {
-	rows   map[string]source.Connection
+	rows   map[string]modelhelper.Connection
 	defcon string
 }
 

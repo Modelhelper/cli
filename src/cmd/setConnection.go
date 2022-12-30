@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"log"
 	"modelhelper/cli/config"
+	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/source"
 
 	"github.com/gookit/color"
@@ -65,7 +66,7 @@ var setConnectionCmd = &cobra.Command{
 			fmt.Println("\nUse the option --key <keynam> to update the connection with the new connection string")
 		}
 
-		c := source.Connection{
+		c := modelhelper.Connection{
 			Name:             key,
 			Description:      conDesc,
 			Schema:           conSchema,

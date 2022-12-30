@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"modelhelper/cli/config"
+	"modelhelper/cli/modelhelper"
 	"os/exec"
 	"path/filepath"
 
@@ -31,7 +32,7 @@ import (
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
-	Use:   "config",
+	Use:   "config_old",
 	Short: "Manage modelhelper configuration",
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -44,8 +45,12 @@ var configCmd = &cobra.Command{
 			if len(ed) > 0 {
 				editor = ed
 			} else {
+				c := config.NewConfigLoader()
+				cfg, err := c.Load()
 
-				cfg := config.Load()
+				if err != nil {
+					// handle error
+				}
 				editor = getEditor(cfg)
 			}
 
@@ -70,7 +75,7 @@ func openPathInEditor(editor string, loc string) {
 	}
 }
 
-func getEditor(cfg *config.Config) string {
+func getEditor(cfg *modelhelper.Config) string {
 	if len(cfg.DefaultEditor) > 0 {
 		return cfg.DefaultEditor
 	} else {

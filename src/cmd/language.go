@@ -14,7 +14,7 @@ import (
 
 // aboutCmd represents the about command
 var languageCmd = &cobra.Command{
-	Use:     "language",
+	Use:     "language_old",
 	Aliases: []string{"lang", "l"},
 	Short:   "Show a list of language definitions installed for modelhelper",
 	Args:    cobra.RangeArgs(0, 1),

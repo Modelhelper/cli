@@ -6,6 +6,7 @@ import (
 	"context"
 	"io/ioutil"
 	"log"
+	"modelhelper/cli/modelhelper"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,11 +21,11 @@ type GoLangGenerator struct{}
 
 type SimpleGenerator struct{}
 
-func (cstat *Statistics) AppendStat(instat Statistics) {
-	cstat.Chars += instat.Chars
-	cstat.Lines += instat.Lines
-	cstat.Words += instat.Words
-}
+// func (cstat *Statistics) AppendStat(instat Statistics) {
+// 	cstat.Chars += instat.Chars
+// 	cstat.Lines += instat.Lines
+// 	cstat.Words += instat.Words
+// }
 
 func Generate(name string, body string, model interface{}) string {
 	tmpl, err := template.New(name).Funcs(simpleFuncMap()).Parse(body)
@@ -39,14 +40,14 @@ func Generate(name string, body string, model interface{}) string {
 
 }
 
-func (g *GoLangGenerator) Generate(ctx context.Context, model interface{}) (Result, error) {
+func (g *GoLangGenerator) Generate(ctx context.Context, model interface{}) (*modelhelper.CodeGeneratorResult, error) {
 	start := time.Now()
 
 	code, ok := ctx.Value("code").(CodeContextValue)
-	res := Result{}
+	res := modelhelper.CodeGeneratorResult{}
 
 	if !ok {
-		return res, nil
+		return &res, nil
 	}
 	tplMap := make(map[string]string)
 
@@ -59,21 +60,23 @@ func (g *GoLangGenerator) Generate(ctx context.Context, model interface{}) (Resu
 	buf := new(bytes.Buffer)
 	err := template.ExecuteTemplate(buf, code.TemplateName, model)
 	if err != nil {
-		return res, err
+		return nil, err
 	}
 
-	res.Content = buf.String()
-	if len(res.Content) > 0 {
-		res.Stat = getStat(res.Content)
-		res.Stat.Duration = time.Since(start)
+	res.Body = buf.Bytes()
+	if len(res.Body) > 0 {
+		res.Statistics = getStat(res.Body)
+		res.Statistics.Duration = time.Since(start)
 	}
 
-	return res, nil
+	return &res, nil
 
 }
 
-func getStat(s string) Statistics {
-	stat := Statistics{
+func getStat(body []byte) modelhelper.CodeGeneratorStatistics {
+
+	s := string(body)
+	stat := modelhelper.CodeGeneratorStatistics{
 		Chars: len(s),
 		Lines: getLines(s),
 		Words: getWords(s),
@@ -104,17 +107,17 @@ func getLines(input string) int {
 	return count
 }
 
-func (g *SimpleGenerator) Generate(ctx context.Context, model interface{}) (Result, error) {
+func (g *SimpleGenerator) Generate(ctx context.Context, model interface{}) (*modelhelper.CodeGeneratorResult, error) {
 	code, ok := ctx.Value("code").(CodeContextValue)
-	res := Result{}
+	res := modelhelper.CodeGeneratorResult{}
 
 	if !ok {
-		return res, nil
+		return &res, nil
 	}
 
 	var err error
-	res.Content = Generate(code.TemplateName, code.Template, model)
-	return res, err
+	res.Body = []byte(Generate(code.TemplateName, code.Template, model))
+	return &res, err
 
 }
 
