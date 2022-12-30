@@ -11,9 +11,6 @@ import (
 // Initialize builds the configuration
 func (c *Config) Initialize() error {
 
-	// ui.ClearScreen()
-	// ui.Logo("")
-
 	fmt.Println(ui.ConsoleTitle("\nMake the modelhelper CLI useful...\n"))
 	fmt.Printf(`
 The only way to make the modelhelper CLI useful is to
@@ -53,9 +50,6 @@ Anyways, if you choose to do this later you can always open the configuration fi
 
 func askForConnection() *source.Connection {
 
-	// ui.ClearScreen()
-	// ui.Logo("")
-
 	con := source.Connection{}
 	fmt.Printf("The next set of questions will build your first connection string to a MS SQL database.\n\n")
 	fmt.Printf("Leave name empty if you want to skip the rest of the connection builder\n")
@@ -82,8 +76,6 @@ func askForConnection() *source.Connection {
 	return &con
 }
 func askForTemplateLocation() string {
-	// ui.ClearScreen()
-	// ui.Logo("")
 
 	fmt.Printf(`
 To generate code the modelhelper CLI needs to know where to find a set of valid templates.
@@ -102,8 +94,6 @@ If cloned, please point to the 'code' folder in that repository...
 	return loc
 }
 func askForLanguageLocation() string {
-	// ui.ClearScreen()
-	// ui.Logo("")
 
 	fmt.Printf(`
 To generate code the modelhelper CLI and the template needs to know where to find a set of valid language definitions.
