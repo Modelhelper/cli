@@ -7,10 +7,10 @@
         {
             "name": "Launch Package",
             "type": "go",
-            "args": ["g", "-e", "BikeConfiguration", "-t", "test-synonym", "--screen"],
+            "args": ["generate", "--entity", "workout", "--template", "md-describe-table", "--copy", "--screen"],
             "request": "launch",
             "mode": "auto",
-            "program": "${fileDirname}"
+            "program": "${workspaceFolder}\\main.go"
         }
     ]
 }
