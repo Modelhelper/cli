@@ -2,7 +2,7 @@ package language
 
 import "github.com/spf13/cobra"
 
-func NewConfigCommand() *cobra.Command {
+func LanguageCommand() *cobra.Command {
 
 	subCommands := []*cobra.Command{
 		NewListLanguagesCommand(),

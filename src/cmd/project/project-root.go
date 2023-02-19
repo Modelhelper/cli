@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewProjectCommand() *cobra.Command {
+func ProjectCommand() *cobra.Command {
 
 	subCommands := []*cobra.Command{
 		NewGenerateProjectCommand(),

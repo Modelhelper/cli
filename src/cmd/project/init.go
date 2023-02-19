@@ -13,7 +13,7 @@ import (
 func NewProjectInitCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
-		Use:   "create",
+		Use:   "init",
 		Short: "Creates a new project in the current working directory",
 
 		Run: func(cmd *cobra.Command, args []string) {

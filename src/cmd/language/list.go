@@ -2,8 +2,13 @@ package language
 
 import (
 	"fmt"
+	"modelhelper/cli/code"
+	"modelhelper/cli/config"
+	"modelhelper/cli/ui"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 func NewListLanguagesCommand() *cobra.Command {
@@ -13,34 +18,57 @@ func NewListLanguagesCommand() *cobra.Command {
 		Aliases: []string{"ls"},
 		Args:    cobra.MaximumNArgs(1),
 		Short:   "List all languages",
-		Long: `With this command you can list all available templates, snippet and blocks
-
-with the use of --by option you can group the various templates either by type, language
-group or tag.
-
-A template can exist in one or more groups making it possible to generate different
-outcome based on what you need
-
-Filtering the templates:
-Filter the template by using on or more of the following options
---lang <langcodes> (e.g --lang cs), filters by language
---type <type> (e.g --type block), filters by type
---model <model> (e.g --model entity), filters by model
---group <groupname> (e.g --group cs-dpr-full), filters by group
-
-
--- hva med liste på gruppenavn
--- hva med liste på tags
-	
-	`,
-		Run: listlanguagesCommandHandler,
+		Run:     listlanguagesCommandHandler,
 	}
-
-	cmd.Flags().String("editor", "", "The editor to use when opening the file")
 
 	return cmd
 }
 
 func listlanguagesCommandHandler(cmd *cobra.Command, args []string) {
-	fmt.Println("language list")
+	cfg := config.Load()
+	defs, err := code.LoadFromPath(cfg.Languages.Definitions)
+
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+
+	ui.ConsoleTitle("Language list")
+	fmt.Println(`
+This is a list of all available languages defined for model helper			
+			`)
+	renderer := languageTableRenderer{defs}
+	ui.RenderTable(&renderer)
+}
+
+type languageTableRenderer struct {
+	rows map[string]code.LanguageDefinition
+}
+
+func (d *languageTableRenderer) Header() []string {
+	h := []string{"Language", "Version", "Datatypes", "Imports", "Keys", "Injects", "Description"}
+
+	return h
+}
+func (d *languageTableRenderer) Rows() [][]string {
+	var rows [][]string
+
+	p := message.NewPrinter(language.English)
+
+	for _, row := range d.rows {
+		// un := "No"
+		// ci := "No"
+		r := []string{
+			row.Language,
+			row.Version,
+			p.Sprintf("%d", len(row.DataTypes)),
+			p.Sprintf("%d", len(row.DefaultImports)),
+			p.Sprintf("%d", len(row.Keys)),
+			p.Sprintf("%d", len(row.Inject)),
+			row.Short,
+		}
+
+		rows = append(rows, r)
+	}
+
+	return rows
 }

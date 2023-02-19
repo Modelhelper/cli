@@ -29,7 +29,7 @@ type generateOptions struct {
 func NewGenerateProjectCommand() *cobra.Command {
 
 	generateCmd := &cobra.Command{
-		Use:   "new",
+		Use:   "create",
 		Short: "Creates a new project based on a template",
 		Long:  "",
 		Run:   generateCommandHandler,
@@ -69,6 +69,8 @@ func NewGenerateProjectCommand() *cobra.Command {
 }
 
 func generateCommandHandler(cmd *cobra.Command, args []string) {
+
+	fmt.Println("Hello world")
 	options := parseCodeOptions(cmd, args)
 	fmt.Println(options.connection)
 }

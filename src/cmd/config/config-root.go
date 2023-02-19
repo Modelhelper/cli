@@ -5,8 +5,8 @@ import "github.com/spf13/cobra"
 func NewConfigCommand() *cobra.Command {
 
 	subCommands := []*cobra.Command{
-		NewSetCommand(),
-		NewSetCommand(),
+		// NewSetCommand(),
+		// NewSetCommand(),
 		NewOpenConfigCommand(),
 	}
 

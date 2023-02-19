@@ -24,8 +24,8 @@ func TestTreeBuilder(t *testing.T) {
 
 	fmt.Println(tree)
 	if a != e {
+		t.Errorf("TreeBuilder: expected %v, got %v", e, a)
 	}
-	t.Errorf("TreeBuilder: expected %v, got %v", e, a)
 
 	// if len(tree.Nodes[1].Nodes) != 1 {
 	// 	t.Errorf("TreeBuilder: expected %v, got %v", 1, len(tree.Nodes[1].Nodes))

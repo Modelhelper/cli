@@ -7,6 +7,9 @@ import (
 )
 
 func NewSetCommand() *cobra.Command {
+	subCommands := []*cobra.Command{
+		SetConnectionCommand(),
+	}
 
 	generateCmd := &cobra.Command{
 		Use:   "set",
@@ -35,6 +38,9 @@ func NewSetCommand() *cobra.Command {
 	// generateCmd.Flags().String("setup", "", "Use this setup to generate code") // version 3.1
 	generateCmd.Flags().StringP("connection", "c", "", "The connection key to be used, uses default connection if not provided")
 
+	for _, sub := range subCommands {
+		generateCmd.AddCommand(sub)
+	}
 	return generateCmd
 }
 

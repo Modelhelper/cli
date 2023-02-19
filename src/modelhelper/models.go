@@ -225,8 +225,9 @@ type DeveloperSection struct {
 }
 
 type ProjectSection struct {
-	Name  string
-	Owner string
+	Name    string
+	Owner   string
+	Version string
 }
 
 type EntityRelationModel struct {

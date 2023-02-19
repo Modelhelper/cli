@@ -38,13 +38,6 @@ var languageCmd = &cobra.Command{
 			}
 
 			// showLanguage(args[0], cfg.Languages.Definitions)
-		} else {
-			ui.ConsoleTitle("Language list")
-			fmt.Println(`
-This is a list of all available languages defined for model helper			
-			`)
-			renderer := languageTableRenderer{defs}
-			ui.RenderTable(&renderer)
 		}
 
 	},
@@ -89,7 +82,7 @@ func presentLanguage(def *code.LanguageDefinition) {
 }
 
 func init() {
-	rootCmd.AddCommand(languageCmd)
+	// rootCmd.AddCommand(languageCmd)
 	languageCmd.Flags().Bool("open", false, "Opens the language definition in the default editor")
 }
 
