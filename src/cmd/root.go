@@ -1,34 +1,20 @@
-/*
-Copyright © 2020 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
 	"fmt"
 	"modelhelper/cli/app"
+	cfCmd "modelhelper/cli/cmd/config"
+	"modelhelper/cli/cmd/language"
+	prCmd "modelhelper/cli/cmd/project"
+	"modelhelper/cli/cmd/serve"
+	"modelhelper/cli/cmd/source"
+	tplCmd "modelhelper/cli/cmd/template"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
 var modelHelperApp *app.Application
-
-var cfgFile string
-
-// var mhConfig config.Config
-// var source string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -41,7 +27,8 @@ var rootCmd = &cobra.Command{
 
 	},
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {
-		slog := app.Slogan()
+		a := app.NewModelhelperCli()
+		slog := a.Slogan()
 		fmt.Println(slog)
 	},
 }
@@ -61,78 +48,27 @@ func Execute() {
 
 }
 
-// func GetConfig() *config.Config {
-// 	return &mhConfig
-// }
-func init() {
-	// cobra.OnInitialize(initConfig)
-	//rootCmd.PersistentFlags().StringVarP(&source, "source", "s", "", "Sets the source")
+func subCommands() []*cobra.Command {
+	return []*cobra.Command{
+		source.SourceCommand(),
+		language.LanguageCommand(),
+		prCmd.ProjectCommand(),
+		cfCmd.NewConfigCommand(),
+		tplCmd.NewTemplateCommand(),
+		serve.NewServeCommand(),
+		NewAboutCommand(),
+		NewVersionCommand(),
+		NewCompletionCommand(),
+	}
 
 }
 
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
+func init() {
 
-	// configPath := config.Location()
-	// viper.SetConfigName("config")
-	// viper.SetConfigType("yaml")
-
-	// viper.AddConfigPath(configPath) // optionally look for config in the working directory
-	// err := viper.ReadInConfig()     // Find and read the config file
-	// if err != nil {                 // Handle errors reading the config file
-	// 	panic(fmt.Errorf("Fatal error config file: %s \n", err))
-	// }
-
-	// if err := viper.ReadInConfig(); err != nil {
-	// 	if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-	// 		// Config file not found; ignore error if desired
-	// 	} else {
-	// 		// Config file was found but another error was produced
-	// 	}
-	// }
-
-	// err = viper.Unmarshal(&mhConfig)
-	// if err != nil {
-	// 	// t.Fatalf("unable to decode into struct, %v", err)
-	// }
-	// if cfgFile != "" {
-	// 	// Use config file from the flag.
-	// 	viper.SetConfigFile(cfgFile)
-	// } else {
-	// 	// Find home directory.
-	// 	home, err := homedir.Dir()
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 		os.Exit(1)
-	// 	}
-
-	// 	// Search config in home directory with name ".cli" (without extension).
-	// 	viper.AddConfigPath(home)
-	// 	viper.SetConfigName(".cli")
-	// }
-
-	// viper.AutomaticEnv() // read in environment variables that match
-
-	// // If a config file is found, read it in.
-	// if err := viper.ReadInConfig(); err == nil {
-	// 	fmt.Println("Using config file:", viper.ConfigFileUsed())
-	// }
-
-	// defaultSource := mhConfig.DefaultSource
-
-	// if len(defaultSource) == 0 {
-	// 	if len(mhConfig.Sources) == 0 {
-	// 		defaultSource = ""
-	// 	} else {
-	// 		for _, s := range mhConfig.Sources {
-
-	// 			defaultSource = s.Name
-	// 			break
-	// 		}
-	// 	}
-
-	// }
-
-	//app.SetConfig(mhConfig)
+	for _, cmd := range subCommands() {
+		rootCmd.AddCommand(cmd)
+	}
+	// cobra.OnInitialize(initConfig)
+	//rootCmd.PersistentFlags().StringVarP(&source, "source", "s", "", "Sets the source")
 
 }

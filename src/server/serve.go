@@ -8,7 +8,6 @@ import (
 	"io/fs"
 	"log"
 	"mime"
-	"modelhelper/cli/app"
 	"modelhelper/cli/server/api"
 	"net/http"
 	"os"
@@ -37,7 +36,7 @@ var sources [2]sourceApi = [2]sourceApi{
 	{Name: "raw", Connection: "source info for raw"},
 }
 
-func Serve(port int, open bool, appCtx *app.Context) {
+func Serve(port int, open bool) {
 	wait := time.Second * 15
 
 	r := mux.NewRouter()
@@ -50,7 +49,7 @@ func Serve(port int, open bool, appCtx *app.Context) {
 	getRouter := r.Methods(http.MethodGet).Subrouter()
 
 	api.LoadProjectRoutes(getRouter)
-	api.LoadDataSourceRoutes(getRouter, appCtx)
+	api.LoadDataSourceRoutes(getRouter)
 	mime.AddExtensionType(".mjs", "text/javascript")
 	mime.AddExtensionType(".js", "text/javascript")
 	mime.AddExtensionType(".css", "text/css")
@@ -124,8 +123,8 @@ func getFileSystem(useOS bool, root string, f embed.FS) http.FileSystem {
 // 		panic("Could not marshal json.")
 // 	}
 
-// 	fmt.Fprintf(responseWriter, string(output))
-// }
+//		fmt.Fprintf(responseWriter, string(output))
+//	}
 func sourcesHandler(responseWriter http.ResponseWriter, request *http.Request) {
 	output, err := json.Marshal(sources)
 

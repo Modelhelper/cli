@@ -6,6 +6,7 @@ import (
 	"context"
 	"io/ioutil"
 	"log"
+	"modelhelper/cli/modelhelper"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,17 +15,19 @@ import (
 	"unicode"
 
 	"github.com/gertd/go-pluralize"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type GoLangGenerator struct{}
 
 type SimpleGenerator struct{}
 
-func (cstat *Statistics) AppendStat(instat Statistics) {
-	cstat.Chars += instat.Chars
-	cstat.Lines += instat.Lines
-	cstat.Words += instat.Words
-}
+// func (cstat *Statistics) AppendStat(instat Statistics) {
+// 	cstat.Chars += instat.Chars
+// 	cstat.Lines += instat.Lines
+// 	cstat.Words += instat.Words
+// }
 
 func Generate(name string, body string, model interface{}) string {
 	tmpl, err := template.New(name).Funcs(simpleFuncMap()).Parse(body)
@@ -39,14 +42,14 @@ func Generate(name string, body string, model interface{}) string {
 
 }
 
-func (g *GoLangGenerator) Generate(ctx context.Context, model interface{}) (Result, error) {
+func (g *GoLangGenerator) Generate(ctx context.Context, model interface{}) (*modelhelper.CodeGeneratorResult, error) {
 	start := time.Now()
 
 	code, ok := ctx.Value("code").(CodeContextValue)
-	res := Result{}
+	res := modelhelper.CodeGeneratorResult{}
 
 	if !ok {
-		return res, nil
+		return &res, nil
 	}
 	tplMap := make(map[string]string)
 
@@ -59,21 +62,23 @@ func (g *GoLangGenerator) Generate(ctx context.Context, model interface{}) (Resu
 	buf := new(bytes.Buffer)
 	err := template.ExecuteTemplate(buf, code.TemplateName, model)
 	if err != nil {
-		return res, err
+		return nil, err
 	}
 
-	res.Content = buf.String()
-	if len(res.Content) > 0 {
-		res.Stat = getStat(res.Content)
-		res.Stat.Duration = time.Since(start)
+	res.Body = buf.Bytes()
+	if len(res.Body) > 0 {
+		res.Statistics = getStat(res.Body)
+		res.Statistics.Duration = time.Since(start)
 	}
 
-	return res, nil
+	return &res, nil
 
 }
 
-func getStat(s string) Statistics {
-	stat := Statistics{
+func getStat(body []byte) modelhelper.CodeGeneratorStatistics {
+
+	s := string(body)
+	stat := modelhelper.CodeGeneratorStatistics{
 		Chars: len(s),
 		Lines: getLines(s),
 		Words: getWords(s),
@@ -104,17 +109,17 @@ func getLines(input string) int {
 	return count
 }
 
-func (g *SimpleGenerator) Generate(ctx context.Context, model interface{}) (Result, error) {
+func (g *SimpleGenerator) Generate(ctx context.Context, model interface{}) (*modelhelper.CodeGeneratorResult, error) {
 	code, ok := ctx.Value("code").(CodeContextValue)
-	res := Result{}
+	res := modelhelper.CodeGeneratorResult{}
 
 	if !ok {
-		return res, nil
+		return &res, nil
 	}
 
 	var err error
-	res.Content = Generate(code.TemplateName, code.Template, model)
-	return res, err
+	res.Body = []byte(Generate(code.TemplateName, code.Template, model))
+	return &res, err
 
 }
 
@@ -183,7 +188,11 @@ func stringMap() template.FuncMap {
 		"words":    asWords,
 		"sentence": asSentence,
 		"snake":    snakeCase,
+		"macro":    macroCase,
+		"train":    TrainCase,
 		"kebab":    kebabCase,
+		"dot":      DotCase,
+		"title":    titleCase,
 		"pascal":   pascalCase,
 		"camel":    camelCase,
 		// "nullable":  nullableDatatype,
@@ -258,9 +267,36 @@ func snakeCase(input string) string {
 	return strings.ToLower(snake)
 }
 
+func macroCase(input string) string {
+	snake := wordJoiner(asWordArray(input), "_")
+	return strings.ToUpper(snake)
+}
+
+func TrainCase(input string) string {
+	casing := wordJoiner(asWordArray(Captial(input)), "_")
+	return casing
+}
+
+func DotCase(input string) string {
+	casing := wordJoiner(asWordArray(Captial(input)), ".")
+	return casing
+}
+
 func kebabCase(input string) string {
 	kebab := wordJoiner(asWordArray(input), "-")
 	return strings.ToLower(kebab)
+}
+func Captial(input string) string {
+	words := asWordArray(input)
+
+	for idx, word := range words {
+		word = strings.ToLower(word)
+		word = strings.ToUpper(word[0:1]) + word[1:]
+
+		words[idx] = word
+	}
+
+	return wordJoiner(words, " ")
 }
 
 func upperCase(input string) string {
@@ -272,11 +308,17 @@ func lowerCase(input string) string {
 }
 
 func asSentence(input string) string {
-	w := asWords(input)
-	o := strings.Title(w)
+	sentence := asWords(input)
+	sentence = strings.ToUpper(sentence[0:1]) + strings.ToLower(sentence[1:])
 
-	return o
+	return sentence
 }
+func titleCase(input string) string {
+	w := asWords(input)
+	c := cases.Title(language.AmericanEnglish)
+	return c.String(w)
+}
+
 func asWords(input string) string {
 
 	return wordJoiner(asWordArray(input), " ")
@@ -328,15 +370,73 @@ func wordJoiner(input []string, separator string) string {
 	return sb.String()
 }
 
+func splitOnCasing(input string) []string {
+	var words []string
+	var splitPos []int
+	var letterMap []int
+
+	// nextSplitPos := 0
+
+	// wrd := strings.Split(input, " ")
+	for _, c := range input {
+		val := 0
+		if unicode.IsUpper(c) {
+			val = 1
+		}
+
+		letterMap = append(letterMap, val)
+
+	}
+
+	for idx, val := range letterMap {
+		if idx == 0 {
+			splitPos = append(splitPos, idx)
+			continue
+		}
+
+		addPos := (val == 1 && letterMap[idx-1] == 0)
+
+		if val == 1 && idx+1 < len(letterMap) && letterMap[idx+1] == 0 {
+			addPos = true
+		}
+
+		if addPos {
+			splitPos = append(splitPos, idx)
+		}
+	}
+
+	for idx, start := range splitPos {
+		end := len(input)
+		if len(splitPos) > idx+1 {
+			end = splitPos[idx+1]
+		}
+		words = append(words, input[start:end])
+	}
+
+	return words
+}
+
+func splitOnSplitter(input string) []string {
+
+	words := strings.FieldsFunc(input, Split)
+
+	return words
+}
+func Split(r rune) bool {
+	return r == ' ' || r == '_' || r == '-'
+}
+
 func asWordArray(input string) []string {
 	var words []string
-	l := 0
-	for s := input; s != ""; s = s[l:] {
-		l = strings.IndexFunc(s[1:], unicode.IsUpper) + 1
-		if l <= 0 {
-			l = len(s)
+
+	split := splitOnSplitter(input)
+
+	for _, word := range split {
+		caseSplit := splitOnCasing(word)
+
+		for _, caseWord := range caseSplit {
+			words = append(words, caseWord)
 		}
-		words = append(words, s[:l])
 	}
 
 	return words

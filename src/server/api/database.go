@@ -9,10 +9,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var context *app.Context
+// var context *app.Context
 
-func LoadDataSourceRoutes(router *mux.Router, ctx *app.Context) {
-	context = ctx
+func LoadDataSourceRoutes(router *mux.Router) {
+	// context = ctx
 	router.HandleFunc("/api/sources", sourcesHandler)
 	router.HandleFunc("/api/sources/{source}/entities", entitiesHandler)
 	router.HandleFunc("/api/sources/{source}/entities/{entity}", entityHandler)
@@ -32,39 +32,39 @@ func sourcesHandler(responseWriter http.ResponseWriter, request *http.Request) {
 
 func entitiesHandler(responseWriter http.ResponseWriter, r *http.Request) {
 
-	vars := mux.Vars(r)
-	source := vars["source"]
+	// vars := mux.Vars(r)
+	// source := vars["source"]
 
-	con := context.Connections[source]
+	// // con := context.Connections[source]
 
-	input := con.LoadSource()
+	// input := src.SourceFactory(&con)
 
-	items, _ := input.Entities("")
+	// items, _ := input.Entities("")
 
-	output, err := json.Marshal(items)
+	// output, err := json.Marshal(items)
 
-	if err != nil {
-		panic("Could not marshal json.")
-	}
+	// if err != nil {
+	// 	panic("Could not marshal json.")
+	// }
 
-	fmt.Fprintf(responseWriter, string(output))
+	// fmt.Fprintf(responseWriter, string(output))
 }
 func entityHandler(responseWriter http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	source := vars["source"]
-	entity := vars["entity"]
+	// vars := mux.Vars(r)
+	// source := vars["source"]
+	// entity := vars["entity"]
 
-	con := context.Connections[source]
+	// con := context.Connections[source]
 
-	input := con.LoadSource()
+	// input := src.SourceFactory(&con)
 
-	items, _ := input.Entity(entity)
+	// items, _ := input.Entity(entity)
 
-	output, err := json.Marshal(items)
+	// output, err := json.Marshal(items)
 
-	if err != nil {
-		panic("Could not marshal json.")
-	}
+	// if err != nil {
+	// 	panic("Could not marshal json.")
+	// }
 
-	fmt.Fprintf(responseWriter, string(output))
+	// fmt.Fprintf(responseWriter, string(output))
 }

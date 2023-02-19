@@ -18,15 +18,15 @@ type Initializer interface {
 
 func (a *Application) Initialize() error {
 
-	PrintWelcomeMessage()
+	a.PrintWelcomeMessage()
 
 	do := PromptForContinue()
 
 	if do {
 
-		cfg := config.New()
+		loader := config.NewWithWizard()
 
-		if err := cfg.Initialize(); err != nil {
+		if err := loader.Save(); err != nil {
 			return err
 		}
 

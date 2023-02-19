@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"modelhelper/cli/source"
+	"modelhelper/cli/modelhelper"
 	"path/filepath"
 	"strings"
 
@@ -12,8 +12,12 @@ import (
 )
 
 func SetDefaultConnection(key string) error {
-	cfg := Load()
+	loader := NewConfigLoader()
+	cfg, err := loader.Load()
 
+	if err != nil {
+		// handle error
+	}
 	_, f := cfg.Connections[key]
 
 	if !f {
@@ -27,15 +31,25 @@ func SetDefaultConnection(key string) error {
 }
 
 func SetDefaultEditor(editor string) error {
-	cfg := Load()
+	loader := NewConfigLoader()
+	cfg, err := loader.Load()
+
+	if err != nil {
+		// handle error
+	}
 
 	cfg.DefaultEditor = strings.ToLower(editor)
 
 	return update(cfg)
 }
 
-func SetConnection(key string, c *source.Connection, isDefault bool, merge bool) error {
-	cfg := Load()
+func SetConnection(key string, c *modelhelper.Connection, isDefault bool, merge bool) error {
+	loader := NewConfigLoader()
+	cfg, err := loader.Load()
+
+	if err != nil {
+		// handle error
+	}
 
 	current, exists := cfg.Connections[key]
 
@@ -66,7 +80,12 @@ func SetConnection(key string, c *source.Connection, isDefault bool, merge bool)
 	return update(cfg)
 }
 func SetDeveloper(name string, email string, github string, merge bool) error {
-	cfg := Load()
+	loader := NewConfigLoader()
+	cfg, err := loader.Load()
+
+	if err != nil {
+		// handle error
+	}
 
 	if merge {
 		if len(name) > 0 {
@@ -82,14 +101,19 @@ func SetDeveloper(name string, email string, github string, merge bool) error {
 		}
 	} else {
 
-		dev := Developer{name, email, github}
+		dev := modelhelper.Developer{name, email, github}
 		cfg.Developer = dev
 	}
 
 	return update(cfg)
 }
 func SetPort(api int, web int) error {
-	cfg := Load()
+	loader := NewConfigLoader()
+	cfg, err := loader.Load()
+
+	if err != nil {
+		// handle error
+	}
 
 	cfg.Port = api
 
@@ -97,19 +121,29 @@ func SetPort(api int, web int) error {
 }
 
 func SetTemplateLocation(loc string) error {
-	cfg := Load()
+	loader := NewConfigLoader()
+	cfg, err := loader.Load()
+
+	if err != nil {
+		// handle error
+	}
 	cfg.Templates.Location = loc
 
 	return update(cfg)
 }
 func SetLangDefLocation(loc string) error {
-	cfg := Load()
+	loader := NewConfigLoader()
+	cfg, err := loader.Load()
+
+	if err != nil {
+		// handle error
+	}
 	cfg.Languages.Definitions = loc
 
 	return update(cfg)
 }
 
-func update(cfg *Config) error {
+func update(cfg *modelhelper.Config) error {
 
 	d, err := yaml.Marshal(&cfg)
 

@@ -1,10 +1,12 @@
 package source
 
-type SortColumnById []Column
-type SortColumnByName []Column
+import "modelhelper/cli/modelhelper"
+
+type SortColumnById []modelhelper.Column
+type SortColumnByName []modelhelper.Column
 type ColumnToTableRenderer struct {
 	IncludeDescription bool
-	Columns            *ColumnList
+	Columns            *modelhelper.ColumnList
 }
 
 func (d *ColumnToTableRenderer) Rows() [][]string {
