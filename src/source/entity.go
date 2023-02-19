@@ -1,7 +1,7 @@
 package source
 
 import (
-	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/modelhelper/models"
 	"modelhelper/cli/tree"
 
 	"github.com/gookit/color"
@@ -14,10 +14,10 @@ type RelationTreeBuilder struct {
 }
 
 // type SortTableById []Entity
-type SortTableByName []modelhelper.Entity
-type SortTableByNameDesc []modelhelper.Entity
-type SortTableByRows []modelhelper.Entity
-type SortTableByRowsDesc []modelhelper.Entity
+type SortTableByName []models.Entity
+type SortTableByNameDesc []models.Entity
+type SortTableByRows []models.Entity
+type SortTableByRowsDesc []models.Entity
 
 func (a SortTableByName) Len() int           { return len(a) }
 func (a SortTableByName) Less(i, j int) bool { return a[i].Name < a[j].Name }
@@ -35,9 +35,9 @@ func (a SortTableByRowsDesc) Len() int           { return len(a) }
 func (a SortTableByRowsDesc) Less(i, j int) bool { return a[i].RowCount > a[j].RowCount }
 func (a SortTableByRowsDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
-type DefaultEntitiesTableRenderer []modelhelper.Entity
-type DescriptiveEntitiesRenderer []modelhelper.Entity
-type SimpleEntitiesRenderer []modelhelper.Entity
+type DefaultEntitiesTableRenderer []models.Entity
+type DescriptiveEntitiesRenderer []models.Entity
+type SimpleEntitiesRenderer []models.Entity
 
 func (d *DefaultEntitiesTableRenderer) Rows() [][]string {
 	return toRows(*d, false, true)
@@ -61,7 +61,7 @@ func (d *SimpleEntitiesRenderer) Header() []string {
 	return buildHeader(false, false)
 }
 
-func toRows(input []modelhelper.Entity, withDesc, withStat bool) [][]string {
+func toRows(input []models.Entity, withDesc, withStat bool) [][]string {
 	rows := [][]string{}
 	for _, e := range input {
 		p := message.NewPrinter(language.English)

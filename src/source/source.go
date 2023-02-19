@@ -3,6 +3,7 @@ package source
 import (
 	"fmt"
 	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/modelhelper/models"
 	"strings"
 	"unicode"
 )
@@ -19,16 +20,16 @@ type LanguageDef struct {
 	Definitions string
 }
 
-type ConnectionMap map[string]modelhelper.Connection
+type ConnectionMap map[string]models.Connection
 
 // type ConnectionProvider interface {
-// 	GetConnections() (*map[string]modelhelper.Connection, error)
+// 	GetConnections() (*map[string]models.Connection, error)
 // }
 
 type Source interface {
-	Entity(name string) (*modelhelper.Entity, error)
-	Entities(pattern string) (*[]modelhelper.Entity, error)
-	EntitiesFromColumn(column string) (*[]modelhelper.Entity, error)
+	Entity(name string) (*models.Entity, error)
+	Entities(pattern string) (*[]models.Entity, error)
+	EntitiesFromColumn(column string) (*[]models.Entity, error)
 }
 
 type RelationTree interface {
@@ -228,7 +229,7 @@ func IsConnectionTypeValid(t string) bool {
 // 	return output
 // }
 
-func SourceFactory(c *modelhelper.Connection) modelhelper.SourceService {
+func SourceFactory(c *models.Connection) modelhelper.SourceService {
 
 	// }
 

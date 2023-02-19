@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/modelhelper/models"
 	"strconv"
 	"strings"
 
@@ -14,7 +14,7 @@ import (
 )
 
 type MsSql struct {
-	Connection modelhelper.Connection
+	Connection models.Connection
 }
 
 func (c *MsSql) ParseConnectionString() {
@@ -40,7 +40,7 @@ func (server *MsSql) CanConnect() (bool, error) {
 	return false, nil
 }
 
-func (server *MsSql) Entity(name string) (*modelhelper.Entity, error) {
+func (server *MsSql) Entity(name string) (*models.Entity, error) {
 	e, err := server.getEntity(name)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (server *MsSql) Entity(name string) (*modelhelper.Entity, error) {
 
 	return e, nil
 }
-func (server *MsSql) Entities(pattern string) (*[]modelhelper.Entity, error) {
+func (server *MsSql) Entities(pattern string) (*[]models.Entity, error) {
 	filter := ""
 
 	if len(pattern) > 0 {
@@ -197,7 +197,7 @@ func (server *MsSql) Entities(pattern string) (*[]modelhelper.Entity, error) {
 	// return &list, nil
 }
 
-func (server *MsSql) EntitiesFromColumn(column string) (*[]modelhelper.Entity, error) {
+func (server *MsSql) EntitiesFromColumn(column string) (*[]models.Entity, error) {
 	filter := ""
 
 	if len(column) > 0 {
@@ -208,7 +208,7 @@ func (server *MsSql) EntitiesFromColumn(column string) (*[]modelhelper.Entity, e
 	return server.entites(filter)
 }
 
-func (server *MsSql) entites(filter string) (*[]modelhelper.Entity, error) {
+func (server *MsSql) entites(filter string) (*[]models.Entity, error) {
 	sql := fmt.Sprintf(`
 	with rowcnt (object_id, rowcnt) as (
 		SELECT p.object_id, SUM(CASE WHEN (p.index_id < 2) AND (a.type = 1) THEN p.rows ELSE 0 END) 
@@ -288,9 +288,9 @@ func (server *MsSql) entites(filter string) (*[]modelhelper.Entity, error) {
 
 	defer rows.Close()
 
-	list := []modelhelper.Entity{}
+	list := []models.Entity{}
 
-	var e modelhelper.Entity
+	var e models.Entity
 
 	for rows.Next() {
 
@@ -390,7 +390,7 @@ func entitesBaseQuery(filter string) string {
 	return sql
 }
 
-func (server *MsSql) getEntity(entityName string) (*modelhelper.Entity, error) {
+func (server *MsSql) getEntity(entityName string) (*models.Entity, error) {
 
 	db, err := server.openConnection()
 	if err != nil {
@@ -440,7 +440,7 @@ where o.object_id = object_id(@entityName)
 	// Execute query
 	row := stmt.QueryRow(query, sql.Named("entityName", entityName))
 
-	var e modelhelper.Entity
+	var e models.Entity
 
 	if err := row.Scan(
 		&e.Name,
@@ -468,7 +468,7 @@ where o.object_id = object_id(@entityName)
 	return &e, nil
 }
 
-func (server *MsSql) getColumns(schema string, entityName string) (*modelhelper.ColumnList, error) {
+func (server *MsSql) getColumns(schema string, entityName string) (*models.ColumnList, error) {
 	db, err := server.openConnection()
 	if err != nil {
 		return nil, err
@@ -566,8 +566,8 @@ func (server *MsSql) getColumns(schema string, entityName string) (*modelhelper.
 	}
 	defer rows.Close()
 
-	cl := modelhelper.ColumnList{}
-	var c modelhelper.Column
+	cl := models.ColumnList{}
+	var c models.Column
 
 	for rows.Next() {
 
@@ -614,7 +614,7 @@ func (server *MsSql) getColumns(schema string, entityName string) (*modelhelper.
 	return &cl, nil
 }
 
-func (server *MsSql) getParents(schema string, entityName string) (*[]modelhelper.Relation, error) {
+func (server *MsSql) getParents(schema string, entityName string) (*[]models.Relation, error) {
 	db, err := server.openConnection()
 	if err != nil {
 		return nil, err
@@ -665,8 +665,8 @@ where fkc.parent_object_id = OBJECT_ID(@entityName)
 	}
 	defer rows.Close()
 
-	list := []modelhelper.Relation{}
-	var r modelhelper.Relation
+	list := []models.Relation{}
+	var r models.Relation
 
 	for rows.Next() {
 
@@ -703,7 +703,7 @@ where fkc.parent_object_id = OBJECT_ID(@entityName)
 	return &list, nil
 }
 
-func (server *MsSql) getChildren(schema string, entityName string) (*[]modelhelper.Relation, error) {
+func (server *MsSql) getChildren(schema string, entityName string) (*[]models.Relation, error) {
 	db, err := server.openConnection()
 	if err != nil {
 		return nil, err
@@ -755,8 +755,8 @@ where fkc.referenced_object_id = OBJECT_ID(@entityName)
 	}
 	defer rows.Close()
 
-	list := []modelhelper.Relation{}
-	var r modelhelper.Relation
+	list := []models.Relation{}
+	var r models.Relation
 
 	for rows.Next() {
 
@@ -791,7 +791,7 @@ where fkc.referenced_object_id = OBJECT_ID(@entityName)
 	return &list, nil
 }
 
-func (server *MsSql) getIndexes(schema string, entityName string) (*[]modelhelper.Index, error) {
+func (server *MsSql) getIndexes(schema string, entityName string) (*[]models.Index, error) {
 	db, err := server.openConnection()
 	if err != nil {
 		return nil, err
@@ -839,8 +839,8 @@ JOIN sys.indexes AS b ON a.object_id = b.object_id AND a.index_id = b.index_id
 	}
 	defer rows.Close()
 
-	list := []modelhelper.Index{}
-	var r modelhelper.Index
+	list := []models.Index{}
+	var r models.Index
 
 	for rows.Next() {
 
@@ -888,8 +888,8 @@ func (server *MsSql) openConnection() (*sql.DB, error) {
 	return db, nil
 }
 
-func fromJson(blob []byte) (*[]modelhelper.Index, error) {
-	list := []modelhelper.Index{}
+func fromJson(blob []byte) (*[]models.Index, error) {
+	list := []models.Index{}
 
 	if len(blob) > 0 {
 

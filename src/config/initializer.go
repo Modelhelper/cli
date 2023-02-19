@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/modelhelper/models"
 	"modelhelper/cli/source"
 	"modelhelper/cli/ui"
 
@@ -12,7 +13,7 @@ import (
 // Initialize builds the configuration
 func NewWithWizard() modelhelper.ConfigLoader {
 	loader := &rootConfigLoader{}
-	loader.config = &modelhelper.Config{}
+	loader.config = &models.Config{}
 
 	fmt.Println(ui.ConsoleTitle("\nMake the modelhelper CLI useful...\n"))
 	fmt.Printf(`
@@ -36,7 +37,7 @@ Anyways, if you choose to do this later you can always open the configuration fi
 
 		con := askForConnection()
 
-		loader.config.Connections = make(map[string]modelhelper.Connection)
+		loader.config.Connections = make(map[string]models.Connection)
 		loader.config.Connections[con.Name] = *con
 
 		loader.config.Templates.Location = askForTemplateLocation()
@@ -52,9 +53,9 @@ Anyways, if you choose to do this later you can always open the configuration fi
 
 }
 
-func askForConnection() *modelhelper.Connection {
+func askForConnection() *models.Connection {
 
-	con := modelhelper.Connection{}
+	con := models.Connection{}
 	fmt.Printf("The next set of questions will build your first connection string to a MS SQL database.\n\n")
 	fmt.Printf("Leave name empty if you want to skip the rest of the connection builder\n")
 

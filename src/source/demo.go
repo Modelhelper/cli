@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"log"
-	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/modelhelper/models"
 	"path"
 	"strings"
 
@@ -16,7 +16,7 @@ var entities embed.FS
 
 type DemoSource struct{}
 
-func (server *DemoSource) Entity(name string) (*modelhelper.Entity, error) {
+func (server *DemoSource) Entity(name string) (*models.Entity, error) {
 
 	entityFiles, err := server.Entities("")
 	if err != nil {
@@ -32,8 +32,8 @@ func (server *DemoSource) Entity(name string) (*modelhelper.Entity, error) {
 
 	return nil, nil
 }
-func (server *DemoSource) Entities(pattern string) (*[]modelhelper.Entity, error) {
-	list := []modelhelper.Entity{}
+func (server *DemoSource) Entities(pattern string) (*[]models.Entity, error) {
+	list := []models.Entity{}
 	baseList := getDemoEntities()
 
 	for _, fent := range baseList {
@@ -54,8 +54,8 @@ func (server *DemoSource) Entities(pattern string) (*[]modelhelper.Entity, error
 	return &list, nil
 
 }
-func (server *DemoSource) EntitiesFromColumn(column string) (*[]modelhelper.Entity, error) {
-	list := []modelhelper.Entity{}
+func (server *DemoSource) EntitiesFromColumn(column string) (*[]models.Entity, error) {
+	list := []models.Entity{}
 	baseList := getDemoEntities()
 
 	for _, fent := range baseList {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/modelhelper/models"
 	"path/filepath"
 	"strings"
 
@@ -43,7 +43,7 @@ func SetDefaultEditor(editor string) error {
 	return update(cfg)
 }
 
-func SetConnection(key string, c *modelhelper.Connection, isDefault bool, merge bool) error {
+func SetConnection(key string, c *models.Connection, isDefault bool, merge bool) error {
 	loader := NewConfigLoader()
 	cfg, err := loader.Load()
 
@@ -101,7 +101,7 @@ func SetDeveloper(name string, email string, github string, merge bool) error {
 		}
 	} else {
 
-		dev := modelhelper.Developer{name, email, github}
+		dev := models.Developer{name, email, github}
 		cfg.Developer = dev
 	}
 
@@ -143,7 +143,7 @@ func SetLangDefLocation(loc string) error {
 	return update(cfg)
 }
 
-func update(cfg *modelhelper.Config) error {
+func update(cfg *models.Config) error {
 
 	d, err := yaml.Marshal(&cfg)
 

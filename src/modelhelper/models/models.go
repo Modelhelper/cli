@@ -1,4 +1,4 @@
-package modelhelper
+package models
 
 import "time"
 

@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/modelhelper/models"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -14,10 +15,10 @@ import (
 
 type rootConfigLoader struct {
 	path   string
-	config *modelhelper.Config
+	config *models.Config
 }
 
-func Load() *modelhelper.Config {
+func Load() *models.Config {
 	loader := NewConfigLoader()
 	cfg, err := loader.Load()
 
@@ -32,14 +33,14 @@ func NewConfigLoader() modelhelper.ConfigLoader {
 	return &rootConfigLoader{}
 }
 
-func New() *modelhelper.Config {
+func New() *models.Config {
 
 	usr, err := user.Current()
 	if err != nil {
 
 	}
 
-	c := modelhelper.Config{
+	c := models.Config{
 		Port:          3003,
 		ConfigVersion: "3.0",
 	}
@@ -51,18 +52,18 @@ func New() *modelhelper.Config {
 }
 
 // Load returns a new default configuration
-func (c *rootConfigLoader) Load() (*modelhelper.Config, error) {
+func (c *rootConfigLoader) Load() (*models.Config, error) {
 	path := filepath.Join(Location(), "config.yaml")
 	return c.LoadFromFile(path)
 
 }
 
-func (c *rootConfigLoader) GetConnections() (*map[string]modelhelper.Connection, error) {
+func (c *rootConfigLoader) GetConnections() (*map[string]models.Connection, error) {
 	return &c.config.Connections, nil
 }
 
-func (c *rootConfigLoader) LoadFromFile(path string) (*modelhelper.Config, error) {
-	var cfg *modelhelper.Config
+func (c *rootConfigLoader) LoadFromFile(path string) (*models.Config, error) {
+	var cfg *models.Config
 
 	dat, e := ioutil.ReadFile(path)
 	if e != nil {
