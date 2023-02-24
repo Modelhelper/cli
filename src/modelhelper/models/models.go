@@ -2,91 +2,14 @@ package models
 
 import "time"
 
-type ProjectConfig struct {
-	Version       string                `yaml:"version"`
-	Name          string                `yaml:"name"`
-	Language      string                `yaml:"language"`
-	Description   string                `yaml:"description"`
-	DefaultSource string                `yaml:"defaultSource,omitempty"`
-	DefaultKey    string                `yaml:"defaultKey,omitempty"`
-	Connections   map[string]Connection `yaml:"connections,omitempty"`
-	Code          map[string]Code       `yaml:"code,omitempty"`
-	OwnerName     string                `yaml:"ownerName,omitempty"`
-	Options       map[string]string     `yaml:"options,omitempty"`
-	Custom        interface{}           `yaml:"custom,omitempty"`
-	Header        string                `yaml:"header,omitempty"`
+type CodeTemplateListOptions struct {
+	GroupBy         string
+	FilterTypes     []string
+	FilterLanguages []string
+	FilterModels    []string
+	FilterKeys      []string
+	FilterGroups    []string
 }
-
-type Config struct {
-
-	// ConfigVersion gets the version that this configuration file is using.
-	ConfigVersion     string                `json:"configVersion" yaml:"configVersion"`
-	AppVersion        string                `json:"appVersion" yaml:"appVersion"`
-	Connections       map[string]Connection `json:"connections" yaml:"connections"`
-	DefaultConnection string                `json:"defaultConnection" yaml:"defaultConnection"`
-	DefaultEditor     string                `json:"editor" yaml:"editor"`
-	Developer         Developer             `json:"developer" yaml:"developer"`
-	Port              int                   `json:"port" yaml:"port"`
-	Code              Code                  `json:"code" yaml:"code"`
-	Templates         struct {
-		Location string `json:"location" yaml:"location"`
-	} `json:"templates" yaml:"templates"`
-	Languages struct {
-		Definitions string `json:"definitions" yaml:"definitions"`
-	} `json:"languages" yaml:"languages"`
-	Logging struct {
-		Enabled bool `json:"enabled" yaml:"enabled"`
-	} `json:"logging" yaml:"logging"`
-}
-
-type Developer struct {
-	Name          string `json:"name" yaml:"name"`
-	Email         string `json:"email" yaml:"email"`
-	GitHubAccount string `json:"github" yaml:"github"`
-}
-
-type Connection struct {
-	Name             string                     `json:"name" yaml:"name"`
-	Description      string                     `json:"description" yaml:"description,omitempty"`
-	ConnectionString string                     `json:"connectionString" yaml:"connectionString"`
-	Schema           string                     `json:"schema" yaml:"schema"`
-	Database         string                     `json:"database,omitempty" yaml:"database,omitempty"`
-	Server           string                     `json:"server,omitempty" yaml:"server,omitempty"`
-	Type             string                     `json:"type" yaml:"type"`
-	Port             int                        `json:"port,omitempty" yaml:"port,omitempty"`
-	Entities         []string                   `json:"entities,omitempty" yaml:"entities,omitempty"`
-	Groups           map[string]ConnectionGroup `json:"groups,omitempty" yaml:"groups,omitempty"`
-	Options          map[string]interface{}     `json:"options,omitempty" yaml:"options,omitempty"`
-	Synonyms         map[string]string          `json:"synonyms,omitempty" yaml:"synonyms,omitempty"`
-}
-
-// should be renamed
-// should this be in the input source package, since it's shared among project, config and other input sources
-type ConnectionGroup struct {
-	Items   []string               `json:"items" yaml:"items"`
-	Options map[string]interface{} `json:"options" yaml:"options"`
-}
-
-type Synonym struct {
-	Name string
-}
-
-type LanguageDefinition struct {
-	Version        string              `json:"version" yaml:"version"`
-	Language       string              `json:"language" yaml:"language"`
-	DataTypes      map[string]Datatype `json:"datatypes" yaml:"datatypes"`
-	DefaultImports []string            `json:"defaultImports" yaml:"defaultImports"`
-	Keys           map[string]Key      `json:"keys" yaml:"keys"`
-	Inject         map[string]Inject   `json:"inject" yaml:"inject"`
-	Global         Global              `json:"global" yaml:"global"`
-	Short          string              `json:"short" yaml:"short"`
-	Description    string              `json:"description" yaml:"description"`
-	Path           string
-	// CanInject                 bool                       `json:"canInject" yaml:"canInject"`
-	// UsesNamespace             bool                       `json:"usesNamespace" yaml:"usesNamespace"`
-	// ModuleLevelVariablePrefix string                     `json:"moduleLevelVariablePrefix" yaml:"moduleLevelVariablePrefix"`
-}
-
 type Code struct {
 	RootNamespace          string            `yaml:"rootNamespace,omitempty"`
 	OmitSourcePrefix       bool              `yaml:"omitSourcePrefix,omitempty"`
@@ -128,13 +51,17 @@ type Global struct {
 	VariablePostfix string `yaml:"variablePostfix"`
 }
 
+//CodeTemplate represent the full structure of a code template
 type CodeTemplate struct {
 	// InjectKey       string
 	// LanguageVersion string
 	// Scope           TemplateScope
 	// Name        string         `yaml:"name"`
-	Version     string   `yaml:"version"`
-	Language    string   `yaml:"language"`
+	//Version denotes the version used for the template
+	Version    string `yaml:"version"`
+	Language   string `yaml:"language"`
+	Identifier string `yaml:"identifier"`
+	//Key is obsolete
 	Key         string   `yaml:"key"`
 	Type        string   `yaml:"type"`
 	Description string   `yaml:"description"`
@@ -286,38 +213,6 @@ type EntityColumnModel struct {
 	UsePrecision      bool
 }
 
-type CodeGeneratorStatistics struct {
-	FilesExported    int
-	TemplatesUsed    int
-	EntitiesUsed     int
-	SnippetsInserted int
-	FilesCreated     int
-	SnippetsCreated  int
-	Chars            int
-	Lines            int
-	Words            int
-	Duration         time.Duration
-	TimeSaved        int
-}
-
-type CodeGeneratorResult struct {
-	Statistics CodeGeneratorStatistics
-	Body       []byte
-	FileName   string
-	Path       string
-}
-
-type CodeFileResult struct {
-	Filename string
-	FilePath string
-	Result   *CodeGeneratorResult
-
-	Destination  string
-	Exists       bool
-	Overwrite    bool
-	ExistingBody []byte
-}
-
 type EntityList []Entity
 type ColumnList []Column
 type RelationList []Relation
@@ -464,4 +359,126 @@ type Relation struct {
 type DatabaseInformation struct {
 	Version    string
 	ServerName string
+}
+
+type EntityRelation struct {
+	IsSelfJoin bool
+
+	ReleatedColumn   EntityColumnProps
+	IncomingRelation EntityColumnProps
+	OwnerColumn      EntityColumnProps
+	ForeignColumn    EntityColumnProps
+
+	// GroupIndex         int
+	Name              string
+	Schema            string
+	Type              string
+	Alias             string
+	Description       string
+	HasDescription    bool
+	HasPrefix         bool
+	NameWithoutPrefix string
+	// Columns            []EntityColumnImportModel
+	// NonIgnoredColumns  []EntityColumnImportModel
+	// IgnoredColumns     []EntityColumnImportModel
+	// PrimaryKeys        []EntityColumnImportModel
+	// ForeignKeys        []EntityColumnImportModel
+	// UsedAsColumns      []EntityColumnImportModel
+	UsesIdentityColumn bool
+}
+
+type EntityImportModel struct {
+	Code              CodeImportModel
+	Options           map[string]string
+	Name              string
+	Schema            string
+	Type              string
+	RowCount          int
+	Created           string
+	Alias             string
+	Description       string
+	HasDescription    bool
+	HasPrefix         bool
+	NameWithoutPrefix string
+	Columns           []EntityColumnImportModel
+	Parents           []EntityRelation
+	Children          []EntityRelation
+	// ModelName          string
+	// ContextualName     string
+	NonIgnoredColumns  []EntityColumnImportModel
+	IgnoredColumns     []EntityColumnImportModel
+	PrimaryKeys        []EntityColumnImportModel
+	ForeignKeys        []EntityColumnImportModel
+	UsedAsColumns      []EntityColumnImportModel
+	UsesIdentityColumn bool
+}
+
+type CreatorImportModel struct {
+	CompanyName   string
+	DeveloperName string
+}
+
+type CodeImportModel struct {
+	Creator               CreatorImportModel
+	OmitSourcePrefix      bool
+	CurrentDate           time.Time
+	GlobalVariablePrefix  string
+	GlobalVariablePostfix string
+	CanInject             bool
+	Inject                map[string]CodeInjectImportModel
+	Types                 map[string]CodeTypeImportModel
+	Imports               []string
+	Language              string
+	// Locations             []CodeLocationImportModel
+}
+
+type CodeTypeImportModel struct {
+	Key         string
+	NamePostfix string
+	NamePrefix  string
+	NameSpace   string
+	Imports     []string
+}
+
+type CodeInjectImportModel struct {
+	Key          string
+	Name         string
+	TemplateKeys []string
+	Group        string
+	PropertyName string
+	Interface    string
+}
+
+type EntityColumnImportModel struct {
+	Description      string
+	IsForeignKey     bool
+	IsPrimaryKey     bool
+	IsIdentity       bool
+	IsNullable       bool
+	IsIgnored        bool
+	IsDeletedMarker  bool
+	IsCreatedDate    bool
+	IsCreatedByUser  bool
+	IsModifiedDate   bool
+	IsModifiedByUser bool
+	HasPrefix        bool
+	HasDescription   bool
+	Name             string
+	// PropertyName      string
+	// ContextualName    string
+	NameWithoutPrefix string
+	Collation         string
+	ReferencesColumn  string
+	ReferencesTable   string
+
+	DataType string
+	DbType   string
+
+	Length    int
+	Precision int
+	Scale     int
+
+	UseLength      bool
+	UsePrecision   bool
+	UseInViewModel bool
 }

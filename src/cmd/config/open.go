@@ -1,8 +1,8 @@
 package config
 
 import (
-	"modelhelper/cli/config"
-	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/modelhelper/models"
+	"modelhelper/cli/ports/config"
 	"modelhelper/cli/ui"
 	"os/exec"
 	"path/filepath"
@@ -57,7 +57,7 @@ func openPathInEditor(editor string, loc string) {
 	}
 }
 
-func getEditor(cfg *modelhelper.Config) string {
+func getEditor(cfg *models.Config) string {
 	if len(cfg.DefaultEditor) > 0 {
 		return cfg.DefaultEditor
 	} else {

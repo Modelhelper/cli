@@ -32,6 +32,11 @@ func (server *DemoSource) Entity(name string) (*models.Entity, error) {
 
 	return nil, nil
 }
+
+func (server *DemoSource) EntitiesFromNames(names []string) (*[]models.Entity, error) {
+	return nil, nil
+}
+
 func (server *DemoSource) Entities(pattern string) (*[]models.Entity, error) {
 	list := []models.Entity{}
 	baseList := getDemoEntities()

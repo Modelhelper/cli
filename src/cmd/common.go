@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/modelhelper/models"
 	"modelhelper/cli/ui"
 	"os/exec"
 )
@@ -13,7 +13,7 @@ func openPathInEditor(editor string, loc string) {
 	}
 }
 
-func getEditor(cfg *modelhelper.Config) string {
+func getEditor(cfg *models.Config) string {
 	if len(cfg.DefaultEditor) > 0 {
 		return cfg.DefaultEditor
 	} else {

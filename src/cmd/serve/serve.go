@@ -2,8 +2,6 @@ package serve
 
 import (
 	"fmt"
-	"modelhelper/cli/app"
-	"modelhelper/cli/server"
 
 	"github.com/spf13/cobra"
 )
@@ -17,9 +15,9 @@ func NewServeCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			// mhApp := app.New()
 			// ctx := mhApp.CreateContext()
-			a := app.NewModelhelperCli()
+			// a := app.NewModelhelperCli()
 			port, _ := cmd.Flags().GetInt("port")
-			open, _ := cmd.Flags().GetBool("open")
+			// open, _ := cmd.Flags().GetBool("open")
 			message := fmt.Sprintf(`
 	
 	%s		
@@ -29,11 +27,11 @@ func NewServeCommand() *cobra.Command {
 	
 	And read the API documentation here: http://localhost:%v/api/docs.
 	
-	To exit and stop the service, press ctrl + c`, a.Logo(), port, port, port)
+	To exit and stop the service, press ctrl + c`, "a.Logo()", port, port, port)
 
 			fmt.Println(message)
 
-			server.Serve(port, open)
+			// server.Serve(port, open)
 		},
 	}
 	serveCmd.Flags().IntP("port", "p", 8080, "The port to serve")

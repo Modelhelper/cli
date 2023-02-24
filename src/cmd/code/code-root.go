@@ -1,11 +1,15 @@
 package code
 
-import "github.com/spf13/cobra"
+import (
+	"modelhelper/cli/modelhelper"
 
-func NewGenerateCommand() *cobra.Command {
+	"github.com/spf13/cobra"
+)
+
+func NewCodeRootCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	subCommands := []*cobra.Command{
-		NewGenerateCodeCommand(),
+		NewGenerateCodeCommand(app),
 	}
 
 	rootCmd := &cobra.Command{

@@ -1,11 +1,15 @@
 package language
 
-import "github.com/spf13/cobra"
+import (
+	"modelhelper/cli/modelhelper"
 
-func LanguageCommand() *cobra.Command {
+	"github.com/spf13/cobra"
+)
+
+func LanguageCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	subCommands := []*cobra.Command{
-		NewListLanguagesCommand(),
+		NewListLanguagesCommand(app),
 	}
 
 	rootCmd := &cobra.Command{

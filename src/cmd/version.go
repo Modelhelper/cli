@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"modelhelper/cli/app"
+	"modelhelper/cli/modelhelper"
 	_ "modelhelper/cli/types"
 
 	"github.com/spf13/cobra"
 )
 
-func NewVersionCommand() *cobra.Command {
+func NewVersionCommand(info modelhelper.AppInfoService) *cobra.Command {
 
 	// versionCmd represents the version command
 	var versionCmd = &cobra.Command{
@@ -16,7 +16,7 @@ func NewVersionCommand() *cobra.Command {
 		Short: "Show the CLI version information",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(app.Version())
+			fmt.Println(info.Version())
 		},
 	}
 

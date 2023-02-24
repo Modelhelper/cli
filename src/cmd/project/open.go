@@ -2,11 +2,12 @@ package project
 
 import (
 	"fmt"
+	"modelhelper/cli/modelhelper"
 
 	"github.com/spf13/cobra"
 )
 
-func NewOpenProjectCommand() *cobra.Command {
+func NewOpenProjectCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "open",

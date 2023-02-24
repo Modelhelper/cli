@@ -1,73 +1,76 @@
 package code
 
 import (
-	"context"
 	"fmt"
-	"modelhelper/cli/code/generator"
+	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/modelhelper/models"
 
 	"github.com/spf13/cobra"
 )
 
-func NewGenerateCodeCommand() *cobra.Command {
+func NewGenerateCodeCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	generateCmd := &cobra.Command{
 		Use:   "generate",
 		Short: "Generate code",
 		Long:  "",
-		Run:   codeCommandHandler,
+		Run:   codeCommandHandler(app),
 	}
 
-	generateCmd.Flags().StringArrayP("template", "t", []string{}, "A list of template to convert")
-	generateCmd.Flags().StringArray("template-group", []string{}, "Use a group of templates")
-	generateCmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
-
-	generateCmd.Flags().StringP("relations [direct, all, complete]", "r", "", "Include related entities based on the entities in --entity or --entity-group ('direct' | 'all' | 'complete' | 'children' | 'parents')")
-	// generateCmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
-
-	generateCmd.Flags().StringArray("entity-group", []string{}, "Use a group of entities (must be defines in the current connection)")
-	generateCmd.Flags().StringArrayP("entity", "e", []string{}, "A list of entits to use as a model")
-
-	generateCmd.Flags().Bool("screen", false, "List the output to the screen, default false")
-	generateCmd.Flags().Bool("copy", false, "Copies the generated code to the clipboard (ctrl + v), default false")
-	generateCmd.Flags().String("export-path", "", "Exports to a directory")
-	// generateCmd.Flags().Bool("export-bykey", false, "Exports the code using the template keys, default false")
-	generateCmd.Flags().Bool("overwrite", false, "Overwrite any existing file when exporting to file on disk")
-
-	generateCmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code, default false")
-
-	generateCmd.Flags().Bool("demo", false, "Uses a demo as input source, this will override any other input sources (entity, graphql), default false ")
-
-	generateCmd.Flags().String("config-path", "", "Instructs the program to use this config as the config")
-	generateCmd.Flags().String("project-path", "", "Instructs the program to use this project as input")
-
-	generateCmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
-
-	// generateCmd.Flags().String("setup", "", "Use this setup to generate code") // version 3.1
-	generateCmd.Flags().StringP("connection", "c", "", "The connection key to be used, uses default connection if not provided")
-
-	generateCmd.RegisterFlagCompletionFunc("relations", completeRelations)
+	registerFlags(generateCmd)
 
 	return generateCmd
 }
 
-func codeCommandHandler(cmd *cobra.Command, args []string) {
-	options := parseCodeOptions(cmd, args)
-	cg := generator.NewCodeGenerator(options, nil)
-	ctx := context.Background()
+func registerFlags(cmd *cobra.Command) {
+	cmd.Flags().StringArrayP("template", "t", []string{}, "A list of template to convert")
+	cmd.Flags().StringArray("template-group", []string{}, "Use a group of templates")
+	cmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
 
-	result, err := cg.Generate(ctx)
+	cmd.Flags().StringP("relations [direct, all, complete]", "r", "", "Include related entities based on the entities in --entity or --entity-group ('direct' | 'all' | 'complete' | 'children' | 'parents')")
+	// cmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
 
-	if err != nil {
-		// handle error
-	}
+	cmd.Flags().StringArray("entity-group", []string{}, "Use a group of entities (must be defines in the current connection)")
+	cmd.Flags().StringArrayP("entity", "e", []string{}, "A list of entits to use as a model")
 
-	for _, res := range result {
-		fmt.Printf("Printing the generated result:\n%s", string(res.Result.Body))
+	cmd.Flags().Bool("screen", false, "List the output to the screen, default false")
+	cmd.Flags().Bool("copy", false, "Copies the generated code to the clipboard (ctrl + v), default false")
+	cmd.Flags().String("export-path", "", "Exports to a directory")
+	// cmd.Flags().Bool("export-bykey", false, "Exports the code using the template keys, default false")
+	cmd.Flags().Bool("overwrite", false, "Overwrite any existing file when exporting to file on disk")
+
+	cmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code, default false")
+
+	cmd.Flags().Bool("demo", false, "Uses a demo as input source, this will override any other input sources (entity, graphql), default false ")
+
+	cmd.Flags().String("config-path", "", "Instructs the program to use this config as the config")
+	cmd.Flags().String("project-path", "", "Instructs the program to use this project as input")
+
+	cmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
+
+	// cmd.Flags().String("setup", "", "Use this setup to generate code") // version 3.1
+	cmd.Flags().StringP("connection", "c", "", "The connection key to be used, uses default connection if not provided")
+
+	cmd.RegisterFlagCompletionFunc("relations", completeRelations)
+}
+func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
+
+		options := parseCodeOptions(cmd, args)
+		result, err := app.Code.Generator.Generate(cmd.Root().Context(), options)
+
+		if err != nil {
+			// handle error
+		}
+
+		for _, res := range result {
+			fmt.Printf("Printing the generated result:\n%s", string(res.Result.Body))
+		}
 	}
 }
 
-func parseCodeOptions(cmd *cobra.Command, args []string) *generator.CodeGeneratorOptions {
-	options := generator.CodeGeneratorOptions{}
+func parseCodeOptions(cmd *cobra.Command, args []string) *models.CodeGeneratorOptions {
+	options := models.CodeGeneratorOptions{}
 
 	codeOnly, _ := cmd.Flags().GetBool("code-only")
 	isDemo, _ := cmd.Flags().GetBool("demo")

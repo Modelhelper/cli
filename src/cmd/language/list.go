@@ -3,7 +3,7 @@ package language
 import (
 	"fmt"
 	"modelhelper/cli/code"
-	"modelhelper/cli/config"
+	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/ui"
 
 	"github.com/spf13/cobra"
@@ -11,33 +11,37 @@ import (
 	"golang.org/x/text/message"
 )
 
-func NewListLanguagesCommand() *cobra.Command {
+func NewListLanguagesCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"ls"},
 		Args:    cobra.MaximumNArgs(1),
 		Short:   "List all languages",
-		Run:     listlanguagesCommandHandler,
+		Run:     listlanguagesCommandHandler(app),
 	}
 
 	return cmd
 }
 
-func listlanguagesCommandHandler(cmd *cobra.Command, args []string) {
-	cfg := config.Load()
-	defs, err := code.LoadFromPath(cfg.Languages.Definitions)
+func listlanguagesCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command, args []string) {
 
-	if err != nil {
-		fmt.Println("Error: ", err)
+	return func(cmd *cobra.Command, args []string) {
+
+		cfg := app.Config
+		defs, err := code.LoadFromPath(cfg.Languages.Definitions)
+
+		if err != nil {
+			fmt.Println("Error: ", err)
+		}
+
+		ui.ConsoleTitle("Language list")
+		fmt.Println(`
+	This is a list of all available languages defined for model helper			
+				`)
+		renderer := languageTableRenderer{defs}
+		ui.RenderTable(&renderer)
 	}
-
-	ui.ConsoleTitle("Language list")
-	fmt.Println(`
-This is a list of all available languages defined for model helper			
-			`)
-	renderer := languageTableRenderer{defs}
-	ui.RenderTable(&renderer)
 }
 
 type languageTableRenderer struct {

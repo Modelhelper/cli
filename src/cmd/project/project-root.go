@@ -2,16 +2,18 @@ package project
 
 import (
 	"fmt"
+	"modelhelper/cli/modelhelper"
 
 	"github.com/spf13/cobra"
 )
 
-func ProjectCommand() *cobra.Command {
+func ProjectCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	subCommands := []*cobra.Command{
-		NewGenerateProjectCommand(),
-		NewOpenProjectCommand(),
-		NewProjectInitCommand(),
+		NewGenerateProjectCommand(app),
+		NewOpenProjectCommand(app),
+		NewProjectInitCommand(app),
+		NewTemplatesCommand(app),
 	}
 
 	rootCmd := &cobra.Command{

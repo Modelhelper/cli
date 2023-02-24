@@ -12,6 +12,9 @@ func (server *Postgres) Entity(name string) (*models.Entity, error) {
 func (server *Postgres) Entities(pattern string) (*[]models.Entity, error) {
 	return nil, nil
 }
+func (server *Postgres) EntitiesFromNames(names []string) (*[]models.Entity, error) {
+	return nil, nil
+}
 
 func (server *Postgres) EntitiesFromColumn(column string) (*[]models.Entity, error) {
 	return nil, nil

@@ -40,6 +40,20 @@ func (server *MsSql) CanConnect() (bool, error) {
 	return false, nil
 }
 
+func (server *MsSql) EntitiesFromNames(names []string) (*[]models.Entity, error) {
+	ls := []models.Entity{}
+
+	for _, name := range names {
+		ent, err := server.Entity(name)
+		if err != nil {
+			return nil, err
+		}
+
+		ls = append(ls, *ent)
+	}
+	return &ls, nil
+}
+
 func (server *MsSql) Entity(name string) (*models.Entity, error) {
 	e, err := server.getEntity(name)
 	if err != nil {

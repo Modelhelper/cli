@@ -7,7 +7,8 @@
         {
             "name": "Launch Package",
             "type": "go",
-            "args": ["generate", "--entity", "workout", "--template", "md-describe-table", "--copy", "--screen"],
+            // "args": ["generate", "--entity", "workout", "--template", "md-describe-table", "--copy", "--screen"],
+            "args": ["project", "create", "--name", "'Antulator API'", "--template", "go-hex-api-small", "-d", "C:\\temp\\projects"],
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}\\main.go"

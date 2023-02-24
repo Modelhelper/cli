@@ -1,13 +1,17 @@
 package template
 
-import "github.com/spf13/cobra"
+import (
+	"modelhelper/cli/modelhelper"
 
-func NewTemplateCommand() *cobra.Command {
+	"github.com/spf13/cobra"
+)
+
+func NewTemplateCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	subCommands := []*cobra.Command{
-		ListCommand(),
-		OpenCommand(),
-		CreateCommand(),
+		ListCommand(app),
+		OpenCommand(app),
+		CreateCommand(app),
 	}
 
 	rootCmd := &cobra.Command{

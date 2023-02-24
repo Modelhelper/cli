@@ -1,8 +1,6 @@
 package codegen
 
-import (
-	"modelhelper/cli/modelhelper"
-)
+import "modelhelper/cli/modelhelper/models"
 
 // var datatypeMap map[string]code.LangDefDataType
 
@@ -20,7 +18,7 @@ type CodeContextValue struct {
 	Blocks        map[string]string
 	Datatypes     map[string]string
 	NullableTypes map[string]string
-	Project       modelhelper.ProjectConfig
+	Project       models.ProjectConfig
 
 	// AlternativeNullableTypes map[string]string
 	// Templates                map[string]string // is this really needed

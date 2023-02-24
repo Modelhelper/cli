@@ -2,10 +2,9 @@ package template
 
 import (
 	"fmt"
-	"modelhelper/cli/app"
-	"modelhelper/cli/config"
 	"modelhelper/cli/modelhelper"
-	"modelhelper/cli/tpl"
+
+	"modelhelper/cli/modelhelper/models"
 	"modelhelper/cli/ui"
 	"os/exec"
 	"strings"
@@ -13,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ListCommand() *cobra.Command {
+func ListCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "list",
@@ -40,7 +39,7 @@ Filter the template by using on or more of the following options
 -- hva med liste på tags
 
 `,
-		Run: listTemplateCommandHandler,
+		Run: listTemplateCommandHandler(app),
 	}
 
 	cmd.Flags().String("by", "", "Groups the templates by type, group, language, model or tag")
@@ -56,95 +55,52 @@ Filter the template by using on or more of the following options
 	return cmd
 }
 
-func listTemplateCommandHandler(cmd *cobra.Command, args []string) {
-	open, _ := cmd.Flags().GetBool("open")
-	cloader := config.NewConfigLoader()
-	cfg, _ := cloader.Load()
+func listTemplateCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
 
-	tl := tpl.TemplateLoader{
-		Directory: app.TemplateFolder(cfg.Templates.Location),
-	}
-	allTemplates, _ := tl.LoadTemplates()
+		group, _ := cmd.Flags().GetString("by")
+		typeFiler, _ := cmd.Flags().GetStringArray("type")
+		langFilter, _ := cmd.Flags().GetStringArray("lang")
+		modelFilter, _ := cmd.Flags().GetStringArray("model")
+		keyFilter, _ := cmd.Flags().GetStringArray("key")
+		groupFilter, _ := cmd.Flags().GetStringArray("group")
 
-	if len(args) > 0 {
-		current, found := allTemplates[args[0]]
-		if found {
-			if open {
-				editor := getEditor(cfg)
-				openPathInEditor(editor, current.TemplateFilePath)
-			} else {
-
-				fmt.Print(current.ToString(args[0]))
-			}
+		options := models.CodeTemplateListOptions{
+			FilterTypes:     typeFiler,
+			FilterLanguages: langFilter,
+			FilterModels:    modelFilter,
+			FilterKeys:      keyFilter,
+			FilterGroups:    groupFilter,
 		}
+		templates := app.Code.TemplateService.List(&options)
+		var tp templatePrinter
 
-		return
-	}
-	group, _ := cmd.Flags().GetString("by")
-	typeFiler, _ := cmd.Flags().GetStringArray("type")
-	langFilter, _ := cmd.Flags().GetStringArray("lang")
-	modelFilter, _ := cmd.Flags().GetStringArray("model")
-	keyFilter, _ := cmd.Flags().GetStringArray("key")
-	groupFilter, _ := cmd.Flags().GetStringArray("group")
-
-	var tp templatePrinter
-	if len(typeFiler) > 0 {
-		ft := tpl.FilterByType{}
-		allTemplates = ft.Filter(allTemplates, typeFiler)
-	}
-
-	if len(langFilter) > 0 {
-		ft := tpl.FilterByLang{}
-		allTemplates = ft.Filter(allTemplates, langFilter)
-	}
-	if len(keyFilter) > 0 {
-		ft := tpl.FilterByKey{}
-		allTemplates = ft.Filter(allTemplates, keyFilter)
-	}
-	if len(modelFilter) > 0 {
-		ft := tpl.FilterByModel{}
-		allTemplates = ft.Filter(allTemplates, modelFilter)
-	}
-	if len(groupFilter) > 0 {
-		ft := tpl.FilterByGroup{}
-		allTemplates = ft.Filter(allTemplates, groupFilter)
-	}
-
-	if len(group) > 0 {
-		ui.PrintConsoleTitle("ModelHelper Templates grouped by " + group)
-		fmt.Printf("\nIn the list below you will find all available templates in ModelHelper\n")
-
-		grouper := tpl.GetGrouper(strings.ToLower(group))
-		descr := tpl.GetDescriber(group)
-
-		mg := grouper.Group(allTemplates)
-
-		for typ, tv := range mg {
-			ui.PrintConsoleTitle(typ)
-
-			desc := descr.Describe(typ)
-			if desc != nil {
-				fmt.Println(desc.Long)
-			}
-
-			fmt.Println()
-			tp.templates = tv
-			ui.RenderTable(&tp)
-
-		}
-	} else {
 		ui.PrintConsoleTitle("ModelHelper Templates")
 		fmt.Printf("\nIn the list below you will find all available templates in ModelHelper\n")
 
-		tp.templates = allTemplates
-		ui.RenderTable(&tp)
-	}
+		if len(group) > 0 {
+			grp := app.Code.TemplateService.Group(group, templates)
 
-	fmt.Println()
+			for k, l := range grp {
+
+				// fmt.Println("")
+				// fmt.Println("------------------------------------------------------")
+				// fmt.Println("")
+				ui.PrintConsoleTitle(k)
+				tp.templates = l
+				ui.RenderTable(&tp)
+				fmt.Println("")
+			}
+		} else {
+
+			tp.templates = templates
+			ui.RenderTable(&tp)
+		}
+	}
 }
 
 type templatePrinter struct {
-	templates map[string]tpl.Template
+	templates map[string]models.CodeTemplate
 }
 
 func (t *templatePrinter) Rows() [][]string {
@@ -190,7 +146,7 @@ func openPathInEditor(editor string, loc string) {
 	}
 }
 
-func getEditor(cfg *modelhelper.Config) string {
+func getEditor(cfg *models.Config) string {
 	if len(cfg.DefaultEditor) > 0 {
 		return cfg.DefaultEditor
 	} else {

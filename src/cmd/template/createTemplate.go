@@ -3,6 +3,7 @@ package template
 import (
 	"io/ioutil"
 	"modelhelper/cli/defaults"
+	"modelhelper/cli/modelhelper"
 
 	"github.com/spf13/cobra"
 )
@@ -13,7 +14,7 @@ var createTplKey string = "cs"
 var createTplImport string = "table"
 
 // createTemplateCmd represents the createTemplate command
-func CreateCommand() *cobra.Command {
+func CreateCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	var createTemplateCmd = &cobra.Command{
 		Use:     "create",

@@ -1,15 +1,12 @@
 package template
 
 import (
-	"modelhelper/cli/app"
-	"modelhelper/cli/config"
-	"modelhelper/cli/tpl"
-	"modelhelper/cli/ui"
+	"modelhelper/cli/modelhelper"
 
 	"github.com/spf13/cobra"
 )
 
-func OpenCommand() *cobra.Command {
+func OpenCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "open",
@@ -17,7 +14,7 @@ func OpenCommand() *cobra.Command {
 		Long:  "",
 		Args:  cobra.RangeArgs(1, 2),
 
-		Run: openCommand,
+		Run: openTemplate(app),
 	}
 
 	cmd.Flags().String("editor", "", "The editor to use when opening the file")
@@ -25,30 +22,32 @@ func OpenCommand() *cobra.Command {
 	return cmd
 }
 
-func openCommand(cmd *cobra.Command, args []string) {
-	cloader := config.NewConfigLoader()
-	cfg, _ := cloader.Load()
-	editor := getEditor(cfg)
+func openTemplate(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
 
-	tl := tpl.TemplateLoader{
-		Directory: app.TemplateFolder(cfg.Templates.Location),
-	}
-	allTemplates, _ := tl.LoadTemplates()
+		// cfg := app.Config
+		// editor := getEditor(cfg)
 
-	if len(args) > 0 {
+		// tl := tpl.TemplateLoader{
+		// 	// Directory: app.TemplateFolder(cfg.Templates.Location),
+		// }
+		// allTemplates, _ := tl.LoadTemplates()
 
-		if len(args) == 2 {
-			editor = args[1]
-		}
+		// if len(args) > 0 {
 
-		if len(editor) == 0 {
-			ui.PromptForEditor("Select editor")
-		}
+		// 	if len(args) == 2 {
+		// 		editor = args[1]
+		// 	}
 
-		current, found := allTemplates[args[0]]
-		if found {
-			openPathInEditor(editor, current.TemplateFilePath)
-		}
+		// 	if len(editor) == 0 {
+		// 		ui.PromptForEditor("Select editor")
+		// 	}
 
+		// 	current, found := allTemplates[args[0]]
+		// 	if found {
+		// 		openPathInEditor(editor, current.TemplateFilePath)
+		// 	}
+
+		// }
 	}
 }
