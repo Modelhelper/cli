@@ -3,15 +3,14 @@ package command
 import (
 	"context"
 	"fmt"
-	"modelhelper/cli/cmd"
-	"modelhelper/cli/cmd/code"
-	cfgCmd "modelhelper/cli/cmd/config"
-	"modelhelper/cli/cmd/language"
-	projectCmd "modelhelper/cli/cmd/project"
-	"modelhelper/cli/cmd/serve"
-	"modelhelper/cli/cmd/source"
-	"modelhelper/cli/cmd/template"
 	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/ports/command/code"
+	cfgCmd "modelhelper/cli/ports/command/config"
+	"modelhelper/cli/ports/command/language"
+	projectCmd "modelhelper/cli/ports/command/project"
+	"modelhelper/cli/ports/command/serve"
+	"modelhelper/cli/ports/command/source"
+	"modelhelper/cli/ports/command/template"
 
 	"github.com/spf13/cobra"
 )
@@ -71,9 +70,9 @@ func (cc *cobraCommand) subCommands() []*cobra.Command {
 		cfgCmd.NewConfigCommand(),
 		template.NewTemplateCommand(cc.application),
 		serve.NewServeCommand(),
-		cmd.NewAboutCommand(cc.application.Info),
-		cmd.NewVersionCommand(cc.application.Info),
-		cmd.NewCompletionCommand(),
+		NewAboutCommand(cc.application.Info),
+		NewVersionCommand(cc.application.Info),
+		NewCompletionCommand(),
 	}
 
 }
