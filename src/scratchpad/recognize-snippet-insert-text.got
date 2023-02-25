@@ -1,0 +1,64 @@
+package main
+
+import (
+    "fmt"
+    "io/ioutil"
+    "regexp"
+)
+
+func main() {
+    // Define the regular expression pattern to match the search text
+    searchText := "// %%SNIPPET_IDENTIFIER%%"
+    insertText := "fmt.Println(\"Hello, world!\")"
+    pattern := regexp.MustCompile(`(?m)` + `^// %%(\w+)%%$`)
+
+    // Get a list of files in the directory
+    files, err := ioutil.ReadDir(".")
+    if err != nil {
+        fmt.Println("Error reading directory:", err)
+        return
+    }
+
+    // Loop through each file and process it
+    for _, file := range files {
+        // Skip directories and non-Go files
+        if file.IsDir() || !isGoFile(file.Name()) {
+            continue
+        }
+
+        // Read the contents of the file into a string variable
+        content, err := ioutil.ReadFile(file.Name())
+        if err != nil {
+            fmt.Printf("Error reading file %s: %v\n", file.Name(), err)
+            continue
+        }
+
+        // Find the position of the search text using the regular expression
+        matches := pattern.FindStringSubmatch(string(content))
+        if len(matches) < 2 {
+            fmt.Printf("Error: could not find \"%s\" in file %s\n", searchText, file.Name())
+            continue
+        }
+
+        // Extract the snippet identifier from the capture group
+        snippetIdentifier := matches[1]
+
+        // Insert the new code below the matched text
+        insertIndex := pattern.FindStringIndex(string(content))[1] + 1 // add 1 to move past the newline character
+        modifiedContent := []byte(string(content)[:insertIndex] + insertText + "\n" + string(content)[insertIndex:])
+
+        // Write the modified content back to the file
+        err = ioutil.WriteFile(file.Name(), modifiedContent, 0644)
+        if err != nil {
+            fmt.Printf("Error writing file %s: %v\n", file.Name(), err)
+            continue
+        }
+
+        fmt.Printf("Inserted code in file %s with snippet identifier %s\n", file.Name(), snippetIdentifier)
+    }
+}
+
+// Helper function to check if a file has a ".go" extension
+func isGoFile(name string) bool {
+    return len(name) > 3 && name[len(name)-3:] == ".go"
+}
