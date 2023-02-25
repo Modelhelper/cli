@@ -37,12 +37,14 @@ func (t *codeTemplateService) List(options *models.CodeTemplateListOptions) map[
 	for _, codeFile := range t.getFileList() {
 		// name := convertFileNameToTemplateName(path, p)
 		t, err := loadTemplateFromFile(codeFile.fullPath)
-
 		if err != nil {
 			log.Fatalln(err)
 		}
 
 		if t != nil {
+			if codeFile != nil {
+				t.Name = codeFile.fileNameFromDir
+			}
 			templates[codeFile.fileNameFromDir] = *t
 		}
 	}
@@ -260,68 +262,6 @@ func listGrouper(key string, template models.CodeTemplate, list []string) map[st
 
 	return m
 }
-
-// if len(args) > 0 {
-// 	current, found := allTemplates[args[0]]
-// 	if found {
-// 		if open {
-// 			editor := getEditor(cfg)
-// 			openPathInEditor(editor, current.TemplateFilePath)
-// 		} else {
-
-// 			fmt.Print(current.ToString(args[0]))
-// 		}
-// 	}
-
-// 	return
-// }
-
-// if len(typeFiler) > 0 {
-// 	ft := tpl.FilterByType{}
-// 	allTemplates = ft.Filter(allTemplates, typeFiler)
-// }
-
-// if len(langFilter) > 0 {
-// 	ft := tpl.FilterByLang{}
-// 	allTemplates = ft.Filter(allTemplates, langFilter)
-// }
-// if len(keyFilter) > 0 {
-// 	ft := tpl.FilterByKey{}
-// 	allTemplates = ft.Filter(allTemplates, keyFilter)
-// }
-// if len(modelFilter) > 0 {
-// 	ft := tpl.FilterByModel{}
-// 	allTemplates = ft.Filter(allTemplates, modelFilter)
-// }
-// if len(groupFilter) > 0 {
-// 	ft := tpl.FilterByGroup{}
-// 	allTemplates = ft.Filter(allTemplates, groupFilter)
-// }
-
-// if len(group) > 0 {
-// 	ui.PrintConsoleTitle("ModelHelper Templates grouped by " + group)
-// 	fmt.Printf("\nIn the list below you will find all available templates in ModelHelper\n")
-
-// 	grouper := tpl.GetGrouper(strings.ToLower(group))
-// 	descr := tpl.GetDescriber(group)
-
-// 	mg := grouper.Group(allTemplates)
-
-// 	for typ, tv := range mg {
-// 		ui.PrintConsoleTitle(typ)
-
-// 		desc := descr.Describe(typ)
-// 		if desc != nil {
-// 			fmt.Println(desc.Long)
-// 		}
-
-// 		fmt.Println()
-// 		tp.templates = tv
-// 		ui.RenderTable(&tp)
-
-// 	}
-// } else {
-// }
 
 // Load implements modelhelper.CodeTemplateService
 func (t *codeTemplateService) Load(name string) *models.CodeTemplate {

@@ -2,9 +2,19 @@ package code
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"modelhelper/cli/codegen"
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
+	"modelhelper/cli/ports/exporter"
+	"modelhelper/cli/source"
+	"path/filepath"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/atotto/clipboard"
 	// "go.opencensus.io/examples/exporter"
 )
 
@@ -23,325 +33,281 @@ func NewCodeGeneratorService(cfg *models.Config, pc *models.ProjectConfig, cmc m
 }
 
 func (g *codeGeneratorService) Generate(ctx context.Context, options *models.CodeGeneratorOptions) ([]models.TemplateGeneratorFileResult, error) {
-	fmt.Println("Generate code")
 
-	return nil, nil
-	// 	if len(options.Templates) == 0 && len(options.TemplateGroups) == 0 {
-	// 		// no point to continue if no templates is given
+	if len(options.Templates) == 0 && len(options.TemplateGroups) == 0 {
+		// no point to continue if no templates is given
 
-	// 		return nil, errors.New(`No templates or template groups are provided resulting in nothing to create
-	// please use mh generate with the -t or --template [templatename] to set at template
+		return nil, errors.New(`No templates or template groups are provided resulting in nothing to create
+please use mh generate with the -t or --template [templatename] to set at template
 
-	// You could also use mh template or mh t to see a list of all available templates`)
-	// 	}
+You could also use mh template or mh t to see a list of all available templates`)
+	}
 
-	// 	var con models.Connection
-	// 	var prj *models.ProjectConfig
-	// 	// var entities []*models.Entity
+	var con models.Connection
+	var prj *models.ProjectConfig
+	// var entities []*models.Entity
 
-	// 	if options.UseDemo {
-	// 		options.Connection = "demo"
-	// 		con = models.Connection{Type: options.Connection}
-	// 	} else {
-	// 		if len(g.cfg.Connections) == 0 {
-	// 			return nil, errors.New("Could not find any connections to use, please add a connection to the config file")
-	// 		}
-	// 		if len(options.Connection) == 0 {
+	if options.UseDemo {
+		options.Connection = "demo"
+		con = models.Connection{Type: options.Connection}
+	} else {
+		if len(g.cfg.Connections) == 0 {
+			return nil, errors.New("Could not find any connections to use, please add a connection to the config file")
+		}
+		if len(options.Connection) == 0 {
 
-	// 			options.Connection = g.cfg.DefaultConnection
-	// 		}
+			options.Connection = g.cfg.DefaultConnection
+		}
 
-	// 		if len(options.Connection) == 0 {
-	// 			ka := keyArray(g.cfg.Connections)
-	// 			options.Connection = ka[0]
-	// 		}
+		if len(options.Connection) == 0 {
+			ka := keyArray(g.cfg.Connections)
+			options.Connection = ka[0]
+		}
 
-	// 		con = g.cfg.Connections[options.Connection]
-	// 	}
+		con = g.cfg.Connections[options.Connection]
+	}
 
-	// 	entityList := options.Entities //  mergedList(options.Entities, entitiesFromGroups(con, options.EntityGroups))
+	entityList := options.Entities //  mergedList(options.Entities, entitiesFromGroups(con, options.EntityGroups))
 
-	// 	src := source.SourceFactory(&con)
+	src := source.SourceFactory(&con)
 
-	// 	entities, err := src.EntitiesFromNames(entityList)
+	entities, err := src.EntitiesFromNames(entityList)
 
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
+	if err != nil {
+		return nil, err
+	}
 
-	// 	prj = g.projectConfig
-
-	// 	languages, _ := code.LoadFromPath(g.cfg.Languages.Definitions)
+	prj = g.projectConfig
 
 	// 	if len(options.TemplatePath) == 0 {
 	// 		options.TemplatePath = g.cfg.Templates.Code[0]
 	// 	}
 
-	// 	allTemplates, blocks := loadTemplates(options.TemplatePath)
+	allTemplates := g.templateService.List(nil)
 
-	// 	options.Templates = selectTemplates(allTemplates, options.Templates, options.TemplateGroups)
+	options.Templates = selectTemplates(allTemplates, options.Templates, options.TemplateGroups)
 
-	// 	start := time.Now()
-	// 	var cstat = &models.TemplateGeneratorStatistics{}
-	// 	var generatedCode []models.TemplateGeneratorFileResult
+	start := time.Now()
+	var cstat = &models.TemplateGeneratorStatistics{}
+	var generatedCode []models.TemplateGeneratorFileResult
 
-	// 	// creates the root context to be passed to each sub routine
-	// 	ctxVal := codegen.CodeContextValue{}
-	// 	ctxVal.Blocks = blocks
+	for _, tname := range options.Templates {
 
-	// 	for _, tname := range options.Templates {
+		// var tt *tpl.Template
+		// fmt.Println(tname)
+		currentTemplate, found := allTemplates[tname]
 
-	// 		// var tt *tpl.Template
-	// 		// fmt.Println(tname)
-	// 		currentTemplate, found := allTemplates[tname]
+		if found {
+			var codeSection models.Code
 
-	// 		if found {
-	// 			var codeSection models.Code
-	// 			// var csFound = false
-	// 			// obsolete when context is completed
-	// 			tplMap := make(map[string]string)
+			if prj != nil && prj.Code != nil {
+				codeSection = prj.Code[currentTemplate.Language]
+			}
 
-	// 			for k, b := range blocks {
-	// 				tplMap[k] = b
-	// 			}
-	// 			tplMap[tname] = currentTemplate.Body
+			if len(currentTemplate.Model) == 0 || currentTemplate.Model == "basic" {
 
-	// 			ctxVal.TemplateName = tname
-	// 			ctxVal.Template = currentTemplate.Body
+				basicGenerator := func() {
+					cstat.TemplatesUsed += 1
 
-	// 			ctxVal.Datatypes = defaultNoNullDatatype()
-	// 			ctxVal.NullableTypes = defaultNullDatatype()
+					model := g.cmc.ToBasicModel(currentTemplate.Key, currentTemplate.Language, prj)
+					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
 
-	// 			def, defFound := languages[currentTemplate.Language]
-	// 			if defFound {
+					f := models.TemplateGeneratorFileResult{
+						Result:   o,
+						Filename: "",
+					}
 
-	// 				for k, v := range def.DataTypes {
-	// 					ctxVal.Datatypes[k] = v.NotNull
-	// 					ctxVal.NullableTypes[k] = v.Nullable
+					generatedCode = append(generatedCode, f)
+				}
 
-	// 				}
+				basicGenerator()
 
-	// 			}
+			} else if currentTemplate.Model == "entity" && len(*entities) > 0 {
 
-	// 			// if len(prj.Code. {
-	// 			if prj != nil && prj.Code != nil {
-	// 				// codeSection, csFound = prj.Code[currentTemplate.Language]
-	// 				codeSection = prj.Code[currentTemplate.Language]
-	// 			}
-	// 			// }
-	// 			generator := codegen.GoLangGenerator{}
+				for _, entity := range *entities {
 
-	// 			ctx := context.WithValue(context.Background(), "code", ctxVal)
-	// 			if len(currentTemplate.Model) == 0 || currentTemplate.Model == "basic" {
+					entityGenerator := func() {
+						cstat.TemplatesUsed += 1
+						cstat.EntitiesUsed += 1
 
-	// 				basicGenerator := func() {
-	// 					cstat.TemplatesUsed += 1
+						model := g.cmc.ToEntityModel(currentTemplate.Key, currentTemplate.Language, prj, &entity)
 
-	// 					model := g.cmc.ToBasicModel(currentTemplate.Key, currentTemplate.Language, prj)
-	// 					o, _ := generator.Generate(ctx, model)
+						model.PageHeader = codegen.Generate("header", model.PageHeader, model)
+						model.Namespace = codegen.Generate("namesp", model.Namespace, model)
 
-	// 					f := models.TemplateGeneratorFileResult{
-	// 						Result:   o,
-	// 						Filename: "",
-	// 					}
+						for i, imp := range model.Imports {
 
-	// 					generatedCode = append(generatedCode, f)
-	// 				}
+							model.Imports[i] = codegen.Generate("import", imp, model)
+						}
 
-	// 				basicGenerator()
+						model.Imports = removeDuplicateStringValues(model.Imports)
 
-	// 			} else if currentTemplate.Model == "entity" && len(*entities) > 0 {
+						for x, inj := range model.Inject {
 
-	// 				for _, entity := range *entities {
+							model.Inject[x].Name = codegen.Generate("injprop", inj.Name, model)
+						}
 
-	// 					entityGenerator := func() {
-	// 						cstat.TemplatesUsed += 1
-	// 						cstat.EntitiesUsed += 1
+						o, _ := g.generator.Generate(ctx, &currentTemplate, model)
 
-	// 						model := g.cmc.ToEntityModel(currentTemplate.Key, currentTemplate.Language, prj, &entity)
+						fileName := ""
+						if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+							cstat.FilesCreated += 1
 
-	// 						model.PageHeader = codegen.Generate("header", model.PageHeader, model)
-	// 						model.Namespace = codegen.Generate("namesp", model.Namespace, model)
+							fileName = codegen.Generate("filename", currentTemplate.FileName, model)
+						}
 
-	// 						for i, imp := range model.Imports {
+						f := models.TemplateGeneratorFileResult{
+							Result:   o,
+							Filename: fileName,
+							FilePath: codeSection.Locations[currentTemplate.Key],
+						}
 
-	// 							model.Imports[i] = codegen.Generate("import", imp, model)
-	// 						}
+						generatedCode = append(generatedCode, f)
+					}
 
-	// 						model.Imports = removeDuplicateStringValues(model.Imports)
+					entityGenerator()
 
-	// 						for x, inj := range model.Inject {
+				}
+			} else if currentTemplate.Model == "entities" && len(*entities) > 0 {
 
-	// 							model.Inject[x].Name = codegen.Generate("injprop", inj.Name, model)
-	// 						}
+				entitiesGenerator := func() {
+					cstat.TemplatesUsed += 1
+					model := g.cmc.ToEntityListModel(currentTemplate.Key, currentTemplate.Language, prj, entities)
+					model.PageHeader = codegen.Generate("header", model.PageHeader, model)
 
-	// 						o, _ := generator.Generate(ctx, model)
+					model.Namespace = codegen.Generate("namesp", model.Namespace, model)
 
-	// 						// fullPath := ""
-	// 						fileName := ""
-	// 						if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-	// 							cstat.FilesCreated += 1
+					for i, imp := range model.Imports {
 
-	// 							fileName = codegen.Generate("filename", currentTemplate.FileName, model)
+						model.Imports[i] = codegen.Generate("import", imp, model)
+					}
 
-	// 							// if csFound {
-	// 							// 	if options.exportPath
-	// 							// 	fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
-	// 							// }
-	// 						}
+					model.Imports = removeDuplicateStringValues(model.Imports)
 
-	// 						f := models.TemplateGeneratorFileResult{
-	// 							Result:   o,
-	// 							Filename: fileName,
-	// 							FilePath: codeSection.Locations[currentTemplate.Key],
-	// 						}
-
-	// 						generatedCode = append(generatedCode, f)
-	// 					}
-
-	// 					entityGenerator()
-
-	// 				}
-	// 			} else if currentTemplate.Model == "entities" && len(*entities) > 0 {
-
-	// 				entitiesGenerator := func() {
-	// 					cstat.TemplatesUsed += 1
-	// 					model := g.cmc.ToEntityListModel(currentTemplate.Key, currentTemplate.Language, prj, entities)
-	// 					model.PageHeader = codegen.Generate("header", model.PageHeader, model)
-
-	// 					model.Namespace = codegen.Generate("namesp", model.Namespace, model)
-
-	// 					for i, imp := range model.Imports {
-
-	// 						model.Imports[i] = codegen.Generate("import", imp, model)
-	// 					}
-
-	// 					model.Imports = removeDuplicateStringValues(model.Imports)
-
-	// 					for x, inj := range model.Inject {
-
-	// 						model.Inject[x].Name = codegen.Generate("injprop", inj.Name, model)
-	// 					}
-
-	// 					o, _ := generator.Generate(ctx, model)
-
-	// 					fileName := ""
-	// 					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-	// 						cstat.FilesCreated += 1
-	// 						fileName = codegen.Generate("filename", currentTemplate.FileName, model)
-	// 						// if csFound {
-
-	// 						// 	fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
-	// 						// }
-	// 					}
-
-	// 					f := models.TemplateGeneratorFileResult{
-	// 						Result:   o,
-	// 						Filename: fileName,
-	// 						FilePath: codeSection.Locations[currentTemplate.Key],
-	// 					}
-
-	// 					generatedCode = append(generatedCode, f)
-
-	// 				}
-
-	// 				entitiesGenerator()
-
-	// 			}
-
-	// 		}
-
-	// 	}
-
-	// 	sb := strings.Builder{}
-	// 	var fwg sync.WaitGroup
-	// 	var flock = sync.Mutex{}
-	// 	for _, codeBody := range generatedCode {
-	// 		cstat.Chars += codeBody.Result.Statistics.Chars
-	// 		cstat.Lines += codeBody.Result.Statistics.Lines
-	// 		cstat.Words += codeBody.Result.Statistics.Words
-	// 		content := []byte(codeBody.Result.Body)
-	// 		if options.ExportToScreen {
-	// 			screenWriter := exporter.ScreenExporter{}
-	// 			screenWriter.Write([]byte(content))
-	// 		}
-
-	// 		if options.ExportToClipboard {
-	// 			sb.WriteString(string(codeBody.Result.Body))
-	// 		}
-
-	// 		if options.ExportByKey && len(codeBody.Filename) > 0 {
-	// 			fwg.Add(1)
-	// 			go func(filename string, rootPath string, content []byte) {
-	// 				defer fwg.Done()
-	// 				keyExporter := exporter.FileExporter{
-	// 					Filename:  filepath.Join(rootPath, filename),
-	// 					Overwrite: options.Overwrite,
-	// 				}
-
-	// 				_, err := keyExporter.Write([]byte(content))
-	// 				if err != nil {
-	// 					fmt.Println(filepath.ErrBadPattern)
-	// 				}
-	// 				// fmt.Println("*** FILENAME::", s.filename)
-	// 				flock.Lock()
-	// 				cstat.FilesExported += 1
-	// 				flock.Unlock()
-	// 			}(codeBody.Filename, "D:/projects/ModelHelper", content)
-
-	// 		}
-	// 		// TODO: export to file
-	// 		if len(options.ExportPath) > 0 {
-	// 			fwg.Add(1)
-	// 			go func(filename string, rootPath string, content []byte) {
-	// 				defer fwg.Done()
-
-	// 				if len(filename) > 0 {
-
-	// 					fileExporter := exporter.FileExporter{
-	// 						Filename:  filepath.Join(rootPath, filename),
-	// 						Overwrite: options.Overwrite,
-	// 					}
-
-	// 					_, err := fileExporter.Write([]byte(content))
-	// 					if err != nil {
-	// 						fmt.Printf("%s, err: \n%v", filepath.ErrBadPattern, err)
-	// 					}
-	// 					// fmt.Println("*** FILENAME::", s.filename)
-	// 					flock.Lock()
-	// 					cstat.FilesExported += 1
-	// 					flock.Unlock()
-	// 				} else {
-	// 					fmt.Println("Filename empty...")
-	// 				}
-	// 			}(codeBody.Filename, options.ExportPath, content)
-	// 		}
-	// 	}
-
-	// 	fwg.Wait()
-	// 	if options.ExportToClipboard {
-	// 		fmt.Printf("\nGenerated code is copied to the \033[37mclipboard\033[0m. Use \033[34mctrl+v\033[0m to paste it where you like")
-	// 		clipboard.WriteAll(sb.String())
-	// 	}
-
-	// 	cstat.Duration = time.Since(start)
-	// 	// stat["total.time"] = int(cstat.duration.Milliseconds())
-	// 	if !options.CodeOnly {
-	// 		wpm := 30.0
-	// 		cpm := 250.0
-
-	// 		min := float64(cstat.Words) / wpm
-	// 		min = float64(cstat.Chars) / cpm
-	// 		// stat["total.savings"] = int(min)
-	// 		printStat(cstat)
-	// 		fmt.Printf("\nIn summary... It took \033[32m%vms\033[0m to generate \033[34m%d\033[0m words and \033[34m%d\033[0m lines. \nYou saved around \033[32m%v minutes\033[0m by not typing it youreself\n",
-	// 			cstat.Duration.Milliseconds(),
-	// 			cstat.Words,
-	// 			cstat.Lines,
-	// 			int(min))
-	// 	}
-
-	// 	return nil, nil
+					for x, inj := range model.Inject {
+
+						model.Inject[x].Name = codegen.Generate("injprop", inj.Name, model)
+					}
+
+					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+
+					fileName := ""
+					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+						cstat.FilesCreated += 1
+						fileName = codegen.Generate("filename", currentTemplate.FileName, model)
+						// if csFound {
+
+						// 	fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+						// }
+					}
+
+					f := models.TemplateGeneratorFileResult{
+						Result:   o,
+						Filename: fileName,
+						FilePath: codeSection.Locations[currentTemplate.Key],
+					}
+
+					generatedCode = append(generatedCode, f)
+
+				}
+
+				entitiesGenerator()
+
+			}
+
+		}
+
+	}
+
+	sb := strings.Builder{}
+	var fwg sync.WaitGroup
+	var flock = sync.Mutex{}
+	for _, codeBody := range generatedCode {
+		cstat.Chars += codeBody.Result.Statistics.Chars
+		cstat.Lines += codeBody.Result.Statistics.Lines
+		cstat.Words += codeBody.Result.Statistics.Words
+		content := []byte(codeBody.Result.Body)
+		if options.ExportToScreen {
+			screenWriter := exporter.ScreenExporter{}
+			screenWriter.Write([]byte(content))
+		}
+
+		if options.ExportToClipboard {
+			sb.WriteString(string(codeBody.Result.Body))
+		}
+
+		if options.ExportByKey && len(codeBody.Filename) > 0 {
+			fwg.Add(1)
+			go func(filename string, rootPath string, content []byte) {
+				defer fwg.Done()
+				keyExporter := exporter.FileExporter{
+					Filename:  filepath.Join(rootPath, filename),
+					Overwrite: options.Overwrite,
+				}
+
+				_, err := keyExporter.Write([]byte(content))
+				if err != nil {
+					fmt.Println(filepath.ErrBadPattern)
+				}
+				// fmt.Println("*** FILENAME::", s.filename)
+				flock.Lock()
+				cstat.FilesExported += 1
+				flock.Unlock()
+			}(codeBody.Filename, "D:/projects/ModelHelper", content)
+
+		}
+		// TODO: export to file
+		if len(options.ExportPath) > 0 {
+			fwg.Add(1)
+			go func(filename string, rootPath string, content []byte) {
+				defer fwg.Done()
+
+				if len(filename) > 0 {
+
+					fileExporter := exporter.FileExporter{
+						Filename:  filepath.Join(rootPath, filename),
+						Overwrite: options.Overwrite,
+					}
+
+					_, err := fileExporter.Write([]byte(content))
+					if err != nil {
+						fmt.Printf("%s, err: \n%v", filepath.ErrBadPattern, err)
+					}
+					// fmt.Println("*** FILENAME::", s.filename)
+					flock.Lock()
+					cstat.FilesExported += 1
+					flock.Unlock()
+				} else {
+					fmt.Println("Filename empty...")
+				}
+			}(codeBody.Filename, options.ExportPath, content)
+		}
+	}
+
+	fwg.Wait()
+	if options.ExportToClipboard {
+		fmt.Printf("\nGenerated code is copied to the \033[37mclipboard\033[0m. Use \033[34mctrl+v\033[0m to paste it where you like")
+		clipboard.WriteAll(sb.String())
+	}
+
+	cstat.Duration = time.Since(start)
+	// stat["total.time"] = int(cstat.duration.Milliseconds())
+	if !options.CodeOnly {
+		wpm := 30.0
+		cpm := 250.0
+
+		min := float64(cstat.Words) / wpm
+		min = float64(cstat.Chars) / cpm
+		// stat["total.savings"] = int(min)
+		printStat(cstat)
+		fmt.Printf("\nIn summary... It took \033[32m%vms\033[0m to generate \033[34m%d\033[0m words and \033[34m%d\033[0m lines. \nYou saved around \033[32m%v minutes\033[0m by not typing it youreself\n",
+			cstat.Duration.Milliseconds(),
+			cstat.Words,
+			cstat.Lines,
+			int(min))
+	}
+
+	return generatedCode, nil
 }
 
 func keyArray(input map[string]models.Connection) []string {

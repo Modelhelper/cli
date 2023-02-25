@@ -24,16 +24,16 @@ var isBeta = true
 
 func main() {
 
-	var (
-		// err  error
-		stop context.CancelFunc
-	)
+	// var (
+	// 	// err  error
+	// 	stop context.CancelFunc
+	// )
 
-	defer func() {
-		if err := recover(); err != nil {
-			os.Exit(3)
-		}
-	}()
+	// defer func() {
+	// 	if err := recover(); err != nil {
+	// 		os.Exit(3)
+	// 	}
+	// }()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

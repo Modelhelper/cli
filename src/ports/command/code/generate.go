@@ -61,6 +61,7 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 
 		if err != nil {
 			// handle error
+			fmt.Println(err)
 		}
 
 		for _, res := range result {
