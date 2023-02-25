@@ -2,7 +2,7 @@ package ui
 
 import "fmt"
 
-func Logo(version string) string {
+func FLogo(version string) string {
 	var logo = `
 888b     d888               888          888 888    888          888                           
 8888b   d8888               888          888 888    888          888                           

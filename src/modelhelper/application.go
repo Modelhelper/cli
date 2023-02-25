@@ -17,12 +17,19 @@ type ModelhelperCli struct {
 
 	Code struct {
 		TemplateService CodeTemplateService
-		Generator       CodeGenerator
+		Generator       CodeGeneratorService
 		ModelConverter  CodeModelConverter
 	}
-	Version string
-	IsBeta  bool
-	Info    AppInfoService
+
+	Exporters struct {
+		ScreenExporter    Exporter
+		ClipboardExporter Exporter
+		FileExporter      Exporter
+	}
+	LanguageService LanguageDefinitionService
+	Version         string
+	IsBeta          bool
+	Info            AppInfoService
 }
 
 func NewApplication(cfgService ConfigService, projectService ProjectConfigService, infoService AppInfoService) (*ModelhelperCli, error) {

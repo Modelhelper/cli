@@ -11,13 +11,8 @@ type CodeTemplateService interface {
 	Group(by string, templateList map[string]models.CodeTemplate) map[string]map[string]models.CodeTemplate
 }
 
-type CodeModel interface {
-	models.BasicModel | models.EntityListModel | models.EntityModel
-}
-
-type CodeGenerator interface {
+type CodeGeneratorService interface {
 	Generate(ctx context.Context, options *models.CodeGeneratorOptions) ([]models.TemplateGeneratorFileResult, error)
-	GenerateCode(tpl *models.CodeTemplate, mdl interface{}) (*models.TemplateGeneratorFileResult, error)
 }
 
 type TemplateTypes interface {
@@ -26,4 +21,9 @@ type TemplateTypes interface {
 
 type TemplateGenerator[T TemplateTypes] interface {
 	Generate(ctx context.Context, tpl T, mdl interface{}) (*models.TemplateGeneratorResult, error)
+}
+
+type LanguageDefinitionService interface {
+	List() map[string]models.LanguageDefinition
+	GetDefinition(lang string) *models.LanguageDefinition
 }

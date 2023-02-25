@@ -9,6 +9,7 @@ import (
 	"modelhelper/cli/ports/command"
 	"modelhelper/cli/ports/config"
 	"modelhelper/cli/ports/converter"
+	"modelhelper/cli/ports/language"
 	"modelhelper/cli/ports/project"
 	projectTemplate "modelhelper/cli/ports/project/template"
 	"modelhelper/cli/ports/template"
@@ -58,18 +59,21 @@ func initializeApplication(ctx context.Context) (modelhelper.CommandService, mod
 	prjs := project.NewProjectConfigService()
 	infs := cli.NewCliInfo("modelhelper", version, isBeta)
 	tpls := template.NewCodeTemplateService(cfg)
+	lngs := language.NewLanguageDefinitionService(cfg)
+	tcg := code.NewCodeGenerator(tpls, lngs)
 
 	mha, _ := modelhelper.NewApplication(cfgs, prjs, infs)
 
 	mha.Config = cfg
 	mha.Code.TemplateService = tpls
 	mha.Code.ModelConverter = converter.NewCodeModelConverter()
-	mha.Code.Generator = code.NewCodeGenerator(cfg, mha.Code.ModelConverter)
+	mha.Code.Generator = code.NewCodeGeneratorService(cfg, mha.Project.Config, mha.Code.ModelConverter, tpls, tcg)
 
 	mha.Project.TemplateService = projectTemplate.NewProjectTemplateService(cfg)
 	mha.Project.Generator = project.NewProjectGeneratorService(cfg)
 	mha.Project.ModelConverter = converter.NewProjectModelConverter()
 
+	mha.LanguageService = lngs
 	cmnd := command.NewCobraCli(mha)
 
 	ai := cli.NewCliInitializer(ctx, infs, cfgs)

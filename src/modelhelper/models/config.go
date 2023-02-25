@@ -70,3 +70,8 @@ type LanguageDefinition struct {
 	// UsesNamespace             bool                       `json:"usesNamespace" yaml:"usesNamespace"`
 	// ModuleLevelVariablePrefix string                     `json:"moduleLevelVariablePrefix" yaml:"moduleLevelVariablePrefix"`
 }
+
+type SecretEntry struct {
+	Key   string
+	Value string
+}

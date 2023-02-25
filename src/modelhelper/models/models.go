@@ -53,6 +53,7 @@ type Global struct {
 
 //CodeTemplate represent the full structure of a code template
 type CodeTemplate struct {
+	Name string //derived
 	// InjectKey       string
 	// LanguageVersion string
 	// Scope           TemplateScope

@@ -3,7 +3,6 @@ package command
 import (
 	"fmt"
 	"modelhelper/cli/modelhelper"
-	_ "modelhelper/cli/types"
 
 	"github.com/spf13/cobra"
 )
