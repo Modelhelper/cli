@@ -2,8 +2,8 @@ package language
 
 import (
 	"fmt"
-	"modelhelper/cli/code"
 	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/modelhelper/models"
 	"modelhelper/cli/ui"
 
 	"github.com/spf13/cobra"
@@ -28,12 +28,7 @@ func listlanguagesCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobr
 
 	return func(cmd *cobra.Command, args []string) {
 
-		cfg := app.Config
-		defs, err := code.LoadFromPath(cfg.Languages.Definitions)
-
-		if err != nil {
-			fmt.Println("Error: ", err)
-		}
+		defs := app.LanguageService.List()
 
 		ui.ConsoleTitle("Language list")
 		fmt.Println(`
@@ -45,7 +40,7 @@ func listlanguagesCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobr
 }
 
 type languageTableRenderer struct {
-	rows map[string]code.LanguageDefinition
+	rows map[string]models.LanguageDefinition
 }
 
 func (d *languageTableRenderer) Header() []string {

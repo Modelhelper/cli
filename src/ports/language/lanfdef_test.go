@@ -1,4 +1,4 @@
-package code
+package language
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestCouldLoadFiles(t *testing.T) {
-	defs, err := Load()
+	defs, err := loadInternalFiles()
 
 	if err != nil {
 		fmt.Println(err)
