@@ -21,7 +21,7 @@ import (
 )
 
 // "fmt"
-var version = "3.0.0-beta1"
+var version = "3.0.0-beta2"
 var isBeta = true
 
 func main() {
