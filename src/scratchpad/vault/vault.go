@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"modelhelper/cli/scratchpad/cipher"
 	"os"
 	"sync"
-
-	"modelhelper/cli/cipher"
 )
 
 func File(encodingKey, filepath string) *Vault {
