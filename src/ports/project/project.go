@@ -1,9 +1,11 @@
 package project
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/modelhelper/constants"
 	"modelhelper/cli/modelhelper/models"
 	"os"
 	"path/filepath"
@@ -11,8 +13,6 @@ import (
 
 	"gopkg.in/yaml.v3"
 )
-
-const dirname string = ".modelhelper"
 
 type defaultProject struct {
 	path   string
@@ -48,7 +48,7 @@ func (p *defaultProject) Save() error {
 	path := DefaultLocation()
 
 	if !Exists(path) {
-		CreateDir(dirname)
+		CreateDir(constants.ProjectRootFolderName)
 	}
 
 	err = ioutil.WriteFile(path, d, 0777)
@@ -67,14 +67,15 @@ func DefaultDir() string {
 	if err != nil {
 		log.Println(err)
 	}
-	return filepath.Join(p, dirname)
+	return filepath.Join(p, constants.ProjectRootFolderName)
 }
 func DefaultLocation() string {
 	// p, err := os.Getwd()
 	// if err != nil {
 	// 	log.Println(err)
 	// }
-	return filepath.Join(DefaultDir(), "project.yaml")
+	fileName := fmt.Sprintf("%s.yaml", constants.ProjectConfigFileName)
+	return filepath.Join(DefaultDir(), fileName)
 }
 
 func (p *defaultProject) Exists() bool {
@@ -121,7 +122,7 @@ func Exists(path string) bool {
 // 		if err != nil {
 // 			log.Println(err)
 // 		}
-// 		path = filepath.Join(p, dirname, "project.yaml")
+// 		path = filepath.Join(p, constants.ProjectRootFolderName, "project.yaml")
 // 	}
 
 // 	f, err := loadProjectFromFile(path)
@@ -164,8 +165,8 @@ func (p *defaultProject) FindReleatedProjects(startPath string) []string {
 			continue
 		}
 
-		if dirs[i] == dirname {
-			fp := filepath.Join(basePath, dirname, "project.yaml")
+		if dirs[i] == constants.ProjectRootFolderName {
+			fp := filepath.Join(basePath, constants.ProjectRootFolderName, "project.yaml")
 			list = append(list, fp)
 			break
 		}
@@ -178,7 +179,7 @@ func (p *defaultProject) FindReleatedProjects(startPath string) []string {
 		}
 		for _, f := range files {
 
-			if f.IsDir() && f.Name() == dirname {
+			if f.IsDir() && f.Name() == constants.ProjectRootFolderName {
 				fp := filepath.Join(basePath, f.Name(), "project.yaml")
 				list = append(list, fp)
 			}
@@ -203,7 +204,7 @@ func (p *defaultProject) FindNearestProjectDir() (string, bool) {
 
 		for _, f := range files {
 
-			if f.IsDir() && f.Name() == dirname {
+			if f.IsDir() && f.Name() == constants.ProjectRootFolderName {
 				fp := filepath.Join(basePath, f.Name(), "project.yaml")
 				return fp, true
 			}

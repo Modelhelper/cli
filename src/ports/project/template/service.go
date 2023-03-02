@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"modelhelper/cli/modelhelper"
+	"modelhelper/cli/modelhelper/constants"
 	"modelhelper/cli/modelhelper/models"
 	"os"
 	"path/filepath"
@@ -108,7 +109,8 @@ func getProjectTemplateFiles(path string) []string {
 			return err
 		}
 
-		if !info.IsDir() && (strings.HasSuffix(fullPath, "project.yaml") || strings.HasSuffix(fullPath, "project.yml")) {
+		if !info.IsDir() && (strings.HasSuffix(fullPath, fmt.Sprintf("%s.yaml", constants.ProjectTemplateFileName)) ||
+			strings.HasSuffix(fullPath, fmt.Sprintf("%s.yml", constants.ProjectTemplateFileName))) {
 			files = append(files, fullPath)
 		}
 
@@ -116,8 +118,4 @@ func getProjectTemplateFiles(path string) []string {
 	})
 
 	return files
-}
-
-func relativePath(path, file string) string {
-	return strings.Replace(file, path, "", -1)
 }
