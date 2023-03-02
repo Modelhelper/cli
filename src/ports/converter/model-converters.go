@@ -15,42 +15,60 @@ func (c *codeModelConverter) ToBasicModel(identifier, language string, project *
 	b := models.BasicModel{}
 	imports := []string{}
 
+	if project == nil {
+		project = emptyProject()
+	}
+
 	// inject := map[]
-	if project != nil {
-		code, codeFound := project.Code[language]
+	code, codeFound := project.Code[language]
 
-		if len(project.Options) > 0 {
-			b.Options = project.Options
-		}
-		b.Project.Name = project.Name
-		b.Project.Owner = project.OwnerName
+	if len(project.Options) > 0 {
+		b.Options = project.Options
+	}
+	b.Project.Name = project.Name
+	b.Project.Owner = project.OwnerName
 
-		b.PageHeader = project.Header
+	b.PageHeader = project.Header
 
-		if len(identifier) > 0 && codeFound {
-			val, found := code.Keys[identifier]
-			if found {
-				b.RootNamespace = code.RootNamespace
-				imports = append(imports, val.Imports...)
+	if len(identifier) > 0 && codeFound {
+		val, found := code.Keys[identifier]
+		if found {
+			b.RootNamespace = code.RootNamespace
+			imports = append(imports, val.Imports...)
 
-				b.Inject = []models.InjectSection{}
-				for _, injectKey := range val.Inject {
-					injItem, foundInj := code.Inject[injectKey]
-					if foundInj {
-						b.Inject = append(b.Inject, toInjectSection(injItem, b))
-					}
+			b.Inject = []models.InjectSection{}
+			for _, injectKey := range val.Inject {
+				injItem, foundInj := code.Inject[injectKey]
+				if foundInj {
+					b.Inject = append(b.Inject, toInjectSection(injItem, b))
 				}
-
-				b.Postfix = val.Postfix
-				b.Prefix = val.Prefix
-				b.Namespace = val.Namespace
-
 			}
-		}
 
+			b.Postfix = val.Postfix
+			b.Prefix = val.Prefix
+			b.Namespace = val.Namespace
+
+		}
 	}
 
 	return &b
+}
+
+func emptyProject() *models.ProjectConfig {
+	p := &models.ProjectConfig{
+		Name:        "",
+		Version:     "",
+		DefaultKey:  "",
+		Options:     make(map[string]string),
+		Language:    "",
+		Header:      "",
+		Custom:      nil,
+		Description: "",
+		Code:        make(map[string]models.Code),
+		OwnerName:   "",
+	}
+
+	return p
 }
 
 // ToEntityListModel implements modelhelper.CodeModelConverter
