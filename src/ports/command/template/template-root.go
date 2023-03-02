@@ -15,8 +15,9 @@ func NewTemplateCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 	}
 
 	rootCmd := &cobra.Command{
-		Use:   "template",
-		Short: "Manage modelhelper templates",
+		Use:     "template",
+		Aliases: []string{"t"},
+		Short:   "Manage modelhelper templates",
 	}
 
 	for _, sub := range subCommands {
