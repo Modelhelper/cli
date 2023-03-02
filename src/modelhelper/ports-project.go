@@ -16,7 +16,7 @@ type ProjectConfigService interface {
 }
 
 type ProjectGenerator interface {
-	Generate(ctx context.Context, template *models.ProjectTemplate, model *models.ProjectTemplateModel) ([]*models.ProjectSourceFile, error)
+	Generate(ctx context.Context, template *models.ProjectTemplate, model *models.ProjectTemplateModel) ([]*models.SourceFile, error)
 	BuildTemplateModel(options *models.ProjectTemplateCreateOptions, tpl *models.ProjectTemplate) *models.ProjectTemplateModel
 	GenerateRootDirectoryName(rootFolderTemplateName string, model *models.ProjectTemplateModel) (string, error)
 }

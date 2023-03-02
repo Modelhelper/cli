@@ -163,7 +163,7 @@ func currentDirectory() string {
 	return cd
 }
 
-func writeFilesToLocation(destination string, files []*models.ProjectSourceFile) {
+func writeFilesToLocation(destination string, files []*models.SourceFile) {
 	for _, file := range files {
 		path := filepath.Join(destination, file.RelativePath, file.FileName)
 
