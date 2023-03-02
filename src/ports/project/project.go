@@ -24,10 +24,13 @@ func NewProjectConfigService() modelhelper.ProjectConfigService {
 	return &defaultProject{}
 }
 func (p *defaultProject) Load() (*models.ProjectConfig, error) {
-	return nil, nil
+	path := DefaultLocation()
+	return loadProjectFromFile(path)
+
 }
 func (p *defaultProject) LoadFromFile(path string) (*models.ProjectConfig, error) {
-	return nil, nil
+	return loadProjectFromFile(path)
+
 }
 func (p *defaultProject) New() (*models.ProjectConfig, error) {
 	return nil, nil
@@ -96,39 +99,39 @@ func Exists(path string) bool {
 	return true
 }
 
-func LoadProjects(path ...string) []defaultProject {
-	l := []defaultProject{}
+// func LoadProjects(path ...string) []defaultProject {
+// 	l := []defaultProject{}
 
-	for _, p := range path {
-		project, _ := loadProjectFromFile(p)
-		l = append(l, *project)
-	}
-	return l
-}
-func Load(path string) (*defaultProject, error) {
-	if len(path) > 0 {
-		pathInfo, err := os.Stat(path)
-		if os.IsNotExist(err) || pathInfo.IsDir() {
-			// log.Fatal("Project does not exits")
-			return nil, err
-		}
+//		for _, p := range path {
+//			project, _ := loadProjectFromFile(p)
+//			l = append(l, *project)
+//		}
+//		return l
+//	}
+// func Load(path string) (*defaultProject, error) {
+// 	if len(path) > 0 {
+// 		pathInfo, err := os.Stat(path)
+// 		if os.IsNotExist(err) || pathInfo.IsDir() {
+// 			// log.Fatal("Project does not exits")
+// 			return nil, err
+// 		}
 
-	} else {
-		p, err := os.Getwd()
-		if err != nil {
-			log.Println(err)
-		}
-		path = filepath.Join(p, dirname, "project.yaml")
-	}
+// 	} else {
+// 		p, err := os.Getwd()
+// 		if err != nil {
+// 			log.Println(err)
+// 		}
+// 		path = filepath.Join(p, dirname, "project.yaml")
+// 	}
 
-	f, err := loadProjectFromFile(path)
+// 	f, err := loadProjectFromFile(path)
 
-	return f, err
+// 	return f, err
 
-}
+// }
 
-func loadProjectFromFile(fileName string) (*defaultProject, error) {
-	var p *defaultProject
+func loadProjectFromFile(fileName string) (*models.ProjectConfig, error) {
+	var p *models.ProjectConfig
 
 	dat, e := ioutil.ReadFile(fileName)
 	if e != nil {
