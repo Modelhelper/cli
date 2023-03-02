@@ -66,9 +66,10 @@ type ProjectTemplateCreateOptions struct {
 	RootPath   string
 }
 
-type ProjectSourceFile struct {
+type SourceFile struct {
 	DirectoryName string
 	RelativePath  string
 	FileName      string
+	Snippets      []string
 	Content       []byte
 }
