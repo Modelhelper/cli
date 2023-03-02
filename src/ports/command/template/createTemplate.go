@@ -1,8 +1,6 @@
 package template
 
 import (
-	"io/ioutil"
-	"modelhelper/cli/defaults"
 	"modelhelper/cli/modelhelper"
 
 	"github.com/spf13/cobra"
@@ -23,22 +21,22 @@ func CreateCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 		Args: cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			name := args[0]
+			// name := args[0]
 
-			t := defaults.TemplateOptions{
-				Import:      createTplImport,
-				LocationKey: createTplKey,
-				Language:    createTplLang,
-			}
+			// t := defaults.TemplateOptions{
+			// 	Import:      createTplImport,
+			// 	LocationKey: createTplKey,
+			// 	Language:    createTplLang,
+			// }
 
-			b := defaults.DefaultTemplateContent(&t)
+			// b := defaults.DefaultTemplateContent(&t)
 
 			// f, err := os.Create(createTplPath + "/" + name + ".yaml")
 
-			err := ioutil.WriteFile(createTplPath+"\\"+createTplLang+"\\"+name+".yaml", b, 0644)
-			if err != nil {
-				panic(err)
-			}
+			// err := ioutil.WriteFile(createTplPath+"\\"+createTplLang+"\\"+name+".yaml", b, 0644)
+			// if err != nil {
+			// 	panic(err)
+			// }
 			// defer f.Close()
 
 			// n, err := f.Write(b)
