@@ -3,11 +3,13 @@ package project
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"unicode"
 
@@ -39,8 +41,8 @@ func (p *projectGeneratorService) GenerateRootDirectoryName(rootFolderTemplateNa
 }
 
 // Generate implements modelhelper.ProjectGenerator
-func (p *projectGeneratorService) Generate(ctx context.Context, tpl *models.ProjectTemplate, model *models.ProjectTemplateModel) ([]*models.ProjectSourceFile, error) {
-	files := []*models.ProjectSourceFile{}
+func (p *projectGeneratorService) Generate(ctx context.Context, tpl *models.ProjectTemplate, model *models.ProjectTemplateModel) ([]*models.SourceFile, error) {
+	files := []*models.SourceFile{}
 
 	for _, source := range tpl.Sources {
 		path := filepath.Join(tpl.TemplateFilePath, source)
@@ -56,7 +58,7 @@ func NewProjectGeneratorService(cfg *models.Config) modelhelper.ProjectGenerator
 	return &projectGeneratorService{cfg}
 }
 
-func getProjectSourceFiles(path string) []*models.ProjectSourceFile {
+func getProjectSourceFiles(path string) []*models.SourceFile {
 
 	// abs, err := filepath.Abs(path)
 	// if err != nil {
@@ -65,7 +67,7 @@ func getProjectSourceFiles(path string) []*models.ProjectSourceFile {
 
 	// fmt.Printf("input: %s\nabs: %s\n\n", path, abs)
 
-	files := []*models.ProjectSourceFile{}
+	files := []*models.SourceFile{}
 
 	filepath.Walk(path, func(fullPath string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -78,12 +80,14 @@ func getProjectSourceFiles(path string) []*models.ProjectSourceFile {
 			rel := relativePath(path, dirName)
 
 			b, _ := ioutil.ReadFile(fullPath)
+			snippets := extractSnippetIdentifiers(b)
 
-			file := models.ProjectSourceFile{
+			file := models.SourceFile{
 				DirectoryName: dirName,
 				RelativePath:  rel,
 				FileName:      fname,
 				Content:       b,
+				Snippets:      snippets,
 			}
 
 			files = append(files, &file)
@@ -94,6 +98,37 @@ func getProjectSourceFiles(path string) []*models.ProjectSourceFile {
 	})
 
 	return files
+}
+
+func extractSnippetIdentifiers(content []byte) []string {
+	m := make(map[string]string)
+	list := []string{}
+	searchText := fmt.Sprintf(`%%%%(\w+)%%%%`)
+	pattern := regexp.MustCompile(searchText)
+
+	// Find the position of the search text using the regular expression
+	matches := pattern.FindAllStringSubmatch(string(content), -1)
+	if len(matches) < 2 {
+		// fmt.Printf("Error: could not find \"%s\" in file\n", searchText)
+		return list
+	}
+
+	// idxMatch := pattern.FindAllStringSubmatchIndex(string(content), -1)
+
+	for _, match := range matches {
+		id := match[1]
+		// idx := idxMatch[midx][1]
+
+		_, found := m[id]
+		if !found {
+			m[id] = id
+			list = append(list, id)
+		}
+		// si := snippetIdentifier{id, idx}
+
+	}
+
+	return list
 }
 
 func coalesceString(name ...string) string {
@@ -111,13 +146,13 @@ func coalesceString(name ...string) string {
 func relativePath(path, file string) string {
 	return strings.Replace(file, path, "", -1)
 }
-func parseBody(model *models.ProjectTemplateModel, files []*models.ProjectSourceFile) []*models.ProjectSourceFile {
-	fout := []*models.ProjectSourceFile{}
+func parseBody(model *models.ProjectTemplateModel, files []*models.SourceFile) []*models.SourceFile {
+	fout := []*models.SourceFile{}
 
 	for _, f := range files {
 		b := generate(string(f.Content), model)
 		f.Content = b
-		fout = append(fout, &models.ProjectSourceFile{
+		fout = append(fout, &models.SourceFile{
 			DirectoryName: f.DirectoryName, RelativePath: f.RelativePath, FileName: f.FileName, Content: b})
 	}
 
