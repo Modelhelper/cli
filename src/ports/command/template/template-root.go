@@ -11,7 +11,7 @@ func NewTemplateCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 	subCommands := []*cobra.Command{
 		ListCommand(app),
 		OpenCommand(app),
-		CreateCommand(app),
+		// CreateCommand(app),
 	}
 
 	rootCmd := &cobra.Command{
