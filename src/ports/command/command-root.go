@@ -63,7 +63,7 @@ func (cc *cobraCommand) buildCommandTree() {
 
 func (cc *cobraCommand) subCommands() []*cobra.Command {
 	return []*cobra.Command{
-		source.SourceCommand(),
+		source.SourceCommand(cc.application),
 		language.LanguageCommand(cc.application),
 		projectCmd.ProjectCommand(cc.application),
 		code.NewCodeRootCommand(cc.application),

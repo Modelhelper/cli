@@ -44,7 +44,7 @@ type CodeGeneratorOptions struct {
 	ExportToScreen    bool
 	ExportByKey       bool
 	ExportPath        string
-	Connection        string
+	ConnectionName    string
 	ExportToClipboard bool
 	Overwrite         bool
 	Relations         string

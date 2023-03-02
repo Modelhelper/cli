@@ -1,8 +1,6 @@
 package config
 
 import (
-	"errors"
-	"fmt"
 	"io/ioutil"
 	"modelhelper/cli/modelhelper/models"
 	"path/filepath"
@@ -18,12 +16,12 @@ func SetDefaultConnection(key string) error {
 	if err != nil {
 		// handle error
 	}
-	_, f := cfg.Connections[key]
+	// _, f := cfg.Connections[key]
 
-	if !f {
-		m := fmt.Sprintf("The connection: %s does not exists and cannot be a default connection", key)
-		return errors.New(m)
-	}
+	// if !f {
+	// 	m := fmt.Sprintf("The connection: %s does not exists and cannot be a default connection", key)
+	// 	return errors.New(m)
+	// }
 
 	cfg.DefaultConnection = key
 
@@ -43,42 +41,42 @@ func SetDefaultEditor(editor string) error {
 	return update(cfg)
 }
 
-func SetConnection(key string, c *models.Connection, isDefault bool, merge bool) error {
-	loader := NewConfigLoader()
-	cfg, err := loader.Load()
+// func SetConnection(key string, c *models.Connection, isDefault bool, merge bool) error {
+// 	loader := NewConfigLoader()
+// 	cfg, err := loader.Load()
 
-	if err != nil {
-		// handle error
-	}
+// 	if err != nil {
+// 		// handle error
+// 	}
 
-	current, exists := cfg.Connections[key]
+// 	current, exists := cfg.Connections[key]
 
-	if exists && merge {
-		if len(c.ConnectionString) > 0 {
-			current.ConnectionString = c.ConnectionString
-		}
+// 	if exists && merge {
+// 		if len(c.ConnectionString) > 0 {
+// 			current.ConnectionString = c.ConnectionString
+// 		}
 
-		if len(c.Description) > 0 {
-			current.Description = c.Description
-		}
-		if len(c.Type) > 0 {
-			current.Type = c.Type
-		}
-		if len(c.Schema) > 0 {
-			current.Schema = c.Schema
-		}
+// 		if len(c.Description) > 0 {
+// 			current.Description = c.Description
+// 		}
+// 		if len(c.Type) > 0 {
+// 			current.Type = c.Type
+// 		}
+// 		if len(c.Schema) > 0 {
+// 			current.Schema = c.Schema
+// 		}
 
-	} else {
-		current = *c
-	}
+// 	} else {
+// 		current = *c
+// 	}
 
-	cfg.Connections[key] = current
+// 	cfg.Connections[key] = current
 
-	if isDefault {
-		cfg.DefaultConnection = key
-	}
-	return update(cfg)
-}
+//		if isDefault {
+//			cfg.DefaultConnection = key
+//		}
+//		return update(cfg)
+//	}
 func SetDeveloper(name string, email string, github string, merge bool) error {
 	loader := NewConfigLoader()
 	cfg, err := loader.Load()

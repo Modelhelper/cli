@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
-	"modelhelper/cli/source"
+	"modelhelper/cli/ports/source"
 	"modelhelper/cli/ui"
 
 	"github.com/gookit/color"
@@ -35,10 +35,10 @@ Anyways, if you choose to do this later you can always open the configuration fi
 
 	if do {
 
-		con := askForConnection()
+		// con := askForConnection()
 
-		loader.config.Connections = make(map[string]models.Connection)
-		loader.config.Connections[con.Name] = *con
+		// loader.config.Connections = make(map[string]models.Connection)
+		// loader.config.Connections[con.Name] = *con
 
 		loader.config.Templates.Code = append(loader.config.Templates.Code, askForTemplateLocation())
 		loader.config.Languages.Definitions = askForLanguageLocation()

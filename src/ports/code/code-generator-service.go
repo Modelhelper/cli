@@ -8,7 +8,6 @@ import (
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
 	"modelhelper/cli/ports/exporter"
-	"modelhelper/cli/source"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -21,15 +20,17 @@ import (
 type codeGeneratorService struct {
 	// templateService modelhelper.CodeTemplateService
 	// app *modelhelper.ModelhelperCli
-	cfg             *models.Config
-	projectConfig   *models.ProjectConfig
-	cmc             modelhelper.CodeModelConverter
-	templateService modelhelper.CodeTemplateService
-	generator       modelhelper.TemplateGenerator[*models.CodeTemplate]
+	cfg               *models.Config
+	projectConfig     *models.ProjectConfig
+	cmc               modelhelper.CodeModelConverter
+	templateService   modelhelper.CodeTemplateService
+	generator         modelhelper.TemplateGenerator[*models.CodeTemplate]
+	connectionService modelhelper.ConnectionService
+	sourceFactory     modelhelper.SourceFactoryService
 }
 
-func NewCodeGeneratorService(cfg *models.Config, pc *models.ProjectConfig, cmc modelhelper.CodeModelConverter, ts modelhelper.CodeTemplateService, g modelhelper.TemplateGenerator[*models.CodeTemplate]) modelhelper.CodeGeneratorService {
-	return &codeGeneratorService{cfg, pc, cmc, ts, g}
+func NewCodeGeneratorService(cfg *models.Config, pc *models.ProjectConfig, cmc modelhelper.CodeModelConverter, ts modelhelper.CodeTemplateService, g modelhelper.TemplateGenerator[*models.CodeTemplate], c modelhelper.ConnectionService, srcf modelhelper.SourceFactoryService) modelhelper.CodeGeneratorService {
+	return &codeGeneratorService{cfg, pc, cmc, ts, g, c, srcf}
 }
 
 func (g *codeGeneratorService) Generate(ctx context.Context, options *models.CodeGeneratorOptions) ([]models.TemplateGeneratorFileResult, error) {
@@ -43,33 +44,46 @@ please use mh generate with the -t or --template [templatename] to set at templa
 You could also use mh template or mh t to see a list of all available templates`)
 	}
 
-	var con models.Connection
+	// var con models.Connection
 	var prj *models.ProjectConfig
 	// var entities []*models.Entity
+	conType, conName := "", ""
 
 	if options.UseDemo {
-		options.Connection = "demo"
-		con = models.Connection{Type: options.Connection}
+		options.ConnectionName = "demo"
+		conName = "demo"
+		conType = "file"
+		// con = models.Connection{Type: options.ConnectionName}
+		// con = models.Connection{Type: options.ConnectionName}
 	} else {
-		if len(g.cfg.Connections) == 0 {
+
+		connections, err := g.connectionService.Connections()
+		if err != nil {
+			return nil, err
+		}
+		if len(connections) == 0 {
 			return nil, errors.New("Could not find any connections to use, please add a connection to the config file")
 		}
-		if len(options.Connection) == 0 {
+		if len(options.ConnectionName) == 0 {
 
-			options.Connection = g.cfg.DefaultConnection
+			options.ConnectionName = g.cfg.DefaultConnection
 		}
 
-		if len(options.Connection) == 0 {
-			ka := keyArray(g.cfg.Connections)
-			options.Connection = ka[0]
+		if len(options.ConnectionName) == 0 {
+			for _, v := range connections {
+				options.ConnectionName = v.Name
+				break
+			}
 		}
 
-		con = g.cfg.Connections[options.Connection]
+		conName = options.ConnectionName
+		conType = connections[conName].Type
+		// con = g.connectionService.Connection(options.ConnectionName)
 	}
 
 	entityList := options.Entities //  mergedList(options.Entities, entitiesFromGroups(con, options.EntityGroups))
 
-	src := source.SourceFactory(&con)
+	src, _ := g.sourceFactory.NewSource(conType, conName)
 
 	entities, err := src.EntitiesFromNames(entityList)
 

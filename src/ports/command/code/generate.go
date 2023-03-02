@@ -100,7 +100,7 @@ func parseCodeOptions(cmd *cobra.Command, args []string) *models.CodeGeneratorOp
 	options.ExportToScreen = printScreen
 	options.ExportToClipboard = toClipBoard
 	options.ExportByKey = false
-	options.Connection = conName
+	options.ConnectionName = conName
 	options.Overwrite = overwriteAll
 
 	options.CanUseTemplates = len(options.Templates) > 0 || len(options.TemplateGroups) > 0

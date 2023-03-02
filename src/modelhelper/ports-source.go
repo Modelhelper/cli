@@ -3,6 +3,16 @@ package modelhelper
 import "modelhelper/cli/modelhelper/models"
 
 type SourceService interface {
+	Entity(name string) (*models.Entity, error)
+	Entities(pattern string) (*[]models.Entity, error)
+	EntitiesFromNames(names []string) (*[]models.Entity, error)
+	EntitiesFromColumn(column string) (*[]models.Entity, error)
+}
+
+type SourceFactoryService interface {
+	NewSource(conType, conName string) (SourceService, error)
+}
+type SourceService_Old interface {
 	ConnectionStringPart(part string) string
 	ParseConnectionString()
 	Entity(name string) (*models.Entity, error)
@@ -27,4 +37,10 @@ type CodeModelConverter interface {
 
 type ProjectModelConverter interface {
 	ToProjectModel(cfg *models.Config, options *models.ProjectTemplateCreateOptions) *models.ProjectTemplateModel
+}
+
+type ConnectionService interface {
+	Connections() (map[string]*models.ConnectionList, error)
+	Connection(name string) (any, error)
+	// Create()
 }

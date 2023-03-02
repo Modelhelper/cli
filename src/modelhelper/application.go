@@ -5,7 +5,8 @@ import "modelhelper/cli/modelhelper/models"
 type ModelhelperCli struct {
 	Config        *models.Config
 	ConfigService ConfigService
-	Project       struct {
+
+	Project struct {
 		Gen             TemplateGenerator[*models.ProjectTemplate]
 		Exists          bool
 		Config          *models.ProjectConfig
@@ -26,10 +27,13 @@ type ModelhelperCli struct {
 		ClipboardExporter Exporter
 		FileExporter      Exporter
 	}
-	LanguageService LanguageDefinitionService
-	Version         string
-	IsBeta          bool
-	Info            AppInfoService
+
+	ConnectionService ConnectionService
+	SourceFactory     SourceFactoryService
+	LanguageService   LanguageDefinitionService
+	Version           string
+	IsBeta            bool
+	Info              AppInfoService
 }
 
 func NewApplication(cfgService ConfigService, projectService ProjectConfigService, infoService AppInfoService) (*ModelhelperCli, error) {

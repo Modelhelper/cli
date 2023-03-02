@@ -8,10 +8,12 @@ import (
 	"modelhelper/cli/ports/code"
 	"modelhelper/cli/ports/command"
 	"modelhelper/cli/ports/config"
+	"modelhelper/cli/ports/connection"
 	"modelhelper/cli/ports/converter"
 	"modelhelper/cli/ports/language"
 	"modelhelper/cli/ports/project"
 	projectTemplate "modelhelper/cli/ports/project/template"
+	"modelhelper/cli/ports/source"
 	"modelhelper/cli/ports/template"
 	"os"
 	"os/signal"
@@ -61,18 +63,21 @@ func initializeApplication(ctx context.Context) (modelhelper.CommandService, mod
 	tpls := template.NewCodeTemplateService(cfg)
 	lngs := language.NewLanguageDefinitionService(cfg)
 	tcg := code.NewCodeGenerator(tpls, lngs)
-
+	cons := connection.NewConnectionService(cfg)
+	srcs := source.NewSourceFactoryService(cfg, cons)
 	mha, _ := modelhelper.NewApplication(cfgs, prjs, infs)
 
 	mha.Config = cfg
+
 	mha.Code.TemplateService = tpls
 	mha.Code.ModelConverter = converter.NewCodeModelConverter()
-	mha.Code.Generator = code.NewCodeGeneratorService(cfg, mha.Project.Config, mha.Code.ModelConverter, tpls, tcg)
+	mha.Code.Generator = code.NewCodeGeneratorService(cfg, mha.Project.Config, mha.Code.ModelConverter, tpls, tcg, cons, srcs)
 
 	mha.Project.TemplateService = projectTemplate.NewProjectTemplateService(cfg)
 	mha.Project.Generator = project.NewProjectGeneratorService(cfg)
 	mha.Project.ModelConverter = converter.NewProjectModelConverter()
-
+	mha.ConnectionService = cons
+	mha.SourceFactory = srcs
 	mha.LanguageService = lngs
 	cmnd := command.NewCobraCli(mha)
 

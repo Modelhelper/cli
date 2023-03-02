@@ -4,9 +4,35 @@ import (
 	"fmt"
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
+	"modelhelper/cli/ports/source/mssql"
 	"strings"
 	"unicode"
 )
+
+type sourceFactoryService struct {
+	config            *models.Config
+	connectionService modelhelper.ConnectionService
+}
+
+// CreateSource implements modelhelper.SourceFactoryService
+func (sfs *sourceFactoryService) NewSource(conType, conName string) (modelhelper.SourceService, error) {
+	var src modelhelper.SourceService
+
+	switch conType {
+	case "mssql":
+		src = mssql.NewMsSqlSource(sfs.connectionService, conName)
+	case "demo":
+		src = &DemoSource{}
+	default:
+		src = nil
+	}
+
+	return src, nil
+}
+
+func NewSourceFactoryService(cfg *models.Config, cs modelhelper.ConnectionService) modelhelper.SourceFactoryService {
+	return &sourceFactoryService{cfg, cs}
+}
 
 type EntityNotFoundError struct {
 	Name string
@@ -16,26 +42,49 @@ func (e *EntityNotFoundError) Error() string {
 	return fmt.Sprintf("Entity '%s' not found", e.Name)
 }
 
-type LanguageDef struct {
-	Definitions string
-}
+// type LanguageDef struct {
+// 	Definitions string
+// }
 
-type ConnectionMap map[string]models.Connection
+// type ConnectionMap map[string]models.Connection
 
 // type ConnectionProvider interface {
 // 	GetConnections() (*map[string]models.Connection, error)
 // }
 
-type Source interface {
-	Entity(name string) (*models.Entity, error)
-	Entities(pattern string) (*[]models.Entity, error)
-	EntitiesFromColumn(column string) (*[]models.Entity, error)
-}
+// type Source interface {
+// 	Entity(name string) (*models.Entity, error)
+// 	Entities(pattern string) (*[]models.Entity, error)
+// 	EntitiesFromColumn(column string) (*[]models.Entity, error)
+// }
 
-type RelationTree interface {
-	GetParentRelationTree(schema string, entityName string) (*[]RelationTreeItem, error)
-	GetChildRelationTree(schema string, entityName string) (*[]RelationTreeItem, error)
-	// Entities(pattern string) (*[]Entity, error)
+// type RelationTree interface {
+// 	GetParentRelationTree(schema string, entityName string) (*[]RelationTreeItem, error)
+// 	GetChildRelationTree(schema string, entityName string) (*[]RelationTreeItem, error)
+// 	// Entities(pattern string) (*[]Entity, error)
+// }
+
+// func SourceFactory(c *models.Connection) modelhelper.SourceService {
+func SourceFactory(c *models.Connection) modelhelper.SourceService_Old {
+
+	// }
+
+	// func (c *Connection) LoadSource() Source {
+
+	var src modelhelper.SourceService_Old
+	switch c.Type {
+	case "mssql":
+		src = &MsSql{Connection: *c}
+	case "postgres":
+		src = &Postgres{Connection: *c}
+
+	case "demo":
+		src = &DemoSource{}
+	default:
+		src = nil
+	}
+
+	return src
 }
 
 // should be renamed
@@ -228,28 +277,6 @@ func IsConnectionTypeValid(t string) bool {
 // 	}
 // 	return output
 // }
-
-func SourceFactory(c *models.Connection) modelhelper.SourceService {
-
-	// }
-
-	// func (c *Connection) LoadSource() Source {
-
-	var src modelhelper.SourceService
-	switch c.Type {
-	case "mssql":
-		src = &MsSql{Connection: *c}
-	case "postgres":
-		src = &Postgres{Connection: *c}
-
-	case "demo":
-		src = &DemoSource{}
-	default:
-		src = nil
-	}
-
-	return src
-}
 
 // func (c *Connection) LoadRelationTree() RelationTree {
 

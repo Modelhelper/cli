@@ -10,6 +10,16 @@ type CodeTemplateListOptions struct {
 	FilterKeys      []string
 	FilterGroups    []string
 }
+type SourceListOptions struct {
+	ConnectionName  string
+	GroupBy         string
+	FilterTypes     []string
+	FilterLanguages []string
+	FilterModels    []string
+	FilterKeys      []string
+	FilterGroups    []string
+	IsDemo          bool
+}
 type Code struct {
 	RootNamespace          string            `yaml:"rootNamespace,omitempty"`
 	OmitSourcePrefix       bool              `yaml:"omitSourcePrefix,omitempty"`

@@ -9,7 +9,7 @@
             "type": "go",
             // "args": ["generate", "--entity", "workout", "--template", "md-describe-table", "--copy", "--screen"],
             // "args": ["project", "create", "--name", "'Antulator API'", "--template", "go-hex-api-small", "-d", "C:\\temp\\projects"],
-            "args": ["code", "generate", "-t", "go-struct", "-e", "enterprise", "--screen"],
+            "args": ["code", "generate", "-t", "go-struct", "-e", "enterprise", "--screen", "--identifer"],
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}\\main.go"

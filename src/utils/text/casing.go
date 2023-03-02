@@ -239,3 +239,14 @@ func AddWord(what string, input string) string {
 
 	return output
 }
+
+func Abbreviate(s string) string {
+	abr := ""
+	for i, c := range s {
+		if i == 0 || unicode.IsUpper(c) {
+			abr = abr + string(c)
+		}
+	}
+
+	return strings.ToLower(abr)
+}

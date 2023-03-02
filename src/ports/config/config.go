@@ -57,13 +57,20 @@ func New() *models.Config {
 // Load returns a new default configuration
 func (c *rootConfig) Load() (*models.Config, error) {
 	path := filepath.Join(Location(), "config.yaml")
-	return c.LoadFromFile(path)
+
+	cfg, err := c.LoadFromFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg.DirectoryName = Location()
+	return cfg, nil
 
 }
 
-func (c *rootConfig) GetConnections() (*map[string]models.Connection, error) {
-	return &c.config.Connections, nil
-}
+// func (c *rootConfig) GetConnections() (*map[string]models.Connection, error) {
+// 	return &c.config.Connections, nil
+// }
 
 func (c *rootConfig) LoadFromFile(path string) (*models.Config, error) {
 	var cfg *models.Config
