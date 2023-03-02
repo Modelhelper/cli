@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"modelhelper/cli/codegen"
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
 	"modelhelper/cli/ports/exporter"
@@ -146,19 +145,19 @@ You could also use mh template or mh t to see a list of all available templates`
 
 						model := g.cmc.ToEntityModel(currentTemplate.Key, currentTemplate.Language, prj, &entity)
 
-						model.PageHeader = codegen.Generate("header", model.PageHeader, model)
-						model.Namespace = codegen.Generate("namesp", model.Namespace, model)
+						model.PageHeader = simpleGenerate("header", model.PageHeader, model)
+						model.Namespace = simpleGenerate("namesp", model.Namespace, model)
 
 						for i, imp := range model.Imports {
 
-							model.Imports[i] = codegen.Generate("import", imp, model)
+							model.Imports[i] = simpleGenerate("import", imp, model)
 						}
 
 						model.Imports = removeDuplicateStringValues(model.Imports)
 
 						for x, inj := range model.Inject {
 
-							model.Inject[x].Name = codegen.Generate("injprop", inj.Name, model)
+							model.Inject[x].Name = simpleGenerate("injprop", inj.Name, model)
 						}
 
 						o, _ := g.generator.Generate(ctx, &currentTemplate, model)
@@ -167,7 +166,7 @@ You could also use mh template or mh t to see a list of all available templates`
 						if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
 							cstat.FilesCreated += 1
 
-							fileName = codegen.Generate("filename", currentTemplate.FileName, model)
+							fileName = simpleGenerate("filename", currentTemplate.FileName, model)
 						}
 
 						f := models.TemplateGeneratorFileResult{
@@ -187,20 +186,20 @@ You could also use mh template or mh t to see a list of all available templates`
 				entitiesGenerator := func() {
 					cstat.TemplatesUsed += 1
 					model := g.cmc.ToEntityListModel(currentTemplate.Key, currentTemplate.Language, prj, entities)
-					model.PageHeader = codegen.Generate("header", model.PageHeader, model)
+					model.PageHeader = simpleGenerate("header", model.PageHeader, model)
 
-					model.Namespace = codegen.Generate("namesp", model.Namespace, model)
+					model.Namespace = simpleGenerate("namesp", model.Namespace, model)
 
 					for i, imp := range model.Imports {
 
-						model.Imports[i] = codegen.Generate("import", imp, model)
+						model.Imports[i] = simpleGenerate("import", imp, model)
 					}
 
 					model.Imports = removeDuplicateStringValues(model.Imports)
 
 					for x, inj := range model.Inject {
 
-						model.Inject[x].Name = codegen.Generate("injprop", inj.Name, model)
+						model.Inject[x].Name = simpleGenerate("injprop", inj.Name, model)
 					}
 
 					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
@@ -208,7 +207,7 @@ You could also use mh template or mh t to see a list of all available templates`
 					fileName := ""
 					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
 						cstat.FilesCreated += 1
-						fileName = codegen.Generate("filename", currentTemplate.FileName, model)
+						fileName = simpleGenerate("filename", currentTemplate.FileName, model)
 						// if csFound {
 
 						// 	fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
