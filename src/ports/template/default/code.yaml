@@ -1,0 +1,51 @@
+#mandatory, this is the template version
+version: 3.0
+
+# mandatory. connects to the correct language definition
+language: "{{ .Language}}"
+
+# mandatory, default: file (options: file | snippet)
+type: file
+
+# what groups this template is included in
+# is used to fetch templates within a group when using -tg in generate command
+# optional, default is null
+groups: []
+
+# optional, default is null
+tags: []
+
+# indicates the model classes to be injected
+# optional, default is none
+import: "%s"
+
+# can use template syntax to use information from the models
+# if snippet is used, this will be the filename to inject the snippets to
+# optional if ExportType = none
+exportFileName: "{{ .Table.Name | UpperCamel | Singular}}.%s"
+
+# optional, a key cannot contain .
+locationKey: "%s" 
+
+# the body of the template
+# mandatory
+body: |
+  // code her - indent by SPACE not TAB
+  using System;
+  {{ range .Code.Imports }}
+  {{ . }}
+  {{ end }}
+  namespace {{ .Code.Types[key] }}
+  {
+    // simple if
+    {{ if .Code.Creator != nil}}
+      // developer name: {{ .Developer }} for {{ .Company }}
+    {{ end}}
+
+    public class {{ .Name | Pascal | Singular}}{{ .Code.Types['model'].NamePostfix}}
+    {
+    {{ range .NonIgnoredColumns }}
+      public {{ .Name | Pascal }} { get; set; }
+    {{ end }}    
+    }
+  }
