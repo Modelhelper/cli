@@ -25,10 +25,16 @@ func NewProjectConfigService() modelhelper.ProjectConfigService {
 }
 func (p *defaultProject) Load() (*models.ProjectConfig, error) {
 	path := DefaultLocation()
+
 	return loadProjectFromFile(path)
 
 }
 func (p *defaultProject) LoadFromFile(path string) (*models.ProjectConfig, error) {
+
+	if !Exists(path) {
+		return nil, nil
+	}
+
 	return loadProjectFromFile(path)
 
 }
