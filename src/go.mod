@@ -7,10 +7,8 @@ require (
 	github.com/denisenkom/go-mssqldb v0.11.0
 	github.com/gertd/go-pluralize v0.1.7
 	github.com/gookit/color v1.5.0
-	github.com/gorilla/mux v1.8.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/spf13/cobra v1.2.1
 	golang.org/x/text v0.3.7
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b

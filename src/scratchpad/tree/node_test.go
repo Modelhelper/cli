@@ -2,7 +2,7 @@ package tree_test
 
 import (
 	"io/ioutil"
-	"modelhelper/cli/tree"
+	"modelhelper/cli/scratchpad/tree"
 	"os"
 	"testing"
 )

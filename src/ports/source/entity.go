@@ -2,7 +2,7 @@ package source
 
 import (
 	"modelhelper/cli/modelhelper/models"
-	"modelhelper/cli/tree"
+	"modelhelper/cli/scratchpad/tree"
 
 	"github.com/gookit/color"
 	"golang.org/x/text/language"
