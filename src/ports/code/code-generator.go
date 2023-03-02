@@ -49,6 +49,19 @@ func (g *codeGenerator) Generate(ctx context.Context, tpl *models.CodeTemplate, 
 
 }
 
+func simpleGenerate(name string, body string, model interface{}) string {
+	tmpl, err := template.New(name).Funcs(funcmap.SimpleFuncMap()).Parse(body)
+	if err != nil {
+		return ""
+	}
+
+	buf := new(bytes.Buffer)
+
+	tmpl.Execute(buf, model)
+	return buf.String()
+
+}
+
 // func fromFiles(cv CodeContextValue) *template.Template {
 func (g *codeGenerator) fromFiles(currentTemplate *models.CodeTemplate) *template.Template {
 	templates := make(map[string]string)
