@@ -1,0 +1,55 @@
+package main
+
+import (
+    "bufio"
+    "fmt"
+    "os"
+)
+
+func main() {
+    // Open the code file for reading
+    file, err := os.Open("existing_code.go")
+    if err != nil {
+        fmt.Println("Error opening file:", err)
+        return
+    }
+    defer file.Close()
+
+    // Read the contents of the code file into a string variable
+    scanner := bufio.NewScanner(file)
+    var lines []string
+    for scanner.Scan() {
+        lines = append(lines, scanner.Text())
+    }
+    if err := scanner.Err(); err != nil {
+        fmt.Println("Error reading file:", err)
+        return
+    }
+
+    // Insert the new line of code at line number 4
+    newLine := "fmt.Println(\"Hello, world!\")"
+    lineNumber := 4
+    lines = append(lines[:lineNumber], append([]string{newLine}, lines[lineNumber:]...)...)
+
+    // Join the slice back into a single string, with each element separated by a newline character
+    modifiedContent := []byte("")
+    for _, line := range lines {
+        modifiedContent = append(modifiedContent, []byte(line)...)
+        modifiedContent = append(modifiedContent, []byte("\n")...)
+    }
+
+    // Open the code file for writing
+    outputFile, err := os.Create("existing_code.go")
+    if err != nil {
+        fmt.Println("Error creating file:", err)
+        return
+    }
+    defer outputFile.Close()
+
+    // Write the modified string back to the code file
+    _, err = outputFile.Write(modifiedContent)
+    if err != nil {
+        fmt.Println("Error writing file:", err)
+        return
+    }
+}

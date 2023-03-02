@@ -1,35 +1,88 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"modelhelper/cli/app"
-	"modelhelper/cli/cmd"
+	"modelhelper/cli/modelhelper"
+	cli "modelhelper/cli/ports/app"
+	"modelhelper/cli/ports/code"
+	"modelhelper/cli/ports/command"
+	"modelhelper/cli/ports/config"
+	"modelhelper/cli/ports/connection"
+	"modelhelper/cli/ports/converter"
+	"modelhelper/cli/ports/language"
+	"modelhelper/cli/ports/project"
+	projectTemplate "modelhelper/cli/ports/project/template"
+	"modelhelper/cli/ports/source"
+	"modelhelper/cli/ports/template"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 // "fmt"
+var version = "3.0.0-beta3"
+var isBeta = true
 
 func main() {
 
-	execute()
-}
+	// var (
+	// 	// err  error
+	// 	stop context.CancelFunc
+	// )
 
-func execute() {
-	a := app.Application{}
+	// defer func() {
+	// 	if err := recover(); err != nil {
+	// 		os.Exit(3)
+	// 	}
+	// }()
 
-	isInitialized := a.IsInitialized()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
-	if isInitialized == false {
+	// mainCtx := context.WithCancel()
+	cmnd, ai := initializeApplication(ctx)
 
-		err := a.Initialize()
-
+	if !ai.IsInitialized() {
+		err := ai.Initialize()
 		if err != nil {
 			fmt.Println(err)
 			panic(err)
 		}
-
 	} else {
-		cmd.Execute()
+		cmnd.Execute(ctx)
 	}
+}
+
+func initializeApplication(ctx context.Context) (modelhelper.CommandService, modelhelper.AppInitializer) {
+	cfgs := config.NewConfigService()
+	cfg, _ := cfgs.Load()
+
+	prjs := project.NewProjectConfigService()
+	infs := cli.NewCliInfo("modelhelper", version, isBeta)
+	tpls := template.NewCodeTemplateService(cfg)
+	lngs := language.NewLanguageDefinitionService(cfg)
+	tcg := code.NewCodeGenerator(tpls, lngs)
+	cons := connection.NewConnectionService(cfg)
+	srcs := source.NewSourceFactoryService(cfg, cons)
+	mha, _ := modelhelper.NewApplication(cfgs, prjs, infs)
+
+	mha.Config = cfg
+
+	mha.Code.TemplateService = tpls
+	mha.Code.ModelConverter = converter.NewCodeModelConverter()
+	mha.Code.Generator = code.NewCodeGeneratorService(cfg, mha.Project.Config, mha.Code.ModelConverter, tpls, tcg, cons, srcs)
+
+	mha.Project.TemplateService = projectTemplate.NewProjectTemplateService(cfg)
+	mha.Project.Generator = project.NewProjectGeneratorService(cfg)
+	mha.Project.ModelConverter = converter.NewProjectModelConverter()
+	mha.ConnectionService = cons
+	mha.SourceFactory = srcs
+	mha.LanguageService = lngs
+	cmnd := command.NewCobraCli(mha)
+
+	ai := cli.NewCliInitializer(ctx, infs, cfgs)
+	return cmnd, ai
 }
 
 // func printTerminalSizes() {
