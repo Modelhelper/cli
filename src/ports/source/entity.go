@@ -9,6 +9,15 @@ import (
 	"golang.org/x/text/message"
 )
 
+type RelationTreeItem struct {
+	KeyName           string
+	ParentID          int
+	ID                int
+	RelatedTable      string
+	RelatedColumnName string
+	TableName         string
+	ColumnName        string
+}
 type RelationTreeBuilder struct {
 	Items []RelationTreeItem
 }

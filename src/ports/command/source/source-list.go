@@ -202,7 +202,7 @@ func renderColumns(cl *models.ColumnList) {
 
 	ui.PrintConsoleTitle("Columns")
 
-	colr := source.ColumnToTableRenderer{
+	colr := ui.ColumnToTableRenderer{
 		// IncludeDescription: !skipDescription,
 		IncludeDescription: false,
 		Columns:            cl,

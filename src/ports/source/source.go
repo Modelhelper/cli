@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
+	"modelhelper/cli/ports/source/demo"
 	"modelhelper/cli/ports/source/mssql"
 	"strings"
 	"unicode"
@@ -22,7 +23,7 @@ func (sfs *sourceFactoryService) NewSource(conType, conName string) (modelhelper
 	case "mssql":
 		src = mssql.NewMsSqlSource(sfs.connectionService, conName)
 	case "demo":
-		src = &DemoSource{}
+		src = demo.NewDemoSource()
 	default:
 		src = nil
 	}
@@ -65,27 +66,25 @@ func (e *EntityNotFoundError) Error() string {
 // }
 
 // func SourceFactory(c *models.Connection) modelhelper.SourceService {
-func SourceFactory(c *models.Connection) modelhelper.SourceService_Old {
+// func SourceFactory(c *models.Connection) modelhelper.SourceService_Old {
 
-	// }
+// 	// }
 
-	// func (c *Connection) LoadSource() Source {
+// 	// func (c *Connection) LoadSource() Source {
 
-	var src modelhelper.SourceService_Old
-	switch c.Type {
-	case "mssql":
-		src = &MsSql{Connection: *c}
-	case "postgres":
-		src = &Postgres{Connection: *c}
+// 	var src modelhelper.SourceService_Old
+// 	switch c.Type {
+// 	case "mssql":
+// 		src = &MsSql{Connection: *c}
 
-	case "demo":
-		src = &DemoSource{}
-	default:
-		src = nil
-	}
+// 	case "demo":
+// 		src = &DemoSource{}
+// 	default:
+// 		src = nil
+// 	}
 
-	return src
-}
+// 	return src
+// }
 
 // should be renamed
 // type Connection struct {

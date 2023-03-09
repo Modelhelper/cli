@@ -1,10 +1,12 @@
-package source
+package demo
 
 import (
 	"embed"
 	"fmt"
 	"log"
+	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
+	"modelhelper/cli/utils/text"
 	"path"
 	"strings"
 
@@ -14,9 +16,20 @@ import (
 //go:embed entities/*
 var entities embed.FS
 
-type DemoSource struct{}
+type demoSource struct {
+	// connectionService modelhelper.ConnectionService
+}
 
-func (server *DemoSource) Entity(name string) (*models.Entity, error) {
+func NewDemoSource() modelhelper.SourceService {
+	src := &demoSource{
+		// connectionService: cs,
+	}
+
+	// src.database = loadConnection(cs, connectionName)
+	return src
+}
+
+func (server *demoSource) Entity(name string) (*models.Entity, error) {
 
 	entityFiles, err := server.Entities("")
 	if err != nil {
@@ -33,11 +46,11 @@ func (server *DemoSource) Entity(name string) (*models.Entity, error) {
 	return nil, nil
 }
 
-func (server *DemoSource) EntitiesFromNames(names []string) (*[]models.Entity, error) {
+func (server *demoSource) EntitiesFromNames(names []string) (*[]models.Entity, error) {
 	return nil, nil
 }
 
-func (server *DemoSource) Entities(pattern string) (*[]models.Entity, error) {
+func (server *demoSource) Entities(pattern string) (*[]models.Entity, error) {
 	list := []models.Entity{}
 	baseList := getDemoEntities()
 
@@ -51,7 +64,7 @@ func (server *DemoSource) Entities(pattern string) (*[]models.Entity, error) {
 		entity.ChildRelationCount = len(entity.ChildRelations)
 
 		entity.ColumnCount = len(entity.Columns)
-		entity.Alias = Abbreviate(entity.Name)
+		entity.Alias = text.Abbreviate(entity.Name)
 		list = append(list, entity)
 
 	}
@@ -59,7 +72,7 @@ func (server *DemoSource) Entities(pattern string) (*[]models.Entity, error) {
 	return &list, nil
 
 }
-func (server *DemoSource) EntitiesFromColumn(column string) (*[]models.Entity, error) {
+func (server *demoSource) EntitiesFromColumn(column string) (*[]models.Entity, error) {
 	list := []models.Entity{}
 	baseList := getDemoEntities()
 
@@ -73,7 +86,7 @@ func (server *DemoSource) EntitiesFromColumn(column string) (*[]models.Entity, e
 		entity.ChildRelationCount = len(entity.ChildRelations)
 
 		entity.ColumnCount = len(entity.Columns)
-		entity.Alias = Abbreviate(entity.Name)
+		entity.Alias = text.Abbreviate(entity.Name)
 		list = append(list, entity)
 
 	}
@@ -113,8 +126,8 @@ func getDemoEntities() []fileEntity {
 	return list
 }
 
-func (server *DemoSource) ConnectionStringPart(part string) string {
+func (server *demoSource) ConnectionStringPart(part string) string {
 	return ""
 }
-func (server *DemoSource) ParseConnectionString() {
+func (server *demoSource) ParseConnectionString() {
 }

@@ -1,4 +1,4 @@
-package source
+package ui
 
 import "modelhelper/cli/modelhelper/models"
 
