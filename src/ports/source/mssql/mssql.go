@@ -927,9 +927,9 @@ JOIN sys.indexes AS b ON a.object_id = b.object_id AND a.index_id = b.index_id
 			&r.Rows,
 		); err != nil {
 			if err == sql.ErrNoRows {
-				return nil, nil
+				return &[]models.Index{}, nil
 			} else {
-				return nil, err
+				return &[]models.Index{}, err
 			}
 		} else {
 			list = append(list, r)
