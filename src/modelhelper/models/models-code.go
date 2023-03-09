@@ -36,11 +36,11 @@ type TemplateGeneratorFileResult struct {
 
 type CodeGeneratorOptions struct {
 	Templates         []string
-	TemplateGroups    []string
+	FeatureTemplates  []string
 	TemplatePath      string
 	CanUseTemplates   bool
-	EntityGroups      []string
-	Entities          []string
+	SourceItemGroups  []string
+	SourceItems       []string
 	ExportToScreen    bool
 	ExportByKey       bool
 	ExportPath        string

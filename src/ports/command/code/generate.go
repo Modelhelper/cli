@@ -24,14 +24,14 @@ func NewGenerateCodeCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 func registerFlags(cmd *cobra.Command) {
 	cmd.Flags().StringArrayP("template", "t", []string{}, "A list of template to convert")
-	cmd.Flags().StringArray("template-group", []string{}, "Use a group of templates")
+	cmd.Flags().StringArrayP("feature", "f", []string{}, "Use a group of templates")
 	cmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
 
 	cmd.Flags().StringP("relations [direct, all, complete]", "r", "", "Include related entities based on the entities in --entity or --entity-group ('direct' | 'all' | 'complete' | 'children' | 'parents')")
 	// cmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
 
-	cmd.Flags().StringArray("entity-group", []string{}, "Use a group of entities (must be defines in the current connection)")
-	cmd.Flags().StringArrayP("entity", "e", []string{}, "A list of entits to use as a model")
+	cmd.Flags().StringArrayP("source-group", "g", []string{}, "Use a group of source items (must be defined in the current connection)")
+	cmd.Flags().StringArrayP("source", "s", []string{}, "A list of source items to use as a model")
 
 	cmd.Flags().Bool("screen", false, "List the output to the screen, default false")
 	cmd.Flags().Bool("copy", false, "Copies the generated code to the clipboard (ctrl + v), default false")
@@ -72,13 +72,13 @@ func parseCodeOptions(cmd *cobra.Command, args []string) *models.CodeGeneratorOp
 
 	codeOnly, _ := cmd.Flags().GetBool("code-only")
 	isDemo, _ := cmd.Flags().GetBool("demo")
-	entityFlagArray, _ := cmd.Flags().GetStringArray("entity")
-	entityGroupFlagArray, _ := cmd.Flags().GetStringArray("entity-group")
+	sourceFlagArray, _ := cmd.Flags().GetStringArray("source")
+	sourceGroupFlagArray, _ := cmd.Flags().GetStringArray("source-group")
 	tempPath, _ := cmd.Flags().GetString("template-path")
 	projectPath, _ := cmd.Flags().GetString("project-path")
 	configFile, _ := cmd.Flags().GetString("config-path")
 	inputTemplates, _ := cmd.Flags().GetStringArray("template")
-	inputGroupTemplates, _ := cmd.Flags().GetStringArray("template-group")
+	featureTemplates, _ := cmd.Flags().GetStringArray("feature")
 	printScreen, _ := cmd.Flags().GetBool("screen")
 	toClipBoard, _ := cmd.Flags().GetBool("copy")
 	// exportByKey, _ := cmd.Flags().GetBool("export-bykey")
@@ -87,20 +87,20 @@ func parseCodeOptions(cmd *cobra.Command, args []string) *models.CodeGeneratorOp
 
 	options.CodeOnly = codeOnly
 	options.UseDemo = isDemo
-	options.Entities = entityFlagArray
-	options.EntityGroups = entityGroupFlagArray
+	options.SourceItems = sourceFlagArray
+	options.SourceItemGroups = sourceGroupFlagArray
 	options.TemplatePath = tempPath
 	options.ConfigFilePath = configFile
 	options.ProjectFilePath = projectPath
 	options.Templates = inputTemplates
-	options.TemplateGroups = inputGroupTemplates
+	options.FeatureTemplates = featureTemplates
 	options.ExportToScreen = printScreen
 	options.ExportToClipboard = toClipBoard
 	options.ExportByKey = false
 	options.ConnectionName = conName
 	options.Overwrite = overwriteAll
 
-	options.CanUseTemplates = len(options.Templates) > 0 || len(options.TemplateGroups) > 0
+	options.CanUseTemplates = len(options.Templates) > 0 || len(options.FeatureTemplates) > 0
 	return &options
 }
 

@@ -34,7 +34,7 @@ func NewCodeGeneratorService(cfg *models.Config, pc *models.ProjectConfig, cmc m
 
 func (g *codeGeneratorService) Generate(ctx context.Context, options *models.CodeGeneratorOptions) ([]models.TemplateGeneratorFileResult, error) {
 
-	if len(options.Templates) == 0 && len(options.TemplateGroups) == 0 {
+	if len(options.Templates) == 0 && len(options.FeatureTemplates) == 0 {
 		// no point to continue if no templates is given
 
 		return nil, errors.New(`No templates or template groups are provided resulting in nothing to create
@@ -82,7 +82,7 @@ You could also use mh template or mh t to see a list of all available templates`
 	con, _ := g.connectionService.BaseConnection(options.ConnectionName)
 
 	// entityList := options.Entities //  mergedList(options.Entities, entitiesFromGroups(con, options.EntityGroups))
-	entityList := mergedList(options.Entities, entitiesFromGroups(con, options.EntityGroups))
+	entityList := mergedList(options.SourceItems, entitiesFromGroups(con, options.SourceItemGroups))
 
 	src, _ := g.sourceFactory.NewSource(conType, conName)
 
@@ -100,7 +100,7 @@ You could also use mh template or mh t to see a list of all available templates`
 
 	allTemplates := g.templateService.List(nil)
 
-	options.Templates = selectTemplates(allTemplates, options.Templates, options.TemplateGroups)
+	options.Templates = selectTemplates(allTemplates, options.Templates, options.FeatureTemplates)
 
 	start := time.Now()
 	var cstat = &models.TemplateGeneratorStatistics{}
