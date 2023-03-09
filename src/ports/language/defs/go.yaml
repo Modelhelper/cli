@@ -75,10 +75,10 @@ datatypes:
     nullable: sql.NullTime    
   decimal: 
     notNull: decimal
-    nullable: sql.NullDecimal
+    nullable: sql.NullFloat64
   float: 
-    notNull: float
-    nullable: sql.NullFloat    
+    notNull: float64
+    nullable: sql.NullFloat64
   geography: 
     notNull: string
     nullable: string    
@@ -101,20 +101,20 @@ datatypes:
     notNull: string
     nullable: sql.NullString    
   numeric: 
-    notNull: decimal
-    nullable: sql.NullDecimal    
+    notNull: float64
+    nullable: sql.NullFloat64    
   nvarchar: 
     notNull: string
     nullable: sql.NullString     
   real: 
-    notNull: decimal
-    nullable: decimal?    
+    notNull: float64
+    nullable: sql.NullFloat64
   smalldatetime: 
     notNull: time.Time
     nullable: sql.NullTime    
   smallint: 
-    notNull: Int8
-    nullable: sql.NullInt8
+    notNull: int8
+    nullable: sql.NullInt16
   smallmoney: 
     notNull: string
     nullable: string    
@@ -128,8 +128,8 @@ datatypes:
     notNull: string
     nullable: string    
   tinyint: 
-    notNull: Int16
-    nullable: Int16?    
+    notNull: int16
+    nullable: sql.NullInt16    
   uniqueidentifier: 
     notNull: string
     nullable: sql.NullString   
