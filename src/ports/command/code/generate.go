@@ -57,16 +57,13 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 	return func(cmd *cobra.Command, args []string) {
 
 		options := parseCodeOptions(cmd, args)
-		result, err := app.Code.Generator.Generate(cmd.Root().Context(), options)
+		_, err := app.Code.Generator.Generate(cmd.Root().Context(), options)
 
 		if err != nil {
 			// handle error
 			fmt.Println(err)
 		}
 
-		for _, res := range result {
-			fmt.Printf("Printing the generated result:\n%s", string(res.Result.Body))
-		}
 	}
 }
 
