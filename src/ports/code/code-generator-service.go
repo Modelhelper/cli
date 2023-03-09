@@ -77,10 +77,12 @@ You could also use mh template or mh t to see a list of all available templates`
 
 		conName = options.ConnectionName
 		conType = connections[conName].Type
-		// con = g.connectionService.Connection(options.ConnectionName)
 	}
 
-	entityList := options.Entities //  mergedList(options.Entities, entitiesFromGroups(con, options.EntityGroups))
+	con, _ := g.connectionService.BaseConnection(options.ConnectionName)
+
+	// entityList := options.Entities //  mergedList(options.Entities, entitiesFromGroups(con, options.EntityGroups))
+	entityList := mergedList(options.Entities, entitiesFromGroups(con, options.EntityGroups))
 
 	src, _ := g.sourceFactory.NewSource(conType, conName)
 
@@ -404,16 +406,14 @@ func defaultNullDatatype() map[string]string {
 }
 
 // func templatesFromGroups()
-func entitiesFromGroups(con models.Connection, groups []string) []string {
+func entitiesFromGroups(con *models.ConnectionList, groups []string) []string {
 	list := []string{}
 
 	for _, group := range groups {
 
 		conGrp, found := con.Groups[group]
 		if found {
-			for _, e := range conGrp.Items {
-				list = append(list, e)
-			}
+			list = append(list, conGrp.Items...)
 		}
 	}
 

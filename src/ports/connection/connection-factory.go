@@ -16,6 +16,22 @@ type connectionListService struct {
 	cfg *models.Config
 }
 
+// BaseConnection implements modelhelper.ConnectionService
+func (c *connectionListService) BaseConnection(name string) (*models.ConnectionList, error) {
+	cons, err := c.Connections()
+
+	if err != nil {
+		return nil, err
+	}
+
+	con, f := cons[name]
+	if !f {
+		return nil, nil
+	}
+
+	return con, nil
+}
+
 // Connection implements modelhelper.ConnectionService
 func (c *connectionListService) Connection(name string) (any, error) {
 	cons, err := c.Connections()

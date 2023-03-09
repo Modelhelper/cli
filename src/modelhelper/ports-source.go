@@ -42,5 +42,6 @@ type ProjectModelConverter interface {
 type ConnectionService interface {
 	Connections() (map[string]*models.ConnectionList, error)
 	Connection(name string) (any, error)
+	BaseConnection(name string) (*models.ConnectionList, error)
 	// Create()
 }
