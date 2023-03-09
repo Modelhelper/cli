@@ -6,6 +6,7 @@ import (
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/ports/command/code"
 	cfgCmd "modelhelper/cli/ports/command/config"
+	"modelhelper/cli/ports/command/connection"
 	"modelhelper/cli/ports/command/language"
 	projectCmd "modelhelper/cli/ports/command/project"
 	"modelhelper/cli/ports/command/serve"
@@ -73,6 +74,7 @@ func (cc *cobraCommand) subCommands() []*cobra.Command {
 		NewAboutCommand(cc.application.Info),
 		NewVersionCommand(cc.application.Info),
 		NewCompletionCommand(),
+		connection.NewConnectionCommand(cc.application),
 	}
 
 }
