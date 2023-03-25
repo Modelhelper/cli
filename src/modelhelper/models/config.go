@@ -88,6 +88,14 @@ type MsSqlConnection struct {
 	Port             int      `json:"port,omitempty" yaml:"port,omitempty"`
 	Entities         []string `json:"entities,omitempty" yaml:"entities,omitempty"`
 }
+type PostgresConnection struct {
+	ConnectionString string   `json:"connectionString" yaml:"connectionString"`
+	Schema           string   `json:"schema" yaml:"schema"`
+	Database         string   `json:"database,omitempty" yaml:"database,omitempty"`
+	Server           string   `json:"server,omitempty" yaml:"server,omitempty"`
+	Port             int      `json:"port,omitempty" yaml:"port,omitempty"`
+	Entities         []string `json:"entities,omitempty" yaml:"entities,omitempty"`
+}
 
 type FileConnection struct {
 	Location string `json:"location" yaml:"location"`
@@ -97,7 +105,7 @@ type OpenAPIConnection struct {
 }
 
 type GenericConnectionType interface {
-	MsSqlConnection | FileConnection
+	MsSqlConnection | FileConnection | PostgresConnection
 }
 type GenericConnection[T GenericConnectionType] struct {
 	Name        string                     `json:"name" yaml:"name"`

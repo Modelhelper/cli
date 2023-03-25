@@ -91,6 +91,9 @@ datatypes:
   int: 
     notNull: int
     nullable: sql.NullInt32    
+  int4: 
+    notNull: int
+    nullable: sql.NullInt32    
   money: 
     notNull: decimal
     nullable: sql.NullDecimal    
@@ -125,8 +128,11 @@ datatypes:
     notNull: time.Time
     nullable: sql.NullTime    
   timestamp: 
-    notNull: string
-    nullable: string    
+    notNull: time.Time
+    nullable: sql.NullTime    
+  timestamptz: 
+    notNull: time.Time
+    nullable: sql.NullTime      
   tinyint: 
     notNull: int16
     nullable: sql.NullInt16    
@@ -142,3 +148,6 @@ datatypes:
   xml: 
     notNull: string
     nullable: sql.NullString    
+  json: 
+    notNull: string
+    nullable: sql.NullString     

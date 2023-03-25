@@ -3,6 +3,7 @@ package mssql
 import (
 	"context"
 	"database/sql"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -13,6 +14,20 @@ import (
 	"strings"
 
 	_ "github.com/denisenkom/go-mssqldb"
+)
+
+var (
+	//go:embed queries/columns.sql
+	selectColumnsQuery string
+
+	//go:embed queries/entity.sql
+	selectEntityQuery string
+
+	//go:embed queries/entitiy-list-base.sql
+	selectEntitiesBaseQuery string
+
+	//go:embed queries/entities.sql
+	selectEntitiesQuery string
 )
 
 type EntityNotFoundError struct {
@@ -280,61 +295,8 @@ func (server *mssqlSource) EntitiesFromColumn(column string) (*[]models.Entity, 
 }
 
 func (server *mssqlSource) entites(filter string) (*[]models.Entity, error) {
-	sql := fmt.Sprintf(`
-	with rowcnt (object_id, rowcnt) as (
-		SELECT p.object_id, SUM(CASE WHEN (p.index_id < 2) AND (a.type = 1) THEN p.rows ELSE 0 END) 
-		FROM sys.partitions p 
-		INNER JOIN sys.allocation_units a ON p.partition_id = a.container_id
-		join sys.objects o on p.object_id = o.object_id and o.type = 'U'
-		--where p.object_id = object_id('Add')
-		group by p.object_id
-	), colCnt(id, cnt, nullcnt, idcnt) as (
-		select object_id, cnt = count(*), sum(cast(is_nullable as int)), sum(cast(is_identity as int))--, sum(cast(is_computed as int))
-		from sys.columns 
-		group by object_id
-	), ParentRelCnt(id, cnt) as (
-		select 
-			id = parent_object_id, cnt = count(*) 
-		from sys.foreign_key_columns
-		group by parent_object_id
-	), ChildrenRelCnt(id, cnt) as (
-		select 
-			id = referenced_object_id, cnt = count(*) 
-		from sys.foreign_key_columns
-		group by referenced_object_id
-	)
-		select 
-			o.name
-			,type = CASE 
-				when o.type = 'U' then 'Table' 
-				when o.type = 'V' then 'View' 
-				when o.type = 'SN' then 'Synonym'
-				when o.type = 'P' then 'Proc'
-				end  
-			,[Schema] = s.name
-			, Alias = Left(o.name, 1)
-			, [RowCount] = isnull(rc.RowCnt, 0)
-			, Description = isnull(ep.value, '')
-			, ColumnCount = isnull(cc.cnt, 0)
-			, NullableCount = isnull(cc.nullcnt, 0)
-			, IdentityCount = isnull(cc.idcnt, 0)
-			, ChildrenCount = isnull(crc.cnt, 0)
-			, ParentCount = isnull(prc.cnt, 0)
-			, IsVersioned = case when t.temporal_type = 2 then 1 else 0 end
-			, IsHistory = case when t.temporal_type = 1 then 1 else 0 end
-			, HistoryTable = isnull(object_name(t.history_table_id), '')
-		from sys.objects o
-		join sys.schemas s on s.schema_id = o.schema_id
-		left join sys.tables t on t.object_id = o.object_id
-		left join rowcnt rc on rc.object_id = o.object_id    
-		left join sys.extended_properties ep on o.object_id = ep.major_id and minor_id = 0 and ep.name = 'MS_description'
-		left join colCnt cc on cc.id = o.object_id
-		left join ChildrenRelCnt crc on crc.id = o.object_id
-		left join ParentRelCnt prc on prc.id = o.object_id
-		where o.name not in ('sysdiagrams') %s
-		and o.[type] in ('V', 'U', 'SN', 'P')
-		order by s.name, o.[type], o.name		
-	`, filter)
+
+	sql := fmt.Sprintf(selectEntitiesQuery, filter)
 
 	// --and type in {entityFilter}
 	// {tableFilter}
@@ -400,63 +362,64 @@ func (server *mssqlSource) entites(filter string) (*[]models.Entity, error) {
 }
 
 func entitesBaseQuery(filter string) string {
-	sql := fmt.Sprintf(`
-	with rowcnt (object_id, rowcnt) as (
-		SELECT p.object_id, SUM(CASE WHEN (p.index_id < 2) AND (a.type = 1) THEN p.rows ELSE 0 END) 
-		FROM sys.partitions p 
-		INNER JOIN sys.allocation_units a ON p.partition_id = a.container_id
-		join sys.objects o on p.object_id = o.object_id and o.type = 'U'
-		--where p.object_id = object_id('Add')
-		group by p.object_id
-	), colCnt(id, cnt, nullcnt, idcnt) as (
-		select object_id, cnt = count(*), sum(cast(is_nullable as int)), sum(cast(is_identity as int))--, sum(cast(is_computed as int))
-		from sys.columns 
-		group by object_id
-	), ParentRelCnt(id, cnt) as (
-		select 
-			id = parent_object_id, cnt = count(*) 
-		from sys.foreign_key_columns
-		group by parent_object_id
-	), ChildrenRelCnt(id, cnt) as (
-		select 
-			id = referenced_object_id, cnt = count(*) 
-		from sys.foreign_key_columns
-		group by referenced_object_id
-	)
-		select 
-			o.name
-			,type = CASE 
-				when o.type = 'U' then 'Table' 
-				when o.type = 'V' then 'View' 
-				when o.type = 'SN' then 'Synonym'
-				when o.type = 'P' then 'Proc'
-				end  
-			,[Schema] = s.name
-			, Alias = Left(o.name, 1)
-			, [RowCount] = isnull(rc.RowCnt, 0)
-			, Description = isnull(ep.value, '')
-			, ColumnCount = isnull(cc.cnt, 0)
-			, NullableCount = isnull(cc.nullcnt, 0)
-			, IdentityCount = isnull(cc.idcnt, 0)
-			, ChildrenCount = isnull(crc.cnt, 0)
-			, ParentCount = isnull(prc.cnt, 0)
-			, IsVersioned = case when t.temporal_type = 2 then 1 else 0 end
-			, IsHistory = case when t.temporal_type = 1 then 1 else 0 end
-			, HistoryTable = isnull(object_name(t.history_table_id), '')
-		from sys.objects o
-		join sys.schemas s on s.schema_id = o.schema_id
-		left join sys.tables t on t.object_id = o.object_id
-		left join rowcnt rc on rc.object_id = o.object_id    
-		left join sys.extended_properties ep on o.object_id = ep.major_id and minor_id = 0 and ep.name = 'MS_description'
-		left join colCnt cc on cc.id = o.object_id
-		left join ChildrenRelCnt crc on crc.id = o.object_id
-		left join ParentRelCnt prc on prc.id = o.object_id
-		where 
-			o.name not in ('sysdiagrams') 
-			%s
-			and o.[type] in ('V', 'U', 'SN', 'P')
-		order by s.name, o.[type], o.name		
-	`, filter)
+	sql := fmt.Sprintf(selectEntitiesBaseQuery, filter)
+	// sql := fmt.Sprintf(`
+	// with rowcnt (object_id, rowcnt) as (
+	// 	SELECT p.object_id, SUM(CASE WHEN (p.index_id < 2) AND (a.type = 1) THEN p.rows ELSE 0 END)
+	// 	FROM sys.partitions p
+	// 	INNER JOIN sys.allocation_units a ON p.partition_id = a.container_id
+	// 	join sys.objects o on p.object_id = o.object_id and o.type = 'U'
+	// 	--where p.object_id = object_id('Add')
+	// 	group by p.object_id
+	// ), colCnt(id, cnt, nullcnt, idcnt) as (
+	// 	select object_id, cnt = count(*), sum(cast(is_nullable as int)), sum(cast(is_identity as int))--, sum(cast(is_computed as int))
+	// 	from sys.columns
+	// 	group by object_id
+	// ), ParentRelCnt(id, cnt) as (
+	// 	select
+	// 		id = parent_object_id, cnt = count(*)
+	// 	from sys.foreign_key_columns
+	// 	group by parent_object_id
+	// ), ChildrenRelCnt(id, cnt) as (
+	// 	select
+	// 		id = referenced_object_id, cnt = count(*)
+	// 	from sys.foreign_key_columns
+	// 	group by referenced_object_id
+	// )
+	// 	select
+	// 		o.name
+	// 		,type = CASE
+	// 			when o.type = 'U' then 'Table'
+	// 			when o.type = 'V' then 'View'
+	// 			when o.type = 'SN' then 'Synonym'
+	// 			when o.type = 'P' then 'Proc'
+	// 			end
+	// 		,[Schema] = s.name
+	// 		, Alias = Left(o.name, 1)
+	// 		, [RowCount] = isnull(rc.RowCnt, 0)
+	// 		, Description = isnull(ep.value, '')
+	// 		, ColumnCount = isnull(cc.cnt, 0)
+	// 		, NullableCount = isnull(cc.nullcnt, 0)
+	// 		, IdentityCount = isnull(cc.idcnt, 0)
+	// 		, ChildrenCount = isnull(crc.cnt, 0)
+	// 		, ParentCount = isnull(prc.cnt, 0)
+	// 		, IsVersioned = case when t.temporal_type = 2 then 1 else 0 end
+	// 		, IsHistory = case when t.temporal_type = 1 then 1 else 0 end
+	// 		, HistoryTable = isnull(object_name(t.history_table_id), '')
+	// 	from sys.objects o
+	// 	join sys.schemas s on s.schema_id = o.schema_id
+	// 	left join sys.tables t on t.object_id = o.object_id
+	// 	left join rowcnt rc on rc.object_id = o.object_id
+	// 	left join sys.extended_properties ep on o.object_id = ep.major_id and minor_id = 0 and ep.name = 'MS_description'
+	// 	left join colCnt cc on cc.id = o.object_id
+	// 	left join ChildrenRelCnt crc on crc.id = o.object_id
+	// 	left join ParentRelCnt prc on prc.id = o.object_id
+	// 	where
+	// 		o.name not in ('sysdiagrams')
+	// 		%s
+	// 		and o.[type] in ('V', 'U', 'SN', 'P')
+	// 	order by s.name, o.[type], o.name
+	// `, filter)
 
 	return sql
 }
@@ -471,45 +434,13 @@ func (server *mssqlSource) getEntity(entityName string) (*models.Entity, error) 
 	defer db.Close()
 	ctx := context.Background()
 
-	query := `
-	;with rowcnt (object_id, cnt) as (
-		SELECT p.object_id, SUM(CASE WHEN (p.index_id < 2) AND (a.type = 1) THEN p.rows ELSE 0 END) 
-		FROM sys.partitions p 
-		INNER JOIN sys.allocation_units a ON p.partition_id = a.container_id
-		join sys.objects o on p.object_id = o.object_id and o.type = 'U'
-		where p.object_id = object_id(@entityName)
-		group by p.object_id
-	)
-select 
-	o.name
-	,type = CASE 
-				when o.type = 'U' then 'Table' 
-				when o.type = 'V' then 'View' 
-				when o.type = 'SN' then 'Synonym'
-				when o.type = 'P' then 'Proc'
-				end  
-	,[Schema] = s.name
-    , description =  isnull(ep.value, '')
-    -- , RowCount = rowcnt
-    , [RowCount] = rcnt.cnt
-    , IsVersioned = case when t.temporal_type = 2 then 1 else 0 end
-	, IsHistory = case when t.temporal_type = 1 then 1 else 0 end
-    , HistoryTable = isnull(object_name(t.history_table_id), '')
-from sys.objects o
-join sys.schemas s on s.schema_id = o.schema_id
-left join sys.extended_properties ep on o.object_id = ep.major_id and minor_id = 0 and ep.name = 'MS_description'
-left join sys.tables t on t.object_id = o.object_id
-left join rowcnt rcnt on rcnt.object_id = o.object_id
-where o.object_id = object_id(@entityName)	
-	`
-
-	stmt, err := db.PrepareContext(ctx, query)
+	stmt, err := db.PrepareContext(ctx, selectEntityQuery)
 
 	if err != nil {
 		return nil, err
 	}
 	// Execute query
-	row := stmt.QueryRow(query, sql.Named("entityName", entityName))
+	row := stmt.QueryRow(selectEntityQuery, sql.Named("entityName", entityName))
 
 	var e models.Entity
 
@@ -548,80 +479,7 @@ func (server *mssqlSource) getColumns(schema string, entityName string) (*models
 	defer db.Close()
 	ctx := context.Background()
 
-	query := `
-	with Reserved as (
-		select Name = 'database' union
-		select Name = 'version' union
-		select Name = 'new' union
-		select Name = 'tran' union
-		select Name = 'add' union
-		select Name = 'insert' union
-		select Name = 'inner' union
-		select Name = 'index' union
-		select Name = 'column' union
-		select Name = 'commit' union
-		select Name = 'return'        
-	),PrimaryKeyColumns as (
-
-		SELECT  
-			i.name AS IndexName
-			, OBJECT_NAME(ic.OBJECT_ID) AS TableName
-			, COL_NAME(ic.OBJECT_ID,ic.column_id) AS PrimaryColumnName
-			, ColumnId = ic.column_id
-			, ObjectId = ic.object_id
-		FROM    sys.indexes AS i 
-		INNER JOIN sys.index_columns AS ic ON  i.OBJECT_ID = ic.OBJECT_ID AND i.index_id = ic.index_id
-		WHERE i.is_primary_key = 1 and i.object_id = object_id(@entityName)
-	), ForeignKeyColumns as (
-		select 
-			  ColumnName = cc.name
-			, ColumnId = cc.column_id
-			, ObjectId = cc.object_id
-			, ReferencedColumn = pcc.name  
-			, ReferencedObjectId = pcc.object_id
-			, IsSelfJoin = cast(case when fkc.parent_object_id = fkc.referenced_object_id then 1 else 0 end as bit )
-		from sys.foreign_key_columns fkc
-		join sys.columns cc on fkc.parent_column_id = cc.column_id and cc.object_id = fkc.parent_object_id
-	   join sys.columns pcc on fkc.referenced_column_id = pcc.column_id and pcc.object_id = fkc.referenced_object_id
-		where fkc.parent_object_id = OBJECT_ID(@entityName)
-	)
-	select
-		  Name = c.name	        
-		, Description = isnull(ep.value, '')
-		--, ModelName = c.Name
-		, DataType = TYPE_NAME(c.user_type_id)
-		, DbType = TYPE_NAME(c.user_type_id)
-		, IsNullable = c.is_nullable	        
-		, IsIdentity = c.is_identity             
-		, IsPrimaryKey = cast (case when pkc.PrimaryColumnName is null then 0 else 1 end as bit)
-		, IsForeignKey = cast (case when fkc.ColumnName is null then 0 else 1 end as bit)
-		--, IsIgnored = case when s.name is null then 0 else 1 end
-		, IsReserved = cast (case when r.name is null then 0 else 1 end as bit)
-		--, Selected = cast (1 as bit) --case when s.name is null then 1 else 0 end
-		, [Collation] = isnull(c.collation_name, '')
-		, Length = case 
-			when c.user_type_id = 231 and c.max_length > 0 then c.max_length / 2
-			when left(c.name, 1) = 'n' and st.max_length = 8000 then c.max_length / 2
-			else c.max_length end
-		, UseLength = cast(case when st.precision = 0 and c.collation_name is not null then 1 else 0 end as bit)
-		, c.Precision
-		, c.Scale
-		, UsePrecision = cast(case when st.user_type_id in (108,106) then 1 else 0 end as bit)
-		, ReferencesColumn = isnull(fkc.ReferencedColumn, '')
-		, ReferencesTable = isnull(object_name(fkc.ReferencedObjectId), '')
-	from sys.columns c         
-	left join sys.types st on st.user_type_id = c.user_type_id
-   -- left join IgnoredColumns s on s.Name = c.name
-	left join Reserved r on r.name = c.name
-	left join PrimaryKeyColumns pkc on pkc.ColumnId = c.column_id and pkc.ObjectId = c.object_id -- c.name
-	left join ForeignKeyColumns fkc on fkc.ColumnId = c.column_id and c.object_id = fkc.ObjectId
-	left join sys.extended_properties ep on c.object_id = ep.major_id and minor_id = c.column_id and ep.name = 'MS_description'
-	where object_id = object_id(@entityName)
-		and generated_always_type = 0
-	order by c.column_id
-	`
-
-	stmt, err := db.PrepareContext(ctx, query)
+	stmt, err := db.PrepareContext(ctx, selectColumnsQuery)
 
 	if err != nil {
 		return nil, err
@@ -631,7 +489,7 @@ func (server *mssqlSource) getColumns(schema string, entityName string) (*models
 		entityName = fmt.Sprintf("%s.%s", schema, entityName)
 	}
 	// Execute query
-	rows, err := stmt.Query(query, sql.Named("entityName", entityName))
+	rows, err := stmt.Query(selectColumnsQuery, sql.Named("entityName", entityName))
 	if err != nil {
 		return nil, err
 	}
@@ -660,6 +518,8 @@ func (server *mssqlSource) getColumns(schema string, entityName string) (*models
 			&c.UsePrecision,
 			&c.ReferencesColumn,
 			&c.ReferencesTable,
+			&c.ColumnIndex,
+			&c.ForCreate,
 		); err != nil {
 			if err == sql.ErrNoRows {
 				return nil, nil
