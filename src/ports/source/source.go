@@ -6,6 +6,7 @@ import (
 	"modelhelper/cli/modelhelper/models"
 	"modelhelper/cli/ports/source/demo"
 	"modelhelper/cli/ports/source/mssql"
+	"modelhelper/cli/ports/source/postgres"
 	"strings"
 	"unicode"
 )
@@ -22,6 +23,8 @@ func (sfs *sourceFactoryService) NewSource(conType, conName string) (modelhelper
 	switch conType {
 	case "mssql":
 		src = mssql.NewMsSqlSource(sfs.connectionService, conName)
+	case "postgres":
+		src = postgres.NewPostgresSource(sfs.connectionService, conName)
 	case "demo":
 		src = demo.NewDemoSource()
 	default:

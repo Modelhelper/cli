@@ -57,7 +57,7 @@ func listTemplateCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra
 		if options.IsDemo {
 			options.ConnectionName = "demo"
 			conName = "demo"
-			conType = "file"
+			conType = "demo"
 
 		} else {
 

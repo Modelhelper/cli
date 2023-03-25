@@ -222,6 +222,7 @@ type EntityColumnModel struct {
 	Scale             int
 	UseLength         bool
 	UsePrecision      bool
+	ForCreate         string
 }
 
 type EntityList []Entity
@@ -275,6 +276,7 @@ type EntityStat struct {
 // Column represents the column of an entity, either a table or a view
 type Column struct {
 	ID               int
+	ColumnIndex      int
 	Name             string
 	PropertyName     string
 	DbType           string
@@ -302,6 +304,8 @@ type Column struct {
 
 	Description    string
 	ContextualName string
+
+	ForCreate string
 }
 
 // Index represents the index of a table
@@ -492,4 +496,5 @@ type EntityColumnImportModel struct {
 	UseLength      bool
 	UsePrecision   bool
 	UseInViewModel bool
+	ForCreate      string
 }

@@ -1,0 +1,107 @@
+﻿language: sql # must be the same as template e.g cs, go, java (normally this should be the language file extension e.g startup.cs )
+version: 3.0
+
+short: Language defintion for Go (Golang from Google)
+  
+
+usesNamespace: false
+canInject: false
+
+datatypes: 
+  string: 
+    notNull: STRING  NOT NULL
+    nullable: SQL.NULLSTRING NULL
+  bigint: 
+    notNull: BIGINT NOT NULL
+    nullable: BIGINT NULL
+  binary: 
+    notNull: BINARY
+    nullable: STRING NULL
+  bit: 
+    notNull: BIT NOT NULL
+    nullable: BIT NULL NULL
+    defaultValue: false
+  char: 
+    notNull: CHAR NOT NULL
+    nullable: CHAR NULL    NULL
+  date: 
+    notNull: DATE  NOT NULL
+    nullable: SQL.NULLTIME     NULL
+  datetime: 
+    notNull: DATETIME  NOT NULL
+    nullable: DATETIME    NULL
+  datetime2: 
+    notNull: DATETIME2 NOT NULL
+    nullable: DATETIME2     NULL
+  datetimeoffset: 
+    notNull: DATETIMEOFFSET NOT NULL
+    nullable: DATETIMEOFFSET    NULL
+  decimal: 
+    notNull: DECIMAL NOT NULL
+    nullable: DECIMAL NULL
+  float: 
+    notNull: FLOAT NOT NULL
+    nullable: FLOAT NULL
+  geography: 
+    notNull: STRING NOT NULL
+    nullable: STRING     NULL
+  geometry: 
+    notNull: STRING NOT NULL
+    nullable: STRING     NULL
+  image: 
+    notNull: STRING NOT NULL
+    nullable: STRING     NULL
+  int: 
+    notNull: INT NOT NULL
+    nullable: INT    NULL
+  money: 
+    notNull: MONEY NOT NULL
+    nullable: MONEY     NULL
+  nchar: 
+    notNull: NCHAR NOT NULL
+    nullable: NCHAR   NULL
+  ntext: 
+    notNull: STRINTEXTNG NOT NULL
+    nullable: NTEXT  NULL
+  numeric: 
+    notNull: NUMERIC NOT NULL
+    nullable: NUMERIC    NULL
+  nvarchar: 
+    notNull: NVARCHAR NOT NULL
+    nullable: NVARCHAR      NULL
+  real: 
+    notNull: REAL NOT NULL
+    nullable: REAL NULL
+  smalldatetime: 
+    notNull: SMALLDATETIME NOT NULL
+    nullable: SMALLDATETIME NULL
+  smallint: 
+    notNull: SMALLINT NOT NULL
+    nullable: SMALLINT NULL
+  smallmoney: 
+    notNull: STRING NOT NULL
+    nullable: STRING     NULL
+  text: 
+    notNull: TEXT NOT NULL
+    nullable: TEXT    NULL
+  time: 
+    notNull: TIME NOT NULL
+    nullable: TIME     NULL
+  timestamp: 
+    notNull: STRING NOT NULL
+    nullable: STRING     NULL
+  tinyint: 
+    notNull: INT16 NOT NULL
+    nullable: SQL.NULLINT16     NULL
+  uniqueidentifier: 
+    notNull: STRING NOT NULL
+    nullable: SQL.NULLSTRING    NULL
+  varbinary: 
+    notNull: BYTE[] NOT NULL
+    nullable: BYTE[]     NULL
+  varchar: 
+    notNull: VARCHAR NOT NULL
+    nullable: VARCHAR NULL     NULL
+  xml: 
+    notNull: STRING NOT NULL
+    nullable: SQL.NULLSTRING     NULL

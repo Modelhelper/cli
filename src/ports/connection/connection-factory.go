@@ -47,6 +47,8 @@ func (c *connectionListService) Connection(name string) (any, error) {
 			switch item.Type {
 			case "mssql":
 				return loadGenericConnection[models.MsSqlConnection](item.Path)
+			case "postgres":
+				return loadGenericConnection[models.PostgresConnection](item.Path)
 			case "file":
 				return loadGenericConnection[models.FileConnection](item.Path)
 			}

@@ -305,6 +305,7 @@ func toColumnSection(from models.Column, entityName string) models.EntityColumnM
 		Scale:             from.Scale,
 		UseLength:         from.UseLength,
 		UsePrecision:      from.UsePrecision,
+		ForCreate:         from.ForCreate,
 	}
 
 	return col
