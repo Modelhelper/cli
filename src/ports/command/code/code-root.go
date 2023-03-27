@@ -10,6 +10,7 @@ func NewCodeRootCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	subCommands := []*cobra.Command{
 		NewGenerateCodeCommand(app),
+		NewChangelogCommand(app),
 	}
 
 	rootCmd := &cobra.Command{
