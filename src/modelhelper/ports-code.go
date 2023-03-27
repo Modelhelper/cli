@@ -27,3 +27,9 @@ type LanguageDefinitionService interface {
 	List() map[string]models.LanguageDefinition
 	GetDefinition(lang string) *models.LanguageDefinition
 }
+
+type CommitHistoryService interface {
+	GetCommitHistory(repoPath string, options *models.CommitHistoryOptions) (*models.CommitHistory, error)
+	GetTags(repoPath string, options *models.CommitHistoryOptions) ([]models.GitTag, error)
+	GetAuthors(repoPath string, options *models.CommitHistoryOptions) (*models.Author, error)
+}
