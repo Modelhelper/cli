@@ -63,7 +63,7 @@ func conventionalCommitTypes() []string {
 }
 
 // GetCommitHistory implements modelhelper.CommitHistoryService
-func (*codeCommitService) GetCommitHistory(repoPath string, options *models.CommitHistoryOptions) (*models.CommitHistory, error) {
+func (cs *codeCommitService) GetCommitHistory(repoPath string, options *models.CommitHistoryOptions) (*models.CommitHistory, error) {
 
 	cc := &models.CommitHistory{
 		Repo:     repoPath,
@@ -74,7 +74,8 @@ func (*codeCommitService) GetCommitHistory(repoPath string, options *models.Comm
 	// Open the Git repository
 	repo, err := git.PlainOpen(repoPath)
 	if err != nil {
-		log.Fatalf("Error opening repository: %s", err)
+		return nil, err
+		// log.Fatalf("Error opening repository: %s", err)
 	}
 
 	typeString := strings.Join(conventionalCommitTypes(), "|")
@@ -101,7 +102,9 @@ func (*codeCommitService) GetCommitHistory(repoPath string, options *models.Comm
 	// Get the commit history from the recent tag up to HEAD
 	commitIter, err := repo.Log(gitopt)
 	if err != nil {
-		log.Fatalf("Error getting commit history: %v", err)
+		return nil, err
+
+		// log.Fatalf("Error getting commit history: %v", err)
 	}
 
 	// fmt.Printf("Commits since %v\n\n", tag.Tagger.When)
@@ -143,7 +146,8 @@ func (*codeCommitService) GetCommitHistory(repoPath string, options *models.Comm
 		return nil
 	})
 	if err != nil {
-		log.Fatalf("Error iterating through commits: %s", err)
+		return nil, err
+		// log.Fatalf("Error iterating through commits: %s", err)
 	}
 
 	return cc, nil
@@ -170,7 +174,10 @@ func parseMessage(message *object.Commit, regx *regexp.Regexp) *models.Commit {
 			case 1:
 				msg.Type = strings.TrimSpace(match)
 			case 2:
-				msg.Scope = strings.TrimSpace(match)
+				scope := strings.TrimSpace(match)
+				scope = strings.TrimPrefix(scope, "(")
+				scope = strings.TrimSuffix(scope, ")")
+				msg.Scope = scope
 			case 3:
 				msg.Title = strings.TrimSpace(match)
 			}
