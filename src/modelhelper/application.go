@@ -20,6 +20,7 @@ type ModelhelperCli struct {
 		TemplateService CodeTemplateService
 		Generator       CodeGeneratorService
 		ModelConverter  CodeModelConverter
+		CommitHistory   CommitHistoryService
 	}
 
 	Exporters struct {
