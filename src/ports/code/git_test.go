@@ -49,3 +49,22 @@ func Test_That_We_Get_References(t *testing.T) {
 		t.Errorf("Expected %v but got %v", bex, refs[0].Id)
 	}
 }
+
+func Test_Commit_history(t *testing.T) {
+	repo := "C:\\dev\\projects\\mh\\cli"
+	cs := &codeCommitService{}
+	history, err := cs.GetCommitHistory(repo, nil)
+
+	if err != nil {
+		t.Log(err)
+		t.Errorf("Expected get commit err to be nil")
+	}
+	if history == nil {
+		t.Errorf("Expected history to not be nil")
+
+	}
+
+	if history.Authors != nil && len(history.Authors) != 1 {
+		t.Errorf("Expected %v but got %v", 1, len(history.Authors))
+	}
+}
