@@ -66,6 +66,7 @@ func codeChangelogHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Comma
 		if err != nil {
 			// handle error
 			fmt.Println(err)
+			return
 		}
 
 		commitModel := convertToModel(commits)

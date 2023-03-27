@@ -2,9 +2,11 @@ package code
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
+	"os"
 	"regexp"
 	"strings"
 
@@ -71,6 +73,7 @@ func (cs *codeCommitService) GetCommitHistory(repoPath string, options *models.C
 		Authors:  make(map[string]models.Author),
 	}
 
+	repoPath, _ = findClosestGitDir(repoPath)
 	// Open the Git repository
 	repo, err := git.PlainOpen(repoPath)
 	if err != nil {
@@ -236,4 +239,26 @@ func checkForBreakingChange(message string, regx *regexp.Regexp) (int, string) {
 	body = strings.TrimSuffix(body, "\n")
 	body = strings.TrimSpace(body)
 	return startPos, body
+}
+
+func findClosestGitDir(startPath string) (string, bool) {
+
+	folders := strings.Split(startPath, string(os.PathSeparator))
+
+	for i := len(folders); i > 2; i-- {
+		testPath := strings.Join(folders[:i], string(os.PathSeparator))
+		files, err := ioutil.ReadDir(testPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, f := range files {
+
+			if f.IsDir() && f.Name() == ".git" {
+				return testPath, true
+			}
+		}
+	}
+
+	return "", false
 }
