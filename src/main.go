@@ -72,6 +72,7 @@ func initializeApplication(ctx context.Context) (modelhelper.CommandService, mod
 	mha.Code.TemplateService = tpls
 	mha.Code.ModelConverter = converter.NewCodeModelConverter()
 	mha.Code.Generator = code.NewCodeGeneratorService(cfg, mha.Project.Config, mha.Code.ModelConverter, tpls, tcg, cons, srcs)
+	mha.Code.CommitHistory = code.NewCommitHistoryService()
 
 	mha.Project.TemplateService = projectTemplate.NewProjectTemplateService(cfg)
 	mha.Project.Generator = project.NewProjectGeneratorService(cfg)
