@@ -13,7 +13,8 @@
             // "args": ["code", "generate", "-t", "go-struct", "--entity-group", "flight", "--screen"],
             // "args": ["code", "generate", "-t", "go-feature-command", "-e", "FlightImport.BookingSession", "--screen"],
             // "args": ["source", "FlightImport.BookingSession"],
-            "args": ["source", "person.name"],
+            "args": ["code", "generate", "-t", "git-changelog", "--screen"],
+            // "args": ["source", "person.name"],
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}\\main.go"

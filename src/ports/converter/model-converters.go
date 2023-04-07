@@ -10,6 +10,53 @@ type codeModelConverter struct {
 	// app *modelhelper.ModelhelperCli
 }
 
+// ToCommitHistoryModel implements modelhelper.CodeModelConverter
+func (c *codeModelConverter) ToCommitHistoryModel(key string, language string, project *models.ProjectConfig, commitHistory *models.CommitHistory) *models.CommitModel {
+	base := c.ToBasicModel(key, language, project)
+	mdl := &models.CommitModel{
+		RootNamespace:             base.RootNamespace,
+		Namespace:                 base.Namespace,
+		Postfix:                   base.Postfix,
+		Prefix:                    base.Prefix,
+		ModuleLevelVariablePrefix: base.ModuleLevelVariablePrefix,
+		Inject:                    base.Inject,
+		Imports:                   base.Imports,
+		Project:                   base.Project,
+		Developer:                 base.Developer,
+		Options:                   base.Options,
+		PageHeader:                base.PageHeader,
+	}
+	mdl.Name = commitHistory.Name
+	mdl.Features = commitHistory.Messages["feat"]
+	mdl.Fixes = commitHistory.Messages["fix"]
+	mdl.Refactors = commitHistory.Messages["refactor"]
+	mdl.Docs = commitHistory.Messages["docs"]
+	mdl.Performance = commitHistory.Messages["perf"]
+	mdl.Tests = commitHistory.Messages["tests"]
+	mdl.Builds = commitHistory.Messages["builds"]
+	mdl.Ci = commitHistory.Messages["ci"]
+	mdl.Chores = commitHistory.Messages["chores"]
+	mdl.Reverts = commitHistory.Messages["reverts"]
+
+	mdl.HasFeatures = len(mdl.Features) > 0
+	mdl.HasRefactors = len(mdl.Refactors) > 0
+	mdl.HasFixes = len(mdl.Fixes) > 0
+
+	for _, msg := range commitHistory.Messages {
+		for _, commit := range msg {
+			if commit.IsBreakingChange {
+				mdl.BreakingChanges = append(mdl.BreakingChanges, commit)
+			}
+		}
+	}
+	mdl.HasBreakingChanges = len(mdl.BreakingChanges) > 0
+
+	mdl.Authors = commitHistory.Authors
+	mdl.HasAuthors = len(mdl.Authors) > 0
+	return mdl
+
+}
+
 // ToBasicModel implements modelhelper.CodeModelConverter
 func (c *codeModelConverter) ToBasicModel(identifier, language string, project *models.ProjectConfig) *models.BasicModel {
 	b := models.BasicModel{}

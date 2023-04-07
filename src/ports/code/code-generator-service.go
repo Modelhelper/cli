@@ -7,6 +7,7 @@ import (
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
 	"modelhelper/cli/ports/exporter"
+	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -26,10 +27,16 @@ type codeGeneratorService struct {
 	generator         modelhelper.TemplateGenerator[*models.CodeTemplate]
 	connectionService modelhelper.ConnectionService
 	sourceFactory     modelhelper.SourceFactoryService
+	commitHistory     modelhelper.CommitHistoryService
 }
 
-func NewCodeGeneratorService(cfg *models.Config, pc *models.ProjectConfig, cmc modelhelper.CodeModelConverter, ts modelhelper.CodeTemplateService, g modelhelper.TemplateGenerator[*models.CodeTemplate], c modelhelper.ConnectionService, srcf modelhelper.SourceFactoryService) modelhelper.CodeGeneratorService {
-	return &codeGeneratorService{cfg, pc, cmc, ts, g, c, srcf}
+func NewCodeGeneratorService(cfg *models.Config,
+	pc *models.ProjectConfig, cmc modelhelper.CodeModelConverter,
+	ts modelhelper.CodeTemplateService, g modelhelper.TemplateGenerator[*models.CodeTemplate],
+	c modelhelper.ConnectionService, srcf modelhelper.SourceFactoryService,
+	ch modelhelper.CommitHistoryService,
+) modelhelper.CodeGeneratorService {
+	return &codeGeneratorService{cfg, pc, cmc, ts, g, c, srcf, ch}
 }
 
 func (g *codeGeneratorService) Generate(ctx context.Context, options *models.CodeGeneratorOptions) ([]models.TemplateGeneratorFileResult, error) {
@@ -105,6 +112,7 @@ You could also use mh template or mh t to see a list of all available templates`
 	start := time.Now()
 	var cstat = &models.TemplateGeneratorStatistics{}
 	var generatedCode []models.TemplateGeneratorFileResult
+	var ch *models.CommitHistory
 
 	for _, tname := range options.Templates {
 
@@ -228,6 +236,40 @@ You could also use mh template or mh t to see a list of all available templates`
 
 				entitiesGenerator()
 
+			} else if currentTemplate.Model == "commits" {
+				changelogGenerator := func() {
+					cstat.TemplatesUsed += 1
+
+					if ch == nil {
+						cp, _ := os.Getwd()
+						ch, _ = g.commitHistory.GetCommitHistory(cp, nil)
+					}
+					model := g.cmc.ToCommitHistoryModel(currentTemplate.Key, currentTemplate.Language, prj, ch)
+					// model.PageHeader = simpleGenerate("header", model.PageHeader, model)
+
+					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+
+					fileName := ""
+					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+						cstat.FilesCreated += 1
+						fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+						// if csFound {
+
+						// 	fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+						// }
+					}
+
+					f := models.TemplateGeneratorFileResult{
+						Result:   o,
+						Filename: fileName,
+						FilePath: codeSection.Locations[currentTemplate.Key],
+					}
+
+					generatedCode = append(generatedCode, f)
+
+				}
+
+				changelogGenerator()
 			}
 
 		}

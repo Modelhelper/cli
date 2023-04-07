@@ -33,6 +33,7 @@ type CodeModelConverter interface {
 	ToBasicModel(identifier, language string, project *models.ProjectConfig) *models.BasicModel
 	ToEntityModel(key, language string, project *models.ProjectConfig, entity *models.Entity) *models.EntityModel
 	ToEntityListModel(key, language string, project *models.ProjectConfig, entity *[]models.Entity) *models.EntityListModel
+	ToCommitHistoryModel(key, language string, project *models.ProjectConfig, commitHistory *models.CommitHistory) *models.CommitModel
 }
 
 type ProjectModelConverter interface {
