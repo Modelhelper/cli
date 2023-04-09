@@ -27,6 +27,8 @@ func (sfs *sourceFactoryService) NewSource(conType, conName string) (modelhelper
 		src = postgres.NewPostgresSource(sfs.connectionService, conName)
 	case "demo":
 		src = demo.NewDemoSource()
+	case "file":
+		src = demo.NewDemoSource()
 	default:
 		src = nil
 	}

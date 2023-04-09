@@ -2,18 +2,68 @@ configVersion: 3.0
 version: "3.0.0-beta1"
 
 name: modelhelper/cli 
+language: go
 
-identifiers:
-  - name: core-models    
-    destination: ./core/models # relative to the .modelhelper project folder
-  - name: core-command
-    destination: ./core/commands 
-  - name: core-query
-    destination: ./core/query 
-  - name: ports-controller
-    destination: ./ports/api/controllers 
-  - name: ports-validator
-    destination: ./ports/api/validators 
-  - name: features
-    destination: ./features/{.Name | singular | kebab} 
-  
+connection:
+  use: demo
+  groups: 
+    flight:
+      items:  
+        - FlightImport.BikesConfiguration
+        - FlightImport.BookingSessions
+        - FlightImport.Locations
+        - FlightImport.RoomsConfiguration
+        - FlightImport.UserFtpLevels
+        - FlightImport.Users
+
+locations:
+  core-models: ./core/models # relative to the .modelhelper project folder
+  core-command: ./core/commands 
+  core-query: ./core/query 
+  ports-controller: ./ports/api/controllers 
+  ports-validator: ./ports/api/validators 
+  features: ./features/{.Name | singular | kebab} 
+
+
+rootNamespace: A root namespace if any     
+
+setup: 
+  model: 
+    prefix: O
+    postfix: Model
+    namespace: "{{ .Project.Name | dot }}.Core.Models"
+    location: ./core/models
+    imports: 
+      - MyProject.Core.Models;
+    inject:
+      - logging
+      - user
+    options:  
+      opt1: value1
+  interface:   
+    postfix: Repository
+    namespace: MyProject.Core.Modeling
+    prefix: I
+    imports: 
+      - MyProject.Core.Models;
+
+inject:
+  user:
+    service: IUserContext
+    propertyName: user            
+    imports: 
+      - "SomePlace.BlaBla"      
+  connectionFactory:
+    propertyName: connectionFactory
+    service: IConnectionFactory      
+  logging:
+    service: LoggerService
+    propertyName: logger
+    imports: 
+      - "{{ .Name | kebab }}/{{ .Name | kebab}}/logger"
+
+useFileHeader: false
+
+options:
+  key_1: "value 1"
+  key_2: "value 2"

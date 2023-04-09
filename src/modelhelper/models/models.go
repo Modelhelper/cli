@@ -42,6 +42,7 @@ type Datatype struct {
 }
 
 type Inject struct {
+	Service      string   `json:"service" yaml:"service"`
 	Name         string   `json:"name" yaml:"name"`
 	PropertyName string   `json:"propertyName" yaml:"propertyName"`
 	Method       string   `json:"method" yaml:"method"`

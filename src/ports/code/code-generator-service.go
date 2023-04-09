@@ -6,14 +6,9 @@ import (
 	"fmt"
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
-	"modelhelper/cli/ports/exporter"
 	"os"
 	"path/filepath"
-	"strings"
-	"sync"
 	"time"
-
-	"github.com/atotto/clipboard"
 	// "go.opencensus.io/examples/exporter"
 )
 
@@ -121,11 +116,13 @@ You could also use mh template or mh t to see a list of all available templates`
 		currentTemplate, found := allTemplates[tname]
 
 		if found {
-			var codeSection models.Code
+			locationPath, locationFound := prj.Locations[currentTemplate.Key]
 
-			if prj != nil && prj.Code != nil {
-				codeSection = prj.Code[currentTemplate.Language]
-			}
+			// var codeSection models.Code
+
+			// if prj != nil && prj.Code != nil {
+			// 	codeSection = prj.Code[currentTemplate.Language]
+			// }
 
 			if len(currentTemplate.Model) == 0 || currentTemplate.Model == "basic" {
 
@@ -145,7 +142,7 @@ You could also use mh template or mh t to see a list of all available templates`
 
 				basicGenerator()
 
-			} else if currentTemplate.Model == "entity" && len(*entities) > 0 {
+			} else if currentTemplate.Model == "entity" { //&& len(*entities) > 0
 
 				for _, entity := range *entities {
 
@@ -177,12 +174,17 @@ You could also use mh template or mh t to see a list of all available templates`
 							cstat.FilesCreated += 1
 
 							fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+
+							if locationFound {
+								locationPath = simpleGenerate("location", locationPath, model)
+
+							}
 						}
 
 						f := models.TemplateGeneratorFileResult{
 							Result:   o,
 							Filename: fileName,
-							FilePath: codeSection.Locations[currentTemplate.Key],
+							FilePath: locationPath,
 						}
 
 						generatedCode = append(generatedCode, f)
@@ -218,6 +220,11 @@ You could also use mh template or mh t to see a list of all available templates`
 					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
 						cstat.FilesCreated += 1
 						fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+
+						if locationFound {
+							locationPath = simpleGenerate("location", locationPath, model)
+
+						}
 						// if csFound {
 
 						// 	fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
@@ -227,7 +234,7 @@ You could also use mh template or mh t to see a list of all available templates`
 					f := models.TemplateGeneratorFileResult{
 						Result:   o,
 						Filename: fileName,
-						FilePath: codeSection.Locations[currentTemplate.Key],
+						FilePath: locationPath,
 					}
 
 					generatedCode = append(generatedCode, f)
@@ -253,16 +260,19 @@ You could also use mh template or mh t to see a list of all available templates`
 					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
 						cstat.FilesCreated += 1
 						fileName = simpleGenerate("filename", currentTemplate.FileName, model)
-						// if csFound {
 
-						// 	fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
-						// }
+						if locationFound {
+							locationPath = simpleGenerate("location", locationPath, model)
+
+						}
+
 					}
 
 					f := models.TemplateGeneratorFileResult{
-						Result:   o,
-						Filename: fileName,
-						FilePath: codeSection.Locations[currentTemplate.Key],
+						Destination: filepath.Join(locationPath, fileName),
+						Result:      o,
+						Filename:    fileName,
+						FilePath:    locationPath,
 					}
 
 					generatedCode = append(generatedCode, f)
@@ -276,76 +286,76 @@ You could also use mh template or mh t to see a list of all available templates`
 
 	}
 
-	sb := strings.Builder{}
-	var fwg sync.WaitGroup
-	var flock = sync.Mutex{}
+	// sb := strings.Builder{}
+	// var fwg sync.WaitGroup
+	// var flock = sync.Mutex{}
 	for _, codeBody := range generatedCode {
 		cstat.Chars += codeBody.Result.Statistics.Chars
 		cstat.Lines += codeBody.Result.Statistics.Lines
 		cstat.Words += codeBody.Result.Statistics.Words
-		content := []byte(codeBody.Result.Body)
-		if options.ExportToScreen {
-			screenWriter := exporter.ScreenExporter{}
-			screenWriter.Write([]byte(content))
-		}
+		// content := []byte(codeBody.Result.Body)
+		// if options.ExportToScreen {
+		// 	screenWriter := exporter.ScreenExporter{}
+		// 	screenWriter.Write([]byte(content))
+		// }
 
-		if options.ExportToClipboard {
-			sb.WriteString(string(codeBody.Result.Body))
-		}
+		// if options.ExportToClipboard {
+		// 	sb.WriteString(string(codeBody.Result.Body))
+		// }
 
-		if options.ExportByKey && len(codeBody.Filename) > 0 {
-			fwg.Add(1)
-			go func(filename string, rootPath string, content []byte) {
-				defer fwg.Done()
-				keyExporter := exporter.FileExporter{
-					Filename:  filepath.Join(rootPath, filename),
-					Overwrite: options.Overwrite,
-				}
+		// if options.ExportByKey && len(codeBody.Filename) > 0 {
+		// 	fwg.Add(1)
+		// 	go func(filename string, rootPath string, content []byte) {
+		// 		defer fwg.Done()
+		// 		keyExporter := exporter.FileExporter{
+		// 			Filename:  filepath.Join(rootPath, filename),
+		// 			Overwrite: options.Overwrite,
+		// 		}
 
-				_, err := keyExporter.Write([]byte(content))
-				if err != nil {
-					fmt.Println(filepath.ErrBadPattern)
-				}
-				// fmt.Println("*** FILENAME::", s.filename)
-				flock.Lock()
-				cstat.FilesExported += 1
-				flock.Unlock()
-			}(codeBody.Filename, "D:/projects/ModelHelper", content)
+		// 		_, err := keyExporter.Write([]byte(content))
+		// 		if err != nil {
+		// 			fmt.Println(filepath.ErrBadPattern)
+		// 		}
+		// 		// fmt.Println("*** FILENAME::", s.filename)
+		// 		flock.Lock()
+		// 		cstat.FilesExported += 1
+		// 		flock.Unlock()
+		// 	}(codeBody.Filename, "D:/projects/ModelHelper", content)
 
-		}
-		// TODO: export to file
-		if len(options.ExportPath) > 0 {
-			fwg.Add(1)
-			go func(filename string, rootPath string, content []byte) {
-				defer fwg.Done()
+		// }
+		// // TODO: export to file
+		// if len(options.ExportPath) > 0 {
+		// 	fwg.Add(1)
+		// 	go func(filename string, rootPath string, content []byte) {
+		// 		defer fwg.Done()
 
-				if len(filename) > 0 {
+		// 		if len(filename) > 0 {
 
-					fileExporter := exporter.FileExporter{
-						Filename:  filepath.Join(rootPath, filename),
-						Overwrite: options.Overwrite,
-					}
+		// 			fileExporter := exporter.FileExporter{
+		// 				Filename:  filepath.Join(rootPath, filename),
+		// 				Overwrite: options.Overwrite,
+		// 			}
 
-					_, err := fileExporter.Write([]byte(content))
-					if err != nil {
-						fmt.Printf("%s, err: \n%v", filepath.ErrBadPattern, err)
-					}
-					// fmt.Println("*** FILENAME::", s.filename)
-					flock.Lock()
-					cstat.FilesExported += 1
-					flock.Unlock()
-				} else {
-					fmt.Println("Filename empty...")
-				}
-			}(codeBody.Filename, options.ExportPath, content)
-		}
+		// 			_, err := fileExporter.Write([]byte(content))
+		// 			if err != nil {
+		// 				fmt.Printf("%s, err: \n%v", filepath.ErrBadPattern, err)
+		// 			}
+		// 			// fmt.Println("*** FILENAME::", s.filename)
+		// 			flock.Lock()
+		// 			cstat.FilesExported += 1
+		// 			flock.Unlock()
+		// 		} else {
+		// 			fmt.Println("Filename empty...")
+		// 		}
+		// 	}(codeBody.Filename, options.ExportPath, content)
+		// }
 	}
 
-	fwg.Wait()
-	if options.ExportToClipboard {
-		fmt.Printf("\nGenerated code is copied to the \033[37mclipboard\033[0m. Use \033[34mctrl+v\033[0m to paste it where you like")
-		clipboard.WriteAll(sb.String())
-	}
+	// fwg.Wait()
+	// if options.ExportToClipboard {
+	// 	fmt.Printf("\nGenerated code is copied to the \033[37mclipboard\033[0m. Use \033[34mctrl+v\033[0m to paste it where you like")
+	// 	clipboard.WriteAll(sb.String())
+	// }
 
 	cstat.Duration = time.Since(start)
 	// stat["total.time"] = int(cstat.duration.Milliseconds())

@@ -66,9 +66,6 @@ func (c *codeModelConverter) ToBasicModel(identifier, language string, project *
 		project = emptyProject()
 	}
 
-	// inject := map[]
-	code, codeFound := project.Code[language]
-
 	if len(project.Options) > 0 {
 		b.Options = project.Options
 	}
@@ -77,15 +74,15 @@ func (c *codeModelConverter) ToBasicModel(identifier, language string, project *
 
 	b.PageHeader = project.Header
 
-	if len(identifier) > 0 && codeFound {
-		val, found := code.Keys[identifier]
+	if len(identifier) > 0 {
+		val, found := project.Setup[identifier]
 		if found {
-			b.RootNamespace = code.RootNamespace
+			b.RootNamespace = project.RootNamespace
 			imports = append(imports, val.Imports...)
 
 			b.Inject = []models.InjectSection{}
 			for _, injectKey := range val.Inject {
-				injItem, foundInj := code.Inject[injectKey]
+				injItem, foundInj := project.Inject[injectKey]
 				if foundInj {
 					b.Inject = append(b.Inject, toInjectSection(injItem, b))
 				}
@@ -111,7 +108,8 @@ func emptyProject() *models.ProjectConfig {
 		Header:      "",
 		Custom:      nil,
 		Description: "",
-		Code:        make(map[string]models.Code),
+		Setup:       make(map[string]models.Key),
+		Inject:      make(map[string]models.Inject),
 		OwnerName:   "",
 	}
 

@@ -13,6 +13,7 @@ type ProjectConfigService interface {
 	LoadFromFile(path string) (*models.ProjectConfig, error)
 	FindReleatedProjects(startPath string) []string
 	FindNearestProjectDir() (string, bool)
+	BasePath() string
 }
 
 type ProjectGenerator interface {

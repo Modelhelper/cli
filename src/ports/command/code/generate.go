@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
+	"modelhelper/cli/ports/exporter"
+	"strings"
 
+	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +30,7 @@ func registerFlags(cmd *cobra.Command) {
 	cmd.Flags().StringArrayP("feature", "f", []string{}, "Use a group of templates")
 	cmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
 
-	cmd.Flags().StringP("relations [direct, all, complete]", "r", "", "Include related entities based on the entities in --entity or --entity-group ('direct' | 'all' | 'complete' | 'children' | 'parents')")
+	// cmd.Flags().StringP("relations [direct, all, complete]", "r", "", "Include related entities based on the entities in --entity or --entity-group ('direct' | 'all' | 'complete' | 'children' | 'parents')")
 	// cmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
 
 	cmd.Flags().StringArrayP("source-group", "g", []string{}, "Use a group of source items (must be defined in the current connection)")
@@ -43,10 +46,10 @@ func registerFlags(cmd *cobra.Command) {
 
 	cmd.Flags().Bool("demo", false, "Uses a demo as input source, this will override any other input sources (entity, graphql), default false ")
 
-	cmd.Flags().String("config-path", "", "Instructs the program to use this config as the config")
-	cmd.Flags().String("project-path", "", "Instructs the program to use this project as input")
+	// cmd.Flags().String("config-path", "", "Instructs the program to use this config as the config")
+	// cmd.Flags().String("project-path", "", "Instructs the program to use this project as input")
 
-	cmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
+	// cmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
 
 	// cmd.Flags().String("setup", "", "Use this setup to generate code") // version 3.1
 	cmd.Flags().StringP("connection", "c", "", "The connection key to be used, uses default connection if not provided")
@@ -57,14 +60,38 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 	return func(cmd *cobra.Command, args []string) {
 
 		options := parseCodeOptions(cmd, args)
-		_, err := app.Code.Generator.Generate(cmd.Root().Context(), options)
-
+		result, err := app.Code.Generator.Generate(cmd.Root().Context(), options)
 		if err != nil {
 			// handle error
 			fmt.Println(err)
 		}
+		sb := strings.Builder{}
 
+		// var fwg sync.WaitGroup
+		// var flock = sync.Mutex{}
+
+		for _, res := range result {
+			content := []byte(res.Result.Body)
+			if options.ExportToScreen {
+				screenWriter := exporter.ScreenExporter{}
+				screenWriter.Write([]byte(content))
+			}
+
+			if options.ExportToClipboard {
+				sb.WriteString(string(content))
+			}
+
+		}
+
+		if options.ExportToClipboard {
+			fmt.Printf("\nGenerated code is copied to the \033[37mclipboard\033[0m. Use \033[34mctrl+v\033[0m to paste it where you like")
+			clipboard.WriteAll(sb.String())
+		}
+
+		loc, f := app.Project.ConfigService.FindNearestProjectDir()
+		fmt.Println(loc, f)
 	}
+
 }
 
 func parseCodeOptions(cmd *cobra.Command, args []string) *models.CodeGeneratorOptions {
@@ -106,4 +133,8 @@ func parseCodeOptions(cmd *cobra.Command, args []string) *models.CodeGeneratorOp
 
 func completeRelations(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return []string{"direct", "all", "complete", "children", "parents"}, cobra.ShellCompDirectiveDefault
+}
+
+func exportPath() {
+
 }
