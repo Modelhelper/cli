@@ -128,8 +128,8 @@ func filter(filterType string, t map[string]models.CodeTemplate, filter []string
 				output[name] = template
 			}
 		case "groups":
-			if len(template.Groups) > 0 {
-				for _, grp := range template.Groups {
+			if len(template.Features) > 0 {
+				for _, grp := range template.Features {
 
 					if contains(filter, grp) {
 						output[name] = template
