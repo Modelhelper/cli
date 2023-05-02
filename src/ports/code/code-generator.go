@@ -85,10 +85,14 @@ func (g *codeGenerator) fromFiles(currentTemplate *models.CodeTemplate) *templat
 	dt := make(map[string]string)
 	ndt := make(map[string]string)
 
-	for dtk, dtv := range lang.DataTypes {
-		dt[dtk] = dtv.NotNull
-		ndt[dtk] = dtv.Nullable
+	if lang != nil {
+
+		for dtk, dtv := range lang.DataTypes {
+			dt[dtk] = dtv.NotNull
+			ndt[dtk] = dtv.Nullable
+		}
 	}
+
 	pattern := filepath.Join(dir, "*")
 
 	drivers := template.Must(template.New(currentTemplate.Name).Funcs(

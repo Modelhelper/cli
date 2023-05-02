@@ -69,10 +69,11 @@ func initializeApplication(ctx context.Context) (modelhelper.CommandService, mod
 
 	mha.Config = cfg
 
+	cmtHist := code.NewCommitHistoryService()
 	mha.Code.TemplateService = tpls
 	mha.Code.ModelConverter = converter.NewCodeModelConverter()
-	mha.Code.Generator = code.NewCodeGeneratorService(cfg, mha.Project.Config, mha.Code.ModelConverter, tpls, tcg, cons, srcs)
-	mha.Code.CommitHistory = code.NewCommitHistoryService()
+	mha.Code.CommitHistory = cmtHist
+	mha.Code.Generator = code.NewCodeGeneratorService(cfg, mha.Project.Config, mha.Code.ModelConverter, tpls, tcg, cons, srcs, cmtHist)
 
 	mha.Project.TemplateService = projectTemplate.NewProjectTemplateService(cfg)
 	mha.Project.Generator = project.NewProjectGeneratorService(cfg)
@@ -94,3 +95,12 @@ func initializeApplication(ctx context.Context) (modelhelper.CommandService, mod
 // 	fmt.Println(size.PosY()) // Get Y position
 // 	//
 // }
+
+/*
+
+	//%%MH_SNIPPET_QUERY_DEF%%GetCalibration: calibration.NewGetCalibrationHandler(sqlConn, logger),
+GetCalibration: calibration.NewGetCalibrationHandler(sqlConn, logger),
+
+
+
+*/

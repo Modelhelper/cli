@@ -27,6 +27,7 @@ type Commit struct {
 	References         []Reference
 }
 type CommitHistory struct {
+	Name     string
 	Messages map[string][]Commit
 	Authors  map[string]Author
 	Tags     []string
@@ -42,18 +43,36 @@ type GitTag struct {
 	Hash    string
 }
 type CommitModel struct {
-	Features        []Commit
-	Fixes           []Commit
-	Docs            []Commit
-	Refactors       []Commit
-	Performance     []Commit
-	Tests           []Commit
-	Builds          []Commit
-	Ci              []Commit
-	Chores          []Commit
-	Reverts         []Commit
-	BreakingChanges []Commit
-	Authors         map[string]Author
+	Name                      string
+	RootNamespace             string
+	Namespace                 string
+	Postfix                   string
+	Prefix                    string
+	ModuleLevelVariablePrefix string
+	Inject                    []InjectSection
+	Imports                   []string
+	Project                   ProjectSection
+	Developer                 DeveloperSection
+	Options                   map[string]string
+	PageHeader                string
+	IsConventialCommits       bool
+	HasFeatures               bool
+	Features                  []Commit
+	HasRefactors              bool
+	Refactors                 []Commit
+	HasFixes                  bool
+	Fixes                     []Commit
+	Docs                      []Commit
+	Performance               []Commit
+	Tests                     []Commit
+	Builds                    []Commit
+	Ci                        []Commit
+	Chores                    []Commit
+	Reverts                   []Commit
+	HasBreakingChanges        bool
+	BreakingChanges           []Commit
+	HasAuthors                bool
+	Authors                   map[string]Author
 }
 
 type CommitHistoryOptions struct {

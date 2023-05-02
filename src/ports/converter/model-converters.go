@@ -10,6 +10,95 @@ type codeModelConverter struct {
 	// app *modelhelper.ModelhelperCli
 }
 
+// ToCustomModel implements modelhelper.CodeModelConverter
+func (c *codeModelConverter) ToCustomModel(key string, language string, project *models.ProjectConfig, custom any) *models.CustomModel {
+	base := c.ToBasicModel(key, language, project)
+	mdl := &models.CustomModel{
+		RootNamespace:             base.RootNamespace,
+		Namespace:                 base.Namespace,
+		Postfix:                   base.Postfix,
+		Prefix:                    base.Prefix,
+		ModuleLevelVariablePrefix: base.ModuleLevelVariablePrefix,
+		Inject:                    base.Inject,
+		Imports:                   base.Imports,
+		Project:                   base.Project,
+		Developer:                 base.Developer,
+		Options:                   base.Options,
+		PageHeader:                base.PageHeader,
+		Custom:                    custom,
+	}
+
+	return mdl
+}
+
+// ToNameModel implements modelhelper.CodeModelConverter
+func (c *codeModelConverter) ToNameModel(key string, language string, project *models.ProjectConfig, name string) *models.NameModel {
+	base := c.ToBasicModel(key, language, project)
+	mdl := &models.NameModel{
+		RootNamespace:             base.RootNamespace,
+		Namespace:                 base.Namespace,
+		Postfix:                   base.Postfix,
+		Prefix:                    base.Prefix,
+		ModuleLevelVariablePrefix: base.ModuleLevelVariablePrefix,
+		Inject:                    base.Inject,
+		Imports:                   base.Imports,
+		Project:                   base.Project,
+		Developer:                 base.Developer,
+		Options:                   base.Options,
+		PageHeader:                base.PageHeader,
+		Name:                      name,
+	}
+
+	return mdl
+}
+
+// ToCommitHistoryModel implements modelhelper.CodeModelConverter
+func (c *codeModelConverter) ToCommitHistoryModel(key string, language string, project *models.ProjectConfig, commitHistory *models.CommitHistory) *models.CommitModel {
+	base := c.ToBasicModel(key, language, project)
+	mdl := &models.CommitModel{
+		RootNamespace:             base.RootNamespace,
+		Namespace:                 base.Namespace,
+		Postfix:                   base.Postfix,
+		Prefix:                    base.Prefix,
+		ModuleLevelVariablePrefix: base.ModuleLevelVariablePrefix,
+		Inject:                    base.Inject,
+		Imports:                   base.Imports,
+		Project:                   base.Project,
+		Developer:                 base.Developer,
+		Options:                   base.Options,
+		PageHeader:                base.PageHeader,
+	}
+	mdl.Name = commitHistory.Name
+	mdl.Features = commitHistory.Messages["feat"]
+	mdl.Fixes = commitHistory.Messages["fix"]
+	mdl.Refactors = commitHistory.Messages["refactor"]
+	mdl.Docs = commitHistory.Messages["docs"]
+	mdl.Performance = commitHistory.Messages["perf"]
+	mdl.Tests = commitHistory.Messages["tests"]
+	mdl.Builds = commitHistory.Messages["builds"]
+	mdl.Ci = commitHistory.Messages["ci"]
+	mdl.Chores = commitHistory.Messages["chores"]
+	mdl.Reverts = commitHistory.Messages["reverts"]
+
+	mdl.HasFeatures = len(mdl.Features) > 0
+	mdl.HasRefactors = len(mdl.Refactors) > 0
+	mdl.HasFixes = len(mdl.Fixes) > 0
+
+	for _, msg := range commitHistory.Messages {
+		for _, commit := range msg {
+			if commit.IsBreakingChange {
+				mdl.BreakingChanges = append(mdl.BreakingChanges, commit)
+			}
+		}
+	}
+	mdl.HasBreakingChanges = len(mdl.BreakingChanges) > 0
+
+	mdl.Authors = commitHistory.Authors
+	mdl.HasAuthors = len(mdl.Authors) > 0
+	return mdl
+
+}
+
 // ToBasicModel implements modelhelper.CodeModelConverter
 func (c *codeModelConverter) ToBasicModel(identifier, language string, project *models.ProjectConfig) *models.BasicModel {
 	b := models.BasicModel{}
@@ -19,9 +108,6 @@ func (c *codeModelConverter) ToBasicModel(identifier, language string, project *
 		project = emptyProject()
 	}
 
-	// inject := map[]
-	code, codeFound := project.Code[language]
-
 	if len(project.Options) > 0 {
 		b.Options = project.Options
 	}
@@ -30,15 +116,15 @@ func (c *codeModelConverter) ToBasicModel(identifier, language string, project *
 
 	b.PageHeader = project.Header
 
-	if len(identifier) > 0 && codeFound {
-		val, found := code.Keys[identifier]
+	if len(identifier) > 0 {
+		val, found := project.Setup[identifier]
 		if found {
-			b.RootNamespace = code.RootNamespace
+			b.RootNamespace = project.RootNamespace
 			imports = append(imports, val.Imports...)
 
 			b.Inject = []models.InjectSection{}
 			for _, injectKey := range val.Inject {
-				injItem, foundInj := code.Inject[injectKey]
+				injItem, foundInj := project.Inject[injectKey]
 				if foundInj {
 					b.Inject = append(b.Inject, toInjectSection(injItem, b))
 				}
@@ -64,7 +150,8 @@ func emptyProject() *models.ProjectConfig {
 		Header:      "",
 		Custom:      nil,
 		Description: "",
-		Code:        make(map[string]models.Code),
+		Setup:       make(map[string]models.Key),
+		Inject:      make(map[string]models.Inject),
 		OwnerName:   "",
 	}
 
@@ -131,6 +218,7 @@ func (c *codeModelConverter) ToEntityModel(key, language string, project *models
 		HasPrefix:                 false, //len(entityBase.Prefix) > 0,
 		NameWithoutPrefix:         "",
 		Columns:                   entityBase.Columns,
+		NonPrimaryColumns:         entityBase.NonPrimaryColumns,
 		Parents:                   entityBase.Parents,
 		Children:                  entityBase.Children,
 		PrimaryKeys:               entityBase.PrimaryKeys,
@@ -187,6 +275,8 @@ func toEntitySection(from *models.Entity) models.EntityModel {
 
 		if column.IsPrimaryKey {
 			out.PrimaryKeys = append(out.PrimaryKeys, col)
+		} else {
+			out.NonPrimaryColumns = append(out.NonPrimaryColumns, col)
 		}
 
 		if column.IsForeignKey {

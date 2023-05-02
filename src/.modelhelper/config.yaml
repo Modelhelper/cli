@@ -3,17 +3,17 @@ version: "3.0.0-beta1"
 
 name: modelhelper/cli 
 
-identifiers:
-  - name: core-models    
-    destination: ./core/models # relative to the .modelhelper project folder
-  - name: core-command
-    destination: ./core/commands 
-  - name: core-query
-    destination: ./core/query 
-  - name: ports-controller
-    destination: ./ports/api/controllers 
-  - name: ports-validator
-    destination: ./ports/api/validators 
-  - name: features
-    destination: ./features/{.Name | singular | kebab} 
-  
+setup: 
+  model: 
+    postfix: Model
+    namespace: models
+        
+locations:
+  mail: ./
+  model: ./modelhelper/models
+  core-command: ./core/commands 
+  core-query: ./core/query 
+  ports-controller: ./ports/api/controllers 
+  ports-validator: ./ports/api/validators 
+  features: ./features/{.Name | singular | kebab} 
+  # model: "./core/models/{{.Name | singular | kebab}}" # relative to the .modelhelper project folder

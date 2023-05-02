@@ -47,7 +47,22 @@ func (server *demoSource) Entity(name string) (*models.Entity, error) {
 }
 
 func (server *demoSource) EntitiesFromNames(names []string) (*[]models.Entity, error) {
-	return nil, nil
+	all, err := server.Entities("")
+
+	if err != nil {
+		return nil, err
+	}
+
+	list := []models.Entity{}
+
+	for _, name := range names {
+		for _, entity := range *all {
+			if entity.Name == name {
+				list = append(list, entity)
+			}
+		}
+	}
+	return &list, nil
 }
 
 func (server *demoSource) Entities(pattern string) (*[]models.Entity, error) {

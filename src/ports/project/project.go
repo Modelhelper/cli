@@ -7,6 +7,7 @@ import (
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/constants"
 	"modelhelper/cli/modelhelper/models"
+	"modelhelper/cli/utils/path"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,6 +18,17 @@ import (
 type defaultProject struct {
 	path   string
 	Config models.ProjectConfig
+}
+
+// BasePath implements modelhelper.ProjectConfigService
+func (p *defaultProject) BasePath() string {
+	bp, exist := path.FindBaseDirFromFoldername(path.CurrentDirectory(), constants.ProjectRootFolderName)
+
+	if exist {
+		return bp
+	}
+
+	return ""
 }
 
 // return ProjectService
@@ -203,7 +215,7 @@ func (p *defaultProject) FindNearestProjectDir() (string, bool) {
 	updir := "../"
 
 	for i := 1; i < 6; i++ {
-		files, err := ioutil.ReadDir(basePath)
+		files, err := os.ReadDir(basePath)
 		if err != nil {
 			log.Fatal(err)
 		}

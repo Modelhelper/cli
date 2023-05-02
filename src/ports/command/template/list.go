@@ -107,7 +107,7 @@ func (t *templatePrinter) Rows() [][]string {
 	var rows [][]string
 
 	for name, t := range t.templates {
-		groups := strings.Join(t.Groups, ", ")
+		groups := strings.Join(t.Features, ", ")
 		row := []string{
 			name,
 			t.Language,

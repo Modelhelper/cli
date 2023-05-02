@@ -12,7 +12,7 @@ type CodeTemplateService interface {
 }
 
 type CodeGeneratorService interface {
-	Generate(ctx context.Context, options *models.CodeGeneratorOptions) ([]models.TemplateGeneratorFileResult, error)
+	Generate(ctx context.Context, options *models.CodeGeneratorOptions) (*models.CodeGenerateResult, error)
 }
 
 type TemplateTypes interface {

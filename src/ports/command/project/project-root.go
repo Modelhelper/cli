@@ -19,8 +19,10 @@ func ProjectCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:     "project",
 		Aliases: []string{"p"},
-		Short:   "Generates code based on language, template and source",
-		Run:     rootCommandHandler,
+		Short:   "Work with projects",
+		Run: func(cmd *cobra.Command, args []string) {
+			writeProjectInfo(app)
+		},
 	}
 
 	for _, sub := range subCommands {
@@ -30,6 +32,11 @@ func ProjectCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 	return rootCmd
 }
 
-func rootCommandHandler(cmd *cobra.Command, args []string) {
-	fmt.Println("project info")
+func writeProjectInfo(app *modelhelper.ModelhelperCli) {
+	if !app.Project.Exists {
+		fmt.Printf("No project exists here \n")
+		return
+	}
+
+	fmt.Printf(app.Project.Config.Name)
 }

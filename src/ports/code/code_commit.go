@@ -97,9 +97,11 @@ func (cs *codeCommitService) GetCommitHistory(repoPath string, options *models.C
 	gitopt := &git.LogOptions{
 		Order: git.LogOrderCommitterTime,
 	}
+	cc.Name = "From HEAD"
 
 	if tag != nil {
 		gitopt.Since = &tag.Tagger.When
+		cc.Name = tag.Name
 	}
 	// t := time.Now().AddDate(-1, 0, 0)
 	// Get the commit history from the recent tag up to HEAD

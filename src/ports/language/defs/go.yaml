@@ -47,7 +47,7 @@ datatypes:
     defaultValue: ""
     notnullValue: ''
   bigint: 
-    notNull: Int64
+    notNull: int64
     nullable: sql.NullInt64
     defaultValue: 0
     notnullValue: 0
@@ -79,6 +79,9 @@ datatypes:
   float: 
     notNull: float64
     nullable: sql.NullFloat64
+  float8: 
+    notNull: float64
+    nullable: sql.NullFloat64
   geography: 
     notNull: string
     nullable: string    
@@ -94,6 +97,9 @@ datatypes:
   int4: 
     notNull: int
     nullable: sql.NullInt32    
+  int8: 
+    notNull: int64
+    nullable: sql.NullInt64    
   money: 
     notNull: decimal
     nullable: sql.NullDecimal    
@@ -116,7 +122,7 @@ datatypes:
     notNull: time.Time
     nullable: sql.NullTime    
   smallint: 
-    notNull: int8
+    notNull: int
     nullable: sql.NullInt16
   smallmoney: 
     notNull: string
