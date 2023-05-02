@@ -34,12 +34,13 @@ func NewCodeGeneratorService(cfg *models.Config,
 	return &codeGeneratorService{cfg, pc, cmc, ts, g, c, srcf, ch}
 }
 
-func (g *codeGeneratorService) Generate(ctx context.Context, options *models.CodeGeneratorOptions) ([]models.TemplateGeneratorFileResult, error) {
+func (g *codeGeneratorService) Generate(ctx context.Context, options *models.CodeGeneratorOptions) (*models.CodeGenerateResult, error) {
 
+	result := new(models.CodeGenerateResult)
 	if len(options.Templates) == 0 && len(options.FeatureTemplates) == 0 {
 		// no point to continue if no templates is given
 
-		return nil, errors.New(`No templates or template groups are provided resulting in nothing to create
+		return nil, errors.New(`no templates or template groups are provided resulting in nothing to create
 please use mh generate with the -t or --template [templatename] to set at template
 
 You could also use mh template or mh t to see a list of all available templates`)
@@ -63,7 +64,7 @@ You could also use mh template or mh t to see a list of all available templates`
 			return nil, err
 		}
 		if len(connections) == 0 {
-			return nil, errors.New("Could not find any connections to use, please add a connection to the config file")
+			return nil, errors.New("could not find any connections to use, please add a connection to the config file")
 		}
 		if len(options.ConnectionName) == 0 {
 
@@ -116,7 +117,12 @@ You could also use mh template or mh t to see a list of all available templates`
 		currentTemplate, found := allTemplates[tname]
 
 		if found {
-			locationPath, locationFound := prj.Locations[currentTemplate.Key]
+
+			locationPath, locationFound := "", false
+
+			if prj != nil && prj.Locations != nil {
+				locationPath, locationFound = prj.Locations[currentTemplate.Key]
+			}
 
 			// var codeSection models.Code
 
@@ -132,9 +138,22 @@ You could also use mh template or mh t to see a list of all available templates`
 					model := g.cmc.ToBasicModel(currentTemplate.Key, currentTemplate.Language, prj)
 					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
 
+					fileName := ""
+					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+						cstat.FilesCreated += 1
+						fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+
+						if locationFound {
+							locationPath = simpleGenerate("location", locationPath, model)
+
+						}
+
+					}
 					f := models.TemplateGeneratorFileResult{
-						Result:   o,
-						Filename: "",
+						Destination: filepath.Join(locationPath, fileName),
+						Result:      o,
+						Filename:    fileName,
+						FilePath:    locationPath,
 					}
 
 					generatedCode = append(generatedCode, f)
@@ -200,27 +219,45 @@ You could also use mh template or mh t to see a list of all available templates`
 							model.Inject[x].Name = simpleGenerate("injprop", inj.Name, model)
 						}
 
-						o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+						o, err := g.generator.Generate(ctx, &currentTemplate, model)
 
-						fileName := ""
+						if err != nil {
+							fmt.Println("Error when generating", err)
+						}
+
+						fileName, destination := "", ""
+
+						if currentTemplate.FileName != "" {
+							fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+						}
+
+						if locationFound {
+							locationPath = simpleGenerate("location", locationPath, model)
+						}
+
+						if len(fileName) > 0 {
+							destination = filepath.Join(locationPath, fileName)
+						}
+
+						code := models.TemplateGeneratorFileResult{
+							Result:      o,
+							Destination: destination,
+							Filename:    fileName,
+							FilePath:    locationPath,
+						}
+
 						if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
 							cstat.FilesCreated += 1
+							code.IsSnippet = false
+							result.Files = append(result.Files, code)
 
-							fileName = simpleGenerate("filename", currentTemplate.FileName, model)
-
-							if locationFound {
-								locationPath = simpleGenerate("location", locationPath, model)
-
-							}
+						} else if currentTemplate.Type == "snippet" {
+							cstat.SnippetsCreated += 1
+							code.IsSnippet = true
+							code.SnippetIdentifier = currentTemplate.Identifier
+							result.Snippets = append(result.Snippets, code)
 						}
 
-						f := models.TemplateGeneratorFileResult{
-							Result:   o,
-							Filename: fileName,
-							FilePath: locationPath,
-						}
-
-						generatedCode = append(generatedCode, f)
 					}
 
 					entityGenerator()
@@ -265,9 +302,10 @@ You could also use mh template or mh t to see a list of all available templates`
 					}
 
 					f := models.TemplateGeneratorFileResult{
-						Result:   o,
-						Filename: fileName,
-						FilePath: locationPath,
+						Destination: filepath.Join(locationPath, fileName),
+						Result:      o,
+						Filename:    fileName,
+						FilePath:    locationPath,
 					}
 
 					generatedCode = append(generatedCode, f)
@@ -348,45 +386,23 @@ You could also use mh template or mh t to see a list of all available templates`
 				customGenerator()
 			}
 
-		// 			_, err := fileExporter.Write([]byte(content))
-		// 			if err != nil {
-		// 				fmt.Printf("%s, err: \n%v", filepath.ErrBadPattern, err)
-		// 			}
-		// 			// fmt.Println("*** FILENAME::", s.filename)
-		// 			flock.Lock()
-		// 			cstat.FilesExported += 1
-		// 			flock.Unlock()
-		// 		} else {
-		// 			fmt.Println("Filename empty...")
-		// 		}
-		// 	}(codeBody.Filename, options.ExportPath, content)
-		// }
 		}
 
-	// fwg.Wait()
-	// if options.ExportToClipboard {
-	// 	fmt.Printf("\nGenerated code is copied to the \033[37mclipboard\033[0m. Use \033[34mctrl+v\033[0m to paste it where you like")
-	// 	clipboard.WriteAll(sb.String())
-	// }
-
-	cstat.Duration = time.Since(start)
-	// stat["total.time"] = int(cstat.duration.Milliseconds())
-	if !options.CodeOnly {
-		wpm := 30.0
-		cpm := 250.0
-
-		min := float64(cstat.Words) / wpm
-		min = float64(cstat.Chars) / cpm
-		// stat["total.savings"] = int(min)
-		printStat(cstat)
-		fmt.Printf("\nIn summary... It took \033[32m%vms\033[0m to generate \033[34m%d\033[0m words and \033[34m%d\033[0m lines. \nYou saved around \033[32m%v minutes\033[0m by not typing it youreself\n",
-			cstat.Duration.Milliseconds(),
-			cstat.Words,
-			cstat.Lines,
-			int(min))
 	}
+	result.Files = append(result.Files, generatedCode...)
 
-	return generatedCode, nil
+	for _, codeBody := range result.Files {
+		if codeBody.Result != nil {
+
+			cstat.Chars += codeBody.Result.Statistics.Chars
+			cstat.Lines += codeBody.Result.Statistics.Lines
+			cstat.Words += codeBody.Result.Statistics.Words
+		}
+	}
+	cstat.Duration = time.Since(start)
+
+	result.Statistics = cstat
+	return result, nil
 }
 
 func keyArray(input map[string]models.Connection) []string {
@@ -403,7 +419,7 @@ func selectTemplates(templates map[string]models.CodeTemplate, input []string, g
 
 	if len(groups) > 0 {
 		for keyTpl, tplVal := range templates {
-			for _, templateGroup := range tplVal.Groups {
+			for _, templateGroup := range tplVal.Features {
 
 				for _, checkGroupName := range groups {
 					if checkGroupName == templateGroup {
@@ -502,26 +518,26 @@ func mergedList(lists ...[]string) []string {
 
 }
 
-func printStat(stat *models.TemplateGeneratorStatistics) {
-	fmt.Printf(`
+// func printStat(stat *models.TemplateGeneratorStatistics) {
+// 	fmt.Printf(`
 
-Statistics:
----------------------------------------
-`)
-	tpl := "%-20s%8d\n"
+// Statistics:
+// ---------------------------------------
+// `)
+// 	tpl := "%-20s%8d\n"
 
-	fmt.Printf(tpl, "Templates used", stat.TemplatesUsed)
-	fmt.Printf(tpl, "Entities used", stat.EntitiesUsed)
-	fmt.Printf(tpl, "Files created", stat.FilesCreated)
-	fmt.Printf(tpl, "Files exported", stat.FilesExported)
-	// fmt.Printf(tpl, "Snippets inserted", 1)
-	fmt.Println()
-	fmt.Printf(tpl, "Character count", stat.Chars)
-	fmt.Printf(tpl, "Word count", stat.Words)
-	fmt.Printf(tpl, "Line count", stat.Lines)
-	fmt.Printf(tpl, "Time used (ms)", stat.Duration.Milliseconds())
+// 	fmt.Printf(tpl, "Templates used", stat.TemplatesUsed)
+// 	fmt.Printf(tpl, "Entities used", stat.EntitiesUsed)
+// 	fmt.Printf(tpl, "Files created", stat.FilesCreated)
+// 	fmt.Printf(tpl, "Files exported", stat.FilesExported)
+// 	// fmt.Printf(tpl, "Snippets inserted", 1)
+// 	fmt.Println()
+// 	fmt.Printf(tpl, "Character count", stat.Chars)
+// 	fmt.Printf(tpl, "Word count", stat.Words)
+// 	fmt.Printf(tpl, "Line count", stat.Lines)
+// 	fmt.Printf(tpl, "Time used (ms)", stat.Duration.Milliseconds())
 
-}
+// }
 
 // func getCurrentTemplateSet()
 func testTable() *models.EntityImportModel {

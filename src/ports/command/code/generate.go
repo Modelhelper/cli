@@ -28,6 +28,8 @@ func NewGenerateCodeCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 func registerFlags(cmd *cobra.Command) {
 	cmd.Flags().StringArrayP("template", "t", []string{}, "A list of template to convert")
 	cmd.Flags().StringArrayP("feature", "f", []string{}, "Use a group of templates")
+	// cmd.Flags().StringP("export", "e", "", "Exports the resulted code files to a location or by a mat")
+
 	cmd.Flags().String("template-path", "", "Instructs the program to use this path as root for templates")
 
 	// cmd.Flags().StringP("relations [direct, all, complete]", "r", "", "Include related entities based on the entities in --entity or --entity-group ('direct' | 'all' | 'complete' | 'children' | 'parents')")
@@ -39,7 +41,8 @@ func registerFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool("screen", false, "List the output to the screen, default false")
 	cmd.Flags().Bool("copy", false, "Copies the generated code to the clipboard (ctrl + v), default false")
 	cmd.Flags().String("export-path", "", "Exports to a directory")
-	// cmd.Flags().Bool("export-bykey", false, "Exports the code using the template keys, default false")
+	cmd.Flags().Bool("export-bykey", false, "Exports the code using the template location key, default false")
+
 	cmd.Flags().Bool("overwrite", false, "Overwrite any existing file when exporting to file on disk")
 
 	cmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code, default false")
@@ -53,6 +56,10 @@ func registerFlags(cmd *cobra.Command) {
 
 	// cmd.Flags().String("setup", "", "Use this setup to generate code") // version 3.1
 	cmd.Flags().StringP("connection", "c", "", "The connection key to be used, uses default connection if not provided")
+	cmd.Flags().StringP("name", "n", "", "Sets the name for a template using the 'NameModel'. Will be ignored for any other template type")
+
+	// cmd.Flags().String("custom-json", "", "Instructs the program to use this path as root for templates")
+	// cmd.Flags().String("custom-file", "", "Instructs the program to use this path as root for templates")
 
 	cmd.RegisterFlagCompletionFunc("relations", completeRelations)
 }
@@ -70,7 +77,7 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 		// var fwg sync.WaitGroup
 		// var flock = sync.Mutex{}
 
-		for _, res := range result {
+		for _, res := range result.Files {
 			content := []byte(res.Result.Body)
 			if options.ExportToScreen {
 				screenWriter := exporter.ScreenExporter{}
@@ -81,6 +88,30 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 				sb.WriteString(string(content))
 			}
 
+			if options.ExportByLocationKey && app.Project.Exists {
+				fileLocationWriter := exporter.FileExporter{}
+				fileLocationWriter.Overwrite = options.Overwrite
+				fileLocationWriter.Filename = res.Destination
+				fileLocationWriter.Write(res.Result.Body)
+
+			}
+		}
+
+		for _, snippet := range result.Snippets {
+			content := []byte(snippet.Result.Body)
+			if options.ExportToScreen {
+				screenWriter := exporter.ScreenExporter{}
+				screenWriter.Write([]byte(content))
+			}
+
+			if options.ExportToClipboard {
+				sb.WriteString(string(content))
+			}
+
+			if options.ExportByLocationKey && app.Project.Exists && len(snippet.Destination) > 0 {
+				writer := exporter.NewSnippetExporter(snippet.Destination, snippet.SnippetIdentifier)
+				writer.Write(snippet.Result.Body)
+			}
 		}
 
 		if options.ExportToClipboard {
@@ -88,8 +119,11 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 			clipboard.WriteAll(sb.String())
 		}
 
-		loc, f := app.Project.ConfigService.FindNearestProjectDir()
-		fmt.Println(loc, f)
+		if !options.CodeOnly {
+			printStat(result.Statistics)
+		}
+		// loc, f := app.Project.ConfigService.FindNearestProjectDir()
+		// fmt.Println(loc, f)
 	}
 
 }
@@ -108,10 +142,12 @@ func parseCodeOptions(cmd *cobra.Command, args []string) *models.CodeGeneratorOp
 	featureTemplates, _ := cmd.Flags().GetStringArray("feature")
 	printScreen, _ := cmd.Flags().GetBool("screen")
 	toClipBoard, _ := cmd.Flags().GetBool("copy")
-	// exportByKey, _ := cmd.Flags().GetBool("export-bykey")
+	exportByKey, _ := cmd.Flags().GetBool("export-bykey")
 	conName, _ := cmd.Flags().GetString("connection")
+	name, _ := cmd.Flags().GetString("name")
 	overwriteAll, _ := cmd.Flags().GetBool("overwrite")
 
+	options.Name = name
 	options.CodeOnly = codeOnly
 	options.UseDemo = isDemo
 	options.SourceItems = sourceFlagArray
@@ -123,7 +159,7 @@ func parseCodeOptions(cmd *cobra.Command, args []string) *models.CodeGeneratorOp
 	options.FeatureTemplates = featureTemplates
 	options.ExportToScreen = printScreen
 	options.ExportToClipboard = toClipBoard
-	options.ExportByKey = false
+	options.ExportByLocationKey = exportByKey
 	options.ConnectionName = conName
 	options.Overwrite = overwriteAll
 
@@ -137,4 +173,39 @@ func completeRelations(cmd *cobra.Command, args []string, toComplete string) ([]
 
 func exportPath() {
 
+}
+
+func printStat(stat *models.TemplateGeneratorStatistics) {
+	if stat == nil {
+		return
+	}
+	fmt.Printf(`
+
+Statistics:
+---------------------------------------
+`)
+	tpl := "%-20s%8d\n"
+
+	fmt.Printf(tpl, "Templates used", stat.TemplatesUsed)
+	fmt.Printf(tpl, "Entities used", stat.EntitiesUsed)
+	fmt.Printf(tpl, "Files created", stat.FilesCreated)
+	fmt.Printf(tpl, "Files exported", stat.FilesExported)
+	// fmt.Printf(tpl, "Snippets inserted", 1)
+	fmt.Println()
+	fmt.Printf(tpl, "Character count", stat.Chars)
+	fmt.Printf(tpl, "Word count", stat.Words)
+	fmt.Printf(tpl, "Line count", stat.Lines)
+	fmt.Printf(tpl, "Time used (ms)", stat.Duration.Milliseconds())
+
+	wpm := 30.0
+	cpm := 250.0
+
+	min := float64(stat.Words) / wpm
+	min = float64(stat.Chars) / cpm
+
+	fmt.Printf("\nIn summary... It took \033[32m%vms\033[0m to generate \033[34m%d\033[0m words and \033[34m%d\033[0m lines. \nYou saved around \033[32m%v minutes\033[0m by not typing it youreself\n",
+		stat.Duration.Milliseconds(),
+		stat.Words,
+		stat.Lines,
+		int(min))
 }

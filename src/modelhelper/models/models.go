@@ -64,26 +64,20 @@ type Global struct {
 
 //CodeTemplate represent the full structure of a code template
 type CodeTemplate struct {
-	Name string //derived
-	// InjectKey       string
-	// LanguageVersion string
-	// Scope           TemplateScope
-	// Name        string         `yaml:"name"`
-	//Version denotes the version used for the template
-	Version    string `yaml:"version"`
-	Language   string `yaml:"language"`
-	Identifier string `yaml:"identifier"`
-	//Key is obsolete
-	Key         string   `yaml:"key"`
-	Type        string   `yaml:"type"`
-	Description string   `yaml:"description"`
-	Short       string   `yaml:"short"`
-	Tags        []string `yaml:"tags"`
-	Groups      []string `yaml:"groups"`
-	FileName    string   `yaml:"fileName"`
-	Model       string   `yaml:"model"`
-	Body        string   `yaml:"body"`
-
+	Name             string   //derived
+	Version          string   `yaml:"version"` //Version denotes the version used for the template
+	Language         string   `yaml:"language"`
+	Identifier       string   `yaml:"identifier"`
+	Key              string   `yaml:"key"`
+	Type             string   `yaml:"type"`
+	Description      string   `yaml:"description"`
+	Short            string   `yaml:"short"`
+	Tags             []string `yaml:"tags"`
+	Features         []string `yaml:"features"`
+	FileName         string   `yaml:"fileName"`
+	Model            string   `yaml:"model"`
+	Body             string   `yaml:"body"`
+	BodyFile         string   `yaml:"bodyFile"`
 	TemplateFilePath string
 	// Export      TemplateExport `yaml:"export"`
 }
@@ -158,6 +152,7 @@ type EntityModel struct {
 	HasParents                bool
 	Children                  []EntityRelationModel
 	HasChildren               bool
+	NonPrimaryColumns         []EntityColumnModel
 	PrimaryKeys               []EntityColumnModel
 	ForeignKeys               []EntityColumnModel
 	UsedAsColumns             []EntityColumnModel
@@ -446,6 +441,7 @@ type EntityImportModel struct {
 	HasPrefix         bool
 	NameWithoutPrefix string
 	Columns           []EntityColumnImportModel
+	NonPrimaryColumns []EntityColumnImportModel
 	Parents           []EntityRelation
 	Children          []EntityRelation
 	// ModelName          string
