@@ -1,3 +1,5 @@
+## THIS IS NOT IN USE - USE CONFIG.YAML instead
+
 configVersion: 3.0
 version: "3.0.0-beta1"
 
@@ -23,6 +25,7 @@ locations:
   ports-controller: ./ports/api/controllers 
   ports-validator: ./ports/api/validators 
   features: ./features/{.Name | singular | kebab} 
+  model: ./modelhelper/models
 
 
 rootNamespace: A root namespace if any     
