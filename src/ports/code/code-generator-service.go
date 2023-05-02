@@ -142,6 +142,39 @@ You could also use mh template or mh t to see a list of all available templates`
 
 				basicGenerator()
 
+			} else if currentTemplate.Model == "name" { //&& len(*entities) > 0
+				nameGenerator := func() {
+					cstat.TemplatesUsed += 1
+
+					model := g.cmc.ToNameModel(currentTemplate.Key, currentTemplate.Language, prj, options.Name)
+					// model.PageHeader = simpleGenerate("header", model.PageHeader, model)
+
+					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+
+					fileName := ""
+					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+						cstat.FilesCreated += 1
+						fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+
+						if locationFound {
+							locationPath = simpleGenerate("location", locationPath, model)
+
+						}
+
+					}
+
+					f := models.TemplateGeneratorFileResult{
+						Destination: filepath.Join(locationPath, fileName),
+						Result:      o,
+						Filename:    fileName,
+						FilePath:    locationPath,
+					}
+
+					generatedCode = append(generatedCode, f)
+
+				}
+
+				nameGenerator()
 			} else if currentTemplate.Model == "entity" { //&& len(*entities) > 0
 
 				for _, entity := range *entities {
@@ -280,61 +313,40 @@ You could also use mh template or mh t to see a list of all available templates`
 				}
 
 				changelogGenerator()
+			} else if currentTemplate.Model == "custom" {
+				customGenerator := func() {
+					cstat.TemplatesUsed += 1
+
+					model := g.cmc.ToCustomModel(currentTemplate.Key, currentTemplate.Language, prj, options.Custom)
+					// model.PageHeader = simpleGenerate("header", model.PageHeader, model)
+
+					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+
+					fileName := ""
+					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+						cstat.FilesCreated += 1
+						fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+
+						if locationFound {
+							locationPath = simpleGenerate("location", locationPath, model)
+
+						}
+
+					}
+
+					f := models.TemplateGeneratorFileResult{
+						Destination: filepath.Join(locationPath, fileName),
+						Result:      o,
+						Filename:    fileName,
+						FilePath:    locationPath,
+					}
+
+					generatedCode = append(generatedCode, f)
+
+				}
+
+				customGenerator()
 			}
-
-		}
-
-	}
-
-	// sb := strings.Builder{}
-	// var fwg sync.WaitGroup
-	// var flock = sync.Mutex{}
-	for _, codeBody := range generatedCode {
-		cstat.Chars += codeBody.Result.Statistics.Chars
-		cstat.Lines += codeBody.Result.Statistics.Lines
-		cstat.Words += codeBody.Result.Statistics.Words
-		// content := []byte(codeBody.Result.Body)
-		// if options.ExportToScreen {
-		// 	screenWriter := exporter.ScreenExporter{}
-		// 	screenWriter.Write([]byte(content))
-		// }
-
-		// if options.ExportToClipboard {
-		// 	sb.WriteString(string(codeBody.Result.Body))
-		// }
-
-		// if options.ExportByKey && len(codeBody.Filename) > 0 {
-		// 	fwg.Add(1)
-		// 	go func(filename string, rootPath string, content []byte) {
-		// 		defer fwg.Done()
-		// 		keyExporter := exporter.FileExporter{
-		// 			Filename:  filepath.Join(rootPath, filename),
-		// 			Overwrite: options.Overwrite,
-		// 		}
-
-		// 		_, err := keyExporter.Write([]byte(content))
-		// 		if err != nil {
-		// 			fmt.Println(filepath.ErrBadPattern)
-		// 		}
-		// 		// fmt.Println("*** FILENAME::", s.filename)
-		// 		flock.Lock()
-		// 		cstat.FilesExported += 1
-		// 		flock.Unlock()
-		// 	}(codeBody.Filename, "D:/projects/ModelHelper", content)
-
-		// }
-		// // TODO: export to file
-		// if len(options.ExportPath) > 0 {
-		// 	fwg.Add(1)
-		// 	go func(filename string, rootPath string, content []byte) {
-		// 		defer fwg.Done()
-
-		// 		if len(filename) > 0 {
-
-		// 			fileExporter := exporter.FileExporter{
-		// 				Filename:  filepath.Join(rootPath, filename),
-		// 				Overwrite: options.Overwrite,
-		// 			}
 
 		// 			_, err := fileExporter.Write([]byte(content))
 		// 			if err != nil {
@@ -349,7 +361,7 @@ You could also use mh template or mh t to see a list of all available templates`
 		// 		}
 		// 	}(codeBody.Filename, options.ExportPath, content)
 		// }
-	}
+		}
 
 	// fwg.Wait()
 	// if options.ExportToClipboard {

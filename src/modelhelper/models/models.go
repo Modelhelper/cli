@@ -101,6 +101,35 @@ type BasicModel struct {
 	Options                   map[string]string
 	PageHeader                string
 }
+
+type NameModel struct {
+	Name                      string
+	RootNamespace             string
+	Namespace                 string
+	Postfix                   string
+	Prefix                    string
+	ModuleLevelVariablePrefix string
+	Inject                    []InjectSection
+	Imports                   []string
+	Project                   ProjectSection
+	Developer                 DeveloperSection
+	Options                   map[string]string
+	PageHeader                string
+}
+type CustomModel struct {
+	Custom                    interface{}
+	RootNamespace             string
+	Namespace                 string
+	Postfix                   string
+	Prefix                    string
+	ModuleLevelVariablePrefix string
+	Inject                    []InjectSection
+	Imports                   []string
+	Project                   ProjectSection
+	Developer                 DeveloperSection
+	Options                   map[string]string
+	PageHeader                string
+}
 type EntityModel struct {
 	RootNamespace             string
 	Namespace                 string

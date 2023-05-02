@@ -10,6 +10,48 @@ type codeModelConverter struct {
 	// app *modelhelper.ModelhelperCli
 }
 
+// ToCustomModel implements modelhelper.CodeModelConverter
+func (c *codeModelConverter) ToCustomModel(key string, language string, project *models.ProjectConfig, custom any) *models.CustomModel {
+	base := c.ToBasicModel(key, language, project)
+	mdl := &models.CustomModel{
+		RootNamespace:             base.RootNamespace,
+		Namespace:                 base.Namespace,
+		Postfix:                   base.Postfix,
+		Prefix:                    base.Prefix,
+		ModuleLevelVariablePrefix: base.ModuleLevelVariablePrefix,
+		Inject:                    base.Inject,
+		Imports:                   base.Imports,
+		Project:                   base.Project,
+		Developer:                 base.Developer,
+		Options:                   base.Options,
+		PageHeader:                base.PageHeader,
+		Custom:                    custom,
+	}
+
+	return mdl
+}
+
+// ToNameModel implements modelhelper.CodeModelConverter
+func (c *codeModelConverter) ToNameModel(key string, language string, project *models.ProjectConfig, name string) *models.NameModel {
+	base := c.ToBasicModel(key, language, project)
+	mdl := &models.NameModel{
+		RootNamespace:             base.RootNamespace,
+		Namespace:                 base.Namespace,
+		Postfix:                   base.Postfix,
+		Prefix:                    base.Prefix,
+		ModuleLevelVariablePrefix: base.ModuleLevelVariablePrefix,
+		Inject:                    base.Inject,
+		Imports:                   base.Imports,
+		Project:                   base.Project,
+		Developer:                 base.Developer,
+		Options:                   base.Options,
+		PageHeader:                base.PageHeader,
+		Name:                      name,
+	}
+
+	return mdl
+}
+
 // ToCommitHistoryModel implements modelhelper.CodeModelConverter
 func (c *codeModelConverter) ToCommitHistoryModel(key string, language string, project *models.ProjectConfig, commitHistory *models.CommitHistory) *models.CommitModel {
 	base := c.ToBasicModel(key, language, project)
@@ -176,6 +218,7 @@ func (c *codeModelConverter) ToEntityModel(key, language string, project *models
 		HasPrefix:                 false, //len(entityBase.Prefix) > 0,
 		NameWithoutPrefix:         "",
 		Columns:                   entityBase.Columns,
+		NonPrimaryColumns:         entityBase.NonPrimaryColumns,
 		Parents:                   entityBase.Parents,
 		Children:                  entityBase.Children,
 		PrimaryKeys:               entityBase.PrimaryKeys,
@@ -232,6 +275,8 @@ func toEntitySection(from *models.Entity) models.EntityModel {
 
 		if column.IsPrimaryKey {
 			out.PrimaryKeys = append(out.PrimaryKeys, col)
+		} else {
+			out.NonPrimaryColumns = append(out.NonPrimaryColumns, col)
 		}
 
 		if column.IsForeignKey {
