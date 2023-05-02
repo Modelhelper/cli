@@ -95,3 +95,12 @@ func initializeApplication(ctx context.Context) (modelhelper.CommandService, mod
 // 	fmt.Println(size.PosY()) // Get Y position
 // 	//
 // }
+
+/*
+
+	//%%MH_SNIPPET_QUERY_DEF%%GetCalibration: calibration.NewGetCalibrationHandler(sqlConn, logger),
+GetCalibration: calibration.NewGetCalibrationHandler(sqlConn, logger),
+
+
+
+*/
