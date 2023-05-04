@@ -11,7 +11,7 @@
 		select Name = 'column' union
 		select Name = 'commit' union
 		select Name = 'return'        
-	),PrimaryKeyColumns as (
+	),PrimaryKeys as (
 
 		SELECT  
 			i.name AS IndexName
@@ -65,7 +65,7 @@
 	left join sys.types st on st.user_type_id = c.user_type_id
    -- left join IgnoredColumns s on s.Name = c.name
 	left join Reserved r on r.name = c.name
-	left join PrimaryKeyColumns pkc on pkc.ColumnId = c.column_id and pkc.ObjectId = c.object_id -- c.name
+	left join PrimaryKeys pkc on pkc.ColumnId = c.column_id and pkc.ObjectId = c.object_id -- c.name
 	left join ForeignKeyColumns fkc on fkc.ColumnId = c.column_id and c.object_id = fkc.ObjectId
 	left join sys.extended_properties ep on c.object_id = ep.major_id and minor_id = c.column_id and ep.name = 'MS_description'
 	where object_id = object_id(@entityName)
