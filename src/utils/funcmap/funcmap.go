@@ -6,11 +6,11 @@ import (
 )
 
 func FullFuncMap(dt, ntd map[string]string) template.FuncMap {
-	return FuncMap(StringMap(), DatatypeMap(dt, ntd))
+	return FuncMap(StandardMap(), StringMap(), DatatypeMap(dt, ntd))
 }
 
 func SimpleFuncMap() template.FuncMap {
-	return FuncMap(StringMap())
+	return FuncMap(StandardMap(), StringMap())
 }
 
 func FuncMap(flist ...template.FuncMap) template.FuncMap {
@@ -24,6 +24,17 @@ func FuncMap(flist ...template.FuncMap) template.FuncMap {
 	}
 
 	return m
+}
+
+func StandardMap() template.FuncMap {
+	return template.FuncMap{
+		"increment": Incrementer,
+	}
+
+}
+
+func Incrementer(i int) int {
+	return i + 1
 }
 
 func StringMap() template.FuncMap {
