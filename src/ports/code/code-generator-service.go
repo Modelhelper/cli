@@ -137,26 +137,28 @@ You could also use mh template or mh t to see a list of all available templates`
 
 					model := g.cmc.ToBasicModel(currentTemplate.Key, currentTemplate.Language, prj)
 					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
+					appendCodeResult(result, code)
 
-					fileName := ""
-					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-						cstat.FilesCreated += 1
-						fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+					// fileName := ""
+					// if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+					// 	cstat.FilesCreated += 1
+					// 	fileName = simpleGenerate("filename", currentTemplate.FileName, model)
 
-						if locationFound {
-							locationPath = simpleGenerate("location", locationPath, model)
+					// 	if locationFound {
+					// 		locationPath = simpleGenerate("location", locationPath, model)
 
-						}
+					// 	}
 
-					}
-					f := models.TemplateGeneratorFileResult{
-						Destination: filepath.Join(locationPath, fileName),
-						Result:      o,
-						Filename:    fileName,
-						FilePath:    locationPath,
-					}
+					// }
+					// f := models.TemplateGeneratorFileResult{
+					// 	Destination: filepath.Join(locationPath, fileName),
+					// 	Result:      o,
+					// 	Filename:    fileName,
+					// 	FilePath:    locationPath,
+					// }
 
-					generatedCode = append(generatedCode, f)
+					// generatedCode = append(generatedCode, f)
 				}
 
 				basicGenerator()
@@ -169,27 +171,29 @@ You could also use mh template or mh t to see a list of all available templates`
 					// model.PageHeader = simpleGenerate("header", model.PageHeader, model)
 
 					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
+					appendCodeResult(result, code)
 
-					fileName := ""
-					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-						cstat.FilesCreated += 1
-						fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+					// fileName := ""
+					// if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+					// 	cstat.FilesCreated += 1
+					// 	fileName = simpleGenerate("filename", currentTemplate.FileName, model)
 
-						if locationFound {
-							locationPath = simpleGenerate("location", locationPath, model)
+					// 	if locationFound {
+					// 		locationPath = simpleGenerate("location", locationPath, model)
 
-						}
+					// 	}
 
-					}
+					// }
 
-					f := models.TemplateGeneratorFileResult{
-						Destination: filepath.Join(locationPath, fileName),
-						Result:      o,
-						Filename:    fileName,
-						FilePath:    locationPath,
-					}
+					// f := models.TemplateGeneratorFileResult{
+					// 	Destination: filepath.Join(locationPath, fileName),
+					// 	Result:      o,
+					// 	Filename:    fileName,
+					// 	FilePath:    locationPath,
+					// }
 
-					generatedCode = append(generatedCode, f)
+					// generatedCode = append(generatedCode, f)
 
 				}
 
@@ -225,38 +229,41 @@ You could also use mh template or mh t to see a list of all available templates`
 							fmt.Println("Error when generating", err)
 						}
 
-						fileName, destination := "", ""
+						code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
+						appendCodeResult(result, code)
 
-						if currentTemplate.FileName != "" {
-							fileName = simpleGenerate("filename", currentTemplate.FileName, model)
-						}
+						// fileName, destination := "", ""
 
-						if locationFound {
-							locationPath = simpleGenerate("location", locationPath, model)
-						}
+						// if currentTemplate.FileName != "" {
+						// 	fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+						// }
 
-						if len(fileName) > 0 {
-							destination = filepath.Join(locationPath, fileName)
-						}
+						// if locationFound {
+						// 	locationPath = simpleGenerate("location", locationPath, model)
+						// }
 
-						code := models.TemplateGeneratorFileResult{
-							Result:      o,
-							Destination: destination,
-							Filename:    fileName,
-							FilePath:    locationPath,
-						}
+						// if len(fileName) > 0 {
+						// 	destination = filepath.Join(locationPath, fileName)
+						// }
 
-						if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-							cstat.FilesCreated += 1
-							code.IsSnippet = false
-							result.Files = append(result.Files, code)
+						// code := models.TemplateGeneratorFileResult{
+						// 	Result:      o,
+						// 	Destination: destination,
+						// 	Filename:    fileName,
+						// 	FilePath:    locationPath,
+						// }
 
-						} else if currentTemplate.Type == "snippet" {
-							cstat.SnippetsCreated += 1
-							code.IsSnippet = true
-							code.SnippetIdentifier = currentTemplate.Identifier
-							result.Snippets = append(result.Snippets, code)
-						}
+						// if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+						// 	cstat.FilesCreated += 1
+						// 	// code.IsSnippet = false
+						// 	result.Files = append(result.Files, *code)
+
+						// } else if currentTemplate.Type == "snippet" {
+						// 	cstat.SnippetsCreated += 1
+						// 	// code.IsSnippet = true
+						// 	// code.SnippetIdentifier = currentTemplate.Identifier
+						// 	result.Snippets = append(result.Snippets, *code)
+						// }
 
 					}
 
@@ -286,29 +293,32 @@ You could also use mh template or mh t to see a list of all available templates`
 
 					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
 
-					fileName := ""
-					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-						cstat.FilesCreated += 1
-						fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
+					appendCodeResult(result, code)
 
-						if locationFound {
-							locationPath = simpleGenerate("location", locationPath, model)
+					// fileName := ""
+					// if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+					// 	cstat.FilesCreated += 1
+					// 	fileName = simpleGenerate("filename", currentTemplate.FileName, model)
 
-						}
-						// if csFound {
+					// 	if locationFound {
+					// 		locationPath = simpleGenerate("location", locationPath, model)
 
-						// 	fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
-						// }
-					}
+					// 	}
+					// 	// if csFound {
 
-					f := models.TemplateGeneratorFileResult{
-						Destination: filepath.Join(locationPath, fileName),
-						Result:      o,
-						Filename:    fileName,
-						FilePath:    locationPath,
-					}
+					// 	// 	fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
+					// 	// }
+					// }
 
-					generatedCode = append(generatedCode, f)
+					// f := models.TemplateGeneratorFileResult{
+					// 	Destination: filepath.Join(locationPath, fileName),
+					// 	Result:      o,
+					// 	Filename:    fileName,
+					// 	FilePath:    locationPath,
+					// }
+
+					// generatedCode = append(generatedCode, f)
 
 				}
 
@@ -326,27 +336,29 @@ You could also use mh template or mh t to see a list of all available templates`
 					// model.PageHeader = simpleGenerate("header", model.PageHeader, model)
 
 					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
+					appendCodeResult(result, code)
 
-					fileName := ""
-					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-						cstat.FilesCreated += 1
-						fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+					// fileName := ""
+					// if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+					// 	cstat.FilesCreated += 1
+					// 	fileName = simpleGenerate("filename", currentTemplate.FileName, model)
 
-						if locationFound {
-							locationPath = simpleGenerate("location", locationPath, model)
+					// 	if locationFound {
+					// 		locationPath = simpleGenerate("location", locationPath, model)
 
-						}
+					// 	}
 
-					}
+					// }
 
-					f := models.TemplateGeneratorFileResult{
-						Destination: filepath.Join(locationPath, fileName),
-						Result:      o,
-						Filename:    fileName,
-						FilePath:    locationPath,
-					}
+					// f := models.TemplateGeneratorFileResult{
+					// 	Destination: filepath.Join(locationPath, fileName),
+					// 	Result:      o,
+					// 	Filename:    fileName,
+					// 	FilePath:    locationPath,
+					// }
 
-					generatedCode = append(generatedCode, f)
+					// generatedCode = append(generatedCode, f)
 
 				}
 
@@ -359,27 +371,28 @@ You could also use mh template or mh t to see a list of all available templates`
 					// model.PageHeader = simpleGenerate("header", model.PageHeader, model)
 
 					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
+					appendCodeResult(result, code)
+					// fileName := ""
+					// if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+					// 	cstat.FilesCreated += 1
+					// 	fileName = simpleGenerate("filename", currentTemplate.FileName, model)
 
-					fileName := ""
-					if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-						cstat.FilesCreated += 1
-						fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+					// 	if locationFound {
+					// 		locationPath = simpleGenerate("location", locationPath, model)
 
-						if locationFound {
-							locationPath = simpleGenerate("location", locationPath, model)
+					// 	}
 
-						}
+					// }
 
-					}
+					// f := models.TemplateGeneratorFileResult{
+					// 	Destination: filepath.Join(locationPath, fileName),
+					// 	Result:      o,
+					// 	Filename:    fileName,
+					// 	FilePath:    locationPath,
+					// }
 
-					f := models.TemplateGeneratorFileResult{
-						Destination: filepath.Join(locationPath, fileName),
-						Result:      o,
-						Filename:    fileName,
-						FilePath:    locationPath,
-					}
-
-					generatedCode = append(generatedCode, f)
+					// generatedCode = append(generatedCode, f)
 
 				}
 
@@ -403,6 +416,52 @@ You could also use mh template or mh t to see a list of all available templates`
 
 	result.Statistics = cstat
 	return result, nil
+}
+
+func appendCodeResult(result *models.CodeGenerateResult, code *models.TemplateGeneratorFileResult) {
+	if !code.IsSnippet {
+		result.Files = append(result.Files, *code)
+
+	} else {
+		result.Snippets = append(result.Snippets, *code)
+	}
+}
+
+func createCodeResultFile(codeResult *models.TemplateGeneratorResult, currentTemplate *models.CodeTemplate, model any, locationFound bool, locationPath string) *models.TemplateGeneratorFileResult {
+	fileName, destination := "", ""
+
+	if currentTemplate.FileName != "" {
+		fileName = simpleGenerate("filename", currentTemplate.FileName, model)
+	}
+
+	if locationFound {
+		locationPath = simpleGenerate("location", locationPath, model)
+	}
+
+	if len(fileName) > 0 {
+		destination = filepath.Join(locationPath, fileName)
+	}
+
+	code := models.TemplateGeneratorFileResult{
+		Result:      codeResult,
+		Destination: destination,
+		Filename:    fileName,
+		FilePath:    locationPath,
+	}
+
+	if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
+		// cstat.FilesCreated += 1
+		code.IsSnippet = false
+		// result.Files = append(result.Files, code)
+
+	} else if currentTemplate.Type == "snippet" {
+		// cstat.SnippetsCreated += 1
+		code.IsSnippet = true
+		code.SnippetIdentifier = currentTemplate.Identifier
+		// result.Snippets = append(result.Snippets, code)
+	}
+
+	return &code
 }
 
 func keyArray(input map[string]models.Connection) []string {
