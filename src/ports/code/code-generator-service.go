@@ -140,25 +140,6 @@ You could also use mh template or mh t to see a list of all available templates`
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
 
-					// fileName := ""
-					// if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-					// 	cstat.FilesCreated += 1
-					// 	fileName = simpleGenerate("filename", currentTemplate.FileName, model)
-
-					// 	if locationFound {
-					// 		locationPath = simpleGenerate("location", locationPath, model)
-
-					// 	}
-
-					// }
-					// f := models.TemplateGeneratorFileResult{
-					// 	Destination: filepath.Join(locationPath, fileName),
-					// 	Result:      o,
-					// 	Filename:    fileName,
-					// 	FilePath:    locationPath,
-					// }
-
-					// generatedCode = append(generatedCode, f)
 				}
 
 				basicGenerator()
@@ -173,27 +154,6 @@ You could also use mh template or mh t to see a list of all available templates`
 					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
-
-					// fileName := ""
-					// if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-					// 	cstat.FilesCreated += 1
-					// 	fileName = simpleGenerate("filename", currentTemplate.FileName, model)
-
-					// 	if locationFound {
-					// 		locationPath = simpleGenerate("location", locationPath, model)
-
-					// 	}
-
-					// }
-
-					// f := models.TemplateGeneratorFileResult{
-					// 	Destination: filepath.Join(locationPath, fileName),
-					// 	Result:      o,
-					// 	Filename:    fileName,
-					// 	FilePath:    locationPath,
-					// }
-
-					// generatedCode = append(generatedCode, f)
 
 				}
 
@@ -232,39 +192,6 @@ You could also use mh template or mh t to see a list of all available templates`
 						code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 						appendCodeResult(result, code)
 
-						// fileName, destination := "", ""
-
-						// if currentTemplate.FileName != "" {
-						// 	fileName = simpleGenerate("filename", currentTemplate.FileName, model)
-						// }
-
-						// if locationFound {
-						// 	locationPath = simpleGenerate("location", locationPath, model)
-						// }
-
-						// if len(fileName) > 0 {
-						// 	destination = filepath.Join(locationPath, fileName)
-						// }
-
-						// code := models.TemplateGeneratorFileResult{
-						// 	Result:      o,
-						// 	Destination: destination,
-						// 	Filename:    fileName,
-						// 	FilePath:    locationPath,
-						// }
-
-						// if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-						// 	cstat.FilesCreated += 1
-						// 	// code.IsSnippet = false
-						// 	result.Files = append(result.Files, *code)
-
-						// } else if currentTemplate.Type == "snippet" {
-						// 	cstat.SnippetsCreated += 1
-						// 	// code.IsSnippet = true
-						// 	// code.SnippetIdentifier = currentTemplate.Identifier
-						// 	result.Snippets = append(result.Snippets, *code)
-						// }
-
 					}
 
 					entityGenerator()
@@ -296,30 +223,6 @@ You could also use mh template or mh t to see a list of all available templates`
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
 
-					// fileName := ""
-					// if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-					// 	cstat.FilesCreated += 1
-					// 	fileName = simpleGenerate("filename", currentTemplate.FileName, model)
-
-					// 	if locationFound {
-					// 		locationPath = simpleGenerate("location", locationPath, model)
-
-					// 	}
-					// 	// if csFound {
-
-					// 	// 	fullPath = filepath.Join(codeSection.Locations[currentTemplate.Key], filen)
-					// 	// }
-					// }
-
-					// f := models.TemplateGeneratorFileResult{
-					// 	Destination: filepath.Join(locationPath, fileName),
-					// 	Result:      o,
-					// 	Filename:    fileName,
-					// 	FilePath:    locationPath,
-					// }
-
-					// generatedCode = append(generatedCode, f)
-
 				}
 
 				entitiesGenerator()
@@ -339,27 +242,6 @@ You could also use mh template or mh t to see a list of all available templates`
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
 
-					// fileName := ""
-					// if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-					// 	cstat.FilesCreated += 1
-					// 	fileName = simpleGenerate("filename", currentTemplate.FileName, model)
-
-					// 	if locationFound {
-					// 		locationPath = simpleGenerate("location", locationPath, model)
-
-					// 	}
-
-					// }
-
-					// f := models.TemplateGeneratorFileResult{
-					// 	Destination: filepath.Join(locationPath, fileName),
-					// 	Result:      o,
-					// 	Filename:    fileName,
-					// 	FilePath:    locationPath,
-					// }
-
-					// generatedCode = append(generatedCode, f)
-
 				}
 
 				changelogGenerator()
@@ -373,26 +255,6 @@ You could also use mh template or mh t to see a list of all available templates`
 					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
-					// fileName := ""
-					// if currentTemplate.Type == "file" && len(currentTemplate.FileName) > 0 {
-					// 	cstat.FilesCreated += 1
-					// 	fileName = simpleGenerate("filename", currentTemplate.FileName, model)
-
-					// 	if locationFound {
-					// 		locationPath = simpleGenerate("location", locationPath, model)
-
-					// 	}
-
-					// }
-
-					// f := models.TemplateGeneratorFileResult{
-					// 	Destination: filepath.Join(locationPath, fileName),
-					// 	Result:      o,
-					// 	Filename:    fileName,
-					// 	FilePath:    locationPath,
-					// }
-
-					// generatedCode = append(generatedCode, f)
 
 				}
 
@@ -576,27 +438,6 @@ func mergedList(lists ...[]string) []string {
 	return out
 
 }
-
-// func printStat(stat *models.TemplateGeneratorStatistics) {
-// 	fmt.Printf(`
-
-// Statistics:
-// ---------------------------------------
-// `)
-// 	tpl := "%-20s%8d\n"
-
-// 	fmt.Printf(tpl, "Templates used", stat.TemplatesUsed)
-// 	fmt.Printf(tpl, "Entities used", stat.EntitiesUsed)
-// 	fmt.Printf(tpl, "Files created", stat.FilesCreated)
-// 	fmt.Printf(tpl, "Files exported", stat.FilesExported)
-// 	// fmt.Printf(tpl, "Snippets inserted", 1)
-// 	fmt.Println()
-// 	fmt.Printf(tpl, "Character count", stat.Chars)
-// 	fmt.Printf(tpl, "Word count", stat.Words)
-// 	fmt.Printf(tpl, "Line count", stat.Lines)
-// 	fmt.Printf(tpl, "Time used (ms)", stat.Duration.Milliseconds())
-
-// }
 
 // func getCurrentTemplateSet()
 func testTable() *models.EntityImportModel {
