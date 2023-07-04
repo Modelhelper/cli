@@ -66,4 +66,6 @@ type CodeGeneratorOptions struct {
 	ConfigFilePath      string
 	ProjectFilePath     string
 	RunInteractively    bool
+	BasePath            string // BasePath is the base path for the project
+	Verbose             bool   // If Verbose is true, then the generator will print more information
 }

@@ -44,19 +44,21 @@ func registerFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool("export-bykey", false, "Exports the code using the template location key, default false")
 
 	cmd.Flags().Bool("overwrite", false, "Overwrite any existing file when exporting to file on disk")
+	cmd.Flags().BoolP("verbose", "v", false, "Prints verbose messages, default false")
 
 	cmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code, default false")
 
 	cmd.Flags().Bool("demo", false, "Uses a demo as input source, this will override any other input sources (entity, graphql), default false ")
 
 	// cmd.Flags().String("config-path", "", "Instructs the program to use this config as the config")
-	// cmd.Flags().String("project-path", "", "Instructs the program to use this project as input")
+	cmd.Flags().String("project-path", "", "Instructs the program to use this project as input")
 
 	// cmd.Flags().String("key", "", "The key to use when encoding and decoding secrets for a connection")
 
 	// cmd.Flags().String("setup", "", "Use this setup to generate code") // version 3.1
 	cmd.Flags().StringP("connection", "c", "", "The connection key to be used, uses default connection if not provided")
 	cmd.Flags().StringP("name", "n", "", "Sets the name for a template using the 'NameModel'. Will be ignored for any other template type")
+	cmd.Flags().String("base-path", "", "Sets the base path for where all templates will be placed in")
 
 	// cmd.Flags().String("custom-json", "", "Instructs the program to use this path as root for templates")
 	// cmd.Flags().String("custom-file", "", "Instructs the program to use this path as root for templates")
@@ -92,7 +94,10 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 				fileLocationWriter := exporter.FileExporter{}
 				fileLocationWriter.Overwrite = options.Overwrite
 				fileLocationWriter.Filename = res.Destination
-				fileLocationWriter.Write(res.Result.Body)
+				_, err := fileLocationWriter.Write(res.Result.Body)
+				if err != nil {
+					fmt.Printf("Err when writing to '%s', err: %v", res.Destination, err)
+				}
 
 			}
 		}
@@ -145,7 +150,9 @@ func parseCodeOptions(cmd *cobra.Command, args []string) *models.CodeGeneratorOp
 	exportByKey, _ := cmd.Flags().GetBool("export-bykey")
 	conName, _ := cmd.Flags().GetString("connection")
 	name, _ := cmd.Flags().GetString("name")
+	basePathFlag, _ := cmd.Flags().GetString("base-path")
 	overwriteAll, _ := cmd.Flags().GetBool("overwrite")
+	verboseFlag, _ := cmd.Flags().GetBool("verbose")
 
 	options.Name = name
 	options.CodeOnly = codeOnly
@@ -162,6 +169,10 @@ func parseCodeOptions(cmd *cobra.Command, args []string) *models.CodeGeneratorOp
 	options.ExportByLocationKey = exportByKey
 	options.ConnectionName = conName
 	options.Overwrite = overwriteAll
+	options.Verbose = verboseFlag
+	if len(basePathFlag) > 0 {
+		options.BasePath = basePathFlag
+	}
 
 	options.CanUseTemplates = len(options.Templates) > 0 || len(options.FeatureTemplates) > 0
 	return &options

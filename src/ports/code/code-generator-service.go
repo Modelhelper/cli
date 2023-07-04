@@ -108,6 +108,13 @@ You could also use mh template or mh t to see a list of all available templates`
 
 	options.Templates = selectTemplates(allTemplates, options.Templates, options.FeatureTemplates)
 
+	if len(options.Templates) > 0 && options.Verbose {
+		fmt.Println("Templates to use:")
+		for _, t := range options.Templates {
+			fmt.Println("\t", t)
+		}
+	}
+
 	start := time.Now()
 	var cstat = &models.TemplateGeneratorStatistics{}
 	var generatedCode []models.TemplateGeneratorFileResult
@@ -120,7 +127,9 @@ You could also use mh template or mh t to see a list of all available templates`
 		currentTemplate, found := allTemplates[tname]
 
 		if found {
-
+			if options.Verbose {
+				fmt.Printf("Generating template '%s' for '%s' \n", currentTemplate.Name, currentTemplate.Language)
+			}
 			locationPath, locationFound := "", false
 
 			if prj != nil && prj.Locations != nil {
@@ -165,11 +174,19 @@ You could also use mh template or mh t to see a list of all available templates`
 
 				for _, entity := range *entities {
 
+					if options.Verbose {
+						fmt.Printf("\tUsing entity '%s' \n", entity.Name)
+					}
+
 					entityGenerator := func() {
 						cstat.TemplatesUsed += 1
 						cstat.EntitiesUsed += 1
 
 						model := g.cmc.ToEntityModel(currentTemplate.Key, currentTemplate.Language, prj, &entity)
+
+						if options.Verbose {
+							fmt.Printf("\tEntity model created: '%s' \n", model.Name)
+						}
 
 						model.PageHeader = simpleGenerate("header", model.PageHeader, model)
 						model.Namespace = simpleGenerate("namesp", model.Namespace, model)
@@ -264,6 +281,10 @@ You could also use mh template or mh t to see a list of all available templates`
 				customGenerator()
 			}
 
+		}
+
+		if options.Verbose && !found {
+			fmt.Printf("Template '%s' not found \n", tname)
 		}
 
 	}
