@@ -10,8 +10,8 @@ func NewConnectionCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	subCommands := []*cobra.Command{
 		NewListConnectionsCommand(app),
-		NewCreateConnectionCommand(app.ConnectionService),
-		NewDeleteConnectionCommand(app.ConnectionService),
+		// NewCreateConnectionCommand(app.ConnectionService),
+		// NewDeleteConnectionCommand(app.ConnectionService),
 	}
 
 	rootCmd := &cobra.Command{
