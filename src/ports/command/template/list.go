@@ -3,6 +3,7 @@ package template
 import (
 	"fmt"
 	"modelhelper/cli/modelhelper"
+	"sort"
 
 	"modelhelper/cli/modelhelper/models"
 	"modelhelper/cli/ui"
@@ -90,29 +91,29 @@ func listTemplateCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra
 				// fmt.Println("------------------------------------------------------")
 				// fmt.Println("")
 				ui.PrintConsoleTitle(k)
-				tp.templates = l
+				tp.templates = templatesByName(l)
 				ui.RenderTable(&tp)
 				fmt.Println("")
 			}
 		} else {
 
-			tp.templates = templates
+			tp.templates = templatesByName(templates)
 			ui.RenderTable(&tp)
 		}
 	}
 }
 
 type templatePrinter struct {
-	templates map[string]models.CodeTemplate
+	templates []models.CodeTemplate
 }
 
 func (t *templatePrinter) Rows() [][]string {
 	var rows [][]string
 
-	for name, t := range t.templates {
+	for _, t := range t.templates {
 		groups := strings.Join(t.Features, ", ")
 		row := []string{
-			name,
+			t.Name,
 			t.Language,
 			t.Type,
 			t.Model,
@@ -155,4 +156,17 @@ func getEditor(cfg *models.Config) string {
 	} else {
 		return ui.PromptForEditor("Please select editor to open the config")
 	}
+}
+
+func templatesByName(templates map[string]models.CodeTemplate) []models.CodeTemplate {
+	var templateArray []models.CodeTemplate
+
+	for _, template := range templates {
+		templateArray = append(templateArray, template)
+	}
+
+	sort.Slice(templateArray, func(i, j int) bool {
+		return templateArray[i].Name < templateArray[j].Name
+	})
+	return templateArray
 }
