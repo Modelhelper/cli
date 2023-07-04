@@ -100,8 +100,11 @@ You could also use mh template or mh t to see a list of all available templates`
 	// 	if len(options.TemplatePath) == 0 {
 	// 		options.TemplatePath = g.cfg.Templates.Code[0]
 	// 	}
+	templateOptions := &models.CodeTemplateListOptions{
+		DatabaseType: con.Type,
+	}
 
-	allTemplates := g.templateService.List(nil)
+	allTemplates := g.templateService.List(templateOptions)
 
 	options.Templates = selectTemplates(allTemplates, options.Templates, options.FeatureTemplates)
 
@@ -136,7 +139,7 @@ You could also use mh template or mh t to see a list of all available templates`
 					cstat.TemplatesUsed += 1
 
 					model := g.cmc.ToBasicModel(currentTemplate.Key, currentTemplate.Language, prj)
-					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+					o, _ := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
 
@@ -151,7 +154,7 @@ You could also use mh template or mh t to see a list of all available templates`
 					model := g.cmc.ToNameModel(currentTemplate.Key, currentTemplate.Language, prj, options.Name)
 					// model.PageHeader = simpleGenerate("header", model.PageHeader, model)
 
-					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+					o, _ := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
 
@@ -183,7 +186,7 @@ You could also use mh template or mh t to see a list of all available templates`
 							model.Inject[x].Name = simpleGenerate("injprop", inj.Name, model)
 						}
 
-						o, err := g.generator.Generate(ctx, &currentTemplate, model)
+						o, err := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
 
 						if err != nil {
 							fmt.Println("Error when generating", err)
@@ -218,7 +221,7 @@ You could also use mh template or mh t to see a list of all available templates`
 						model.Inject[x].Name = simpleGenerate("injprop", inj.Name, model)
 					}
 
-					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+					o, _ := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
 
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
@@ -238,7 +241,7 @@ You could also use mh template or mh t to see a list of all available templates`
 					model := g.cmc.ToCommitHistoryModel(currentTemplate.Key, currentTemplate.Language, prj, ch)
 					// model.PageHeader = simpleGenerate("header", model.PageHeader, model)
 
-					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+					o, _ := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
 
@@ -252,7 +255,7 @@ You could also use mh template or mh t to see a list of all available templates`
 					model := g.cmc.ToCustomModel(currentTemplate.Key, currentTemplate.Language, prj, options.Custom)
 					// model.PageHeader = simpleGenerate("header", model.PageHeader, model)
 
-					o, _ := g.generator.Generate(ctx, &currentTemplate, model)
+					o, _ := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
 

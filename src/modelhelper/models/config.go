@@ -12,8 +12,9 @@ type Config struct {
 	Port              int       `json:"port" yaml:"port"`
 	Code              Code      `json:"code" yaml:"code"`
 	Templates         struct {
-		Code    []string `json:"code" yaml:"code"`
-		Project []string `json:"project" yaml:"project"`
+		Database []string `json:"database" yaml:"database"`
+		Code     []string `json:"code" yaml:"code"`
+		Project  []string `json:"project" yaml:"project"`
 	} `json:"templates" yaml:"templates"`
 	Languages struct {
 		Definitions string `json:"definitions" yaml:"definitions"`

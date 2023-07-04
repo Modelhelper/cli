@@ -42,6 +42,7 @@ Filter the template by using on or more of the following options
 		Run: listTemplateCommandHandler(app),
 	}
 
+	cmd.Flags().String("db", "pg", "Use a specific database type to get templates for this database [mssql, pg, postgres]")
 	cmd.Flags().String("by", "", "Groups the templates by type, group, language, model or tag")
 	cmd.Flags().StringArray("type", []string{}, "Filter the templates by the name of the type")
 	cmd.Flags().StringArray("lang", []string{}, "Filter the templates by language")
@@ -58,6 +59,7 @@ Filter the template by using on or more of the following options
 func listTemplateCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 
+		db, _ := cmd.Flags().GetString("db")
 		group, _ := cmd.Flags().GetString("by")
 		typeFiler, _ := cmd.Flags().GetStringArray("type")
 		langFilter, _ := cmd.Flags().GetStringArray("lang")
@@ -66,6 +68,7 @@ func listTemplateCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra
 		groupFilter, _ := cmd.Flags().GetStringArray("group")
 
 		options := models.CodeTemplateListOptions{
+			DatabaseType:    db,
 			FilterTypes:     typeFiler,
 			FilterLanguages: langFilter,
 			FilterModels:    modelFilter,

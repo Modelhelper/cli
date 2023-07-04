@@ -3,6 +3,7 @@ package models
 import "time"
 
 type CodeTemplateListOptions struct {
+	DatabaseType    string
 	GroupBy         string
 	FilterTypes     []string
 	FilterLanguages []string

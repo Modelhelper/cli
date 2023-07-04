@@ -20,7 +20,7 @@ type TemplateTypes interface {
 }
 
 type TemplateGenerator[T TemplateTypes] interface {
-	Generate(ctx context.Context, tpl T, mdl interface{}) (*models.TemplateGeneratorResult, error)
+	Generate(ctx context.Context, tpl T, mdl interface{}, options *models.CodeTemplateListOptions) (*models.TemplateGeneratorResult, error)
 }
 
 type LanguageDefinitionService interface {

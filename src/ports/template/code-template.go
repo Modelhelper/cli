@@ -34,7 +34,7 @@ func (t *codeTemplateService) List(options *models.CodeTemplateListOptions) map[
 	templates := make(map[string]models.CodeTemplate)
 	// path := t.config.Templates.Code
 
-	for _, codeFile := range t.getFileList() {
+	for _, codeFile := range t.getFileList(options) {
 		// name := convertFileNameToTemplateName(path, p)
 		t, err := loadTemplateFromFile(codeFile.fullPath)
 		if err != nil {
@@ -71,13 +71,21 @@ func (t *codeTemplateService) List(options *models.CodeTemplateListOptions) map[
 	return templates
 }
 
-func (p *codeTemplateService) getFileList() []*codeFile {
+func (p *codeTemplateService) getFileList(options *models.CodeTemplateListOptions) []*codeFile {
 	ls := []*codeFile{}
 
 	for _, location := range p.config.Templates.Code {
 		files := getCodeTemplateFiles(location)
 		ls = append(ls, files...)
 
+	}
+
+	if p.config.Templates.Database != nil && options != nil && options.DatabaseType != "" {
+
+		for _, dbPath := range p.config.Templates.Database {
+			files := getDatabaseTemplateFiles(dbPath, options.DatabaseType)
+			ls = append(ls, files...)
+		}
 	}
 
 	return ls
@@ -104,6 +112,20 @@ func getCodeTemplateFiles(path string) []*codeFile {
 	})
 
 	return files
+}
+
+func getDatabaseTemplateFiles(path, dbType string) []*codeFile {
+	typeConverter := make(map[string]string)
+	typeConverter["sqlserver"] = "mssql"
+	typeConverter["mssql"] = "mssql"
+	typeConverter["mysql"] = "mysql"
+	typeConverter["postgres"] = "postgres"
+	typeConverter["postgresql"] = "postgres"
+	typeConverter["pg"] = "postgres"
+
+	dbType = typeConverter[dbType]
+	path = filepath.Join(path, dbType)
+	return getCodeTemplateFiles(path)
 }
 
 func filter(filterType string, t map[string]models.CodeTemplate, filter []string) map[string]models.CodeTemplate {

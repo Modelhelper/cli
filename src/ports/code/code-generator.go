@@ -24,12 +24,12 @@ func NewCodeGenerator(templateService modelhelper.CodeTemplateService, langServi
 	return &codeGenerator{templateService, langService}
 }
 
-func (g *codeGenerator) Generate(ctx context.Context, tpl *models.CodeTemplate, model interface{}) (*models.TemplateGeneratorResult, error) {
+func (g *codeGenerator) Generate(ctx context.Context, tpl *models.CodeTemplate, model interface{}, options *models.CodeTemplateListOptions) (*models.TemplateGeneratorResult, error) {
 	start := time.Now()
 
 	res := models.TemplateGeneratorResult{}
 
-	template := g.fromFiles(tpl)
+	template := g.fromFiles(tpl, options)
 	buf := new(bytes.Buffer)
 	err := template.ExecuteTemplate(buf, tpl.Name, model)
 	if err != nil {
@@ -63,9 +63,15 @@ func simpleGenerate(name string, body string, model interface{}) string {
 }
 
 // func fromFiles(cv CodeContextValue) *template.Template {
-func (g *codeGenerator) fromFiles(currentTemplate *models.CodeTemplate) *template.Template {
+func (g *codeGenerator) fromFiles(currentTemplate *models.CodeTemplate, o *models.CodeTemplateListOptions) *template.Template {
 	templates := make(map[string]string)
-	o := &models.CodeTemplateListOptions{FilterTypes: []string{"block"}}
+
+	if o == nil {
+		o = &models.CodeTemplateListOptions{}
+	}
+
+	o.FilterTypes = []string{"block"} // only block templates are allowed
+
 	tl := g.templateService.List(o)
 	for k, b := range tl {
 		templates[k] = b.Body
