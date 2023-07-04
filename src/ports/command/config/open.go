@@ -26,35 +26,32 @@ func NewOpenConfigCommand() *cobra.Command {
 }
 
 func openCommand(cmd *cobra.Command, args []string) {
-	open, _ := cmd.Flags().GetBool("open")
 	ed, _ := cmd.Flags().GetString("editor")
 
-	if open {
+	var editor string
+	if len(ed) > 0 {
+		editor = ed
+	} else {
+		c := config.NewConfigLoader()
+		cfg, err := c.Load()
 
-		var editor string
-		if len(ed) > 0 {
-			editor = ed
-		} else {
-			c := config.NewConfigLoader()
-			cfg, err := c.Load()
-
-			if err != nil {
-				// handle error
-			}
-			editor = getEditor(cfg)
+		if err != nil {
+			// handle error
 		}
-
-		loc := filepath.Join(config.Location(), "config.yaml")
-		openPathInEditor(editor, loc)
+		editor = getEditor(cfg)
 	}
+
+	loc := filepath.Join(config.Location(), "config.yaml")
+	openPathInEditor(editor, loc)
 
 }
 
 func openPathInEditor(editor string, loc string) {
 	exe := exec.Command(editor, loc)
-	if exe.Run() != nil {
-		//vim didn't exit with status code 0
-	}
+	exe.Run()
+	// if exe.Run() != nil {
+	// 	//vim didn't exit with status code 0
+	// }
 }
 
 func getEditor(cfg *models.Config) string {
