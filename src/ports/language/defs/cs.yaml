@@ -70,7 +70,7 @@ datatypes:
   string: 
     notNull: string
     nullable: string?
-    nullableAlternative: string    
+    nullableAlternative: nullable<string>    
   bigint: 
     notNull: Int64
     nullable: Int64?
@@ -85,8 +85,8 @@ datatypes:
     nullableAlternative: nullable<bool> # bool
   char: 
     notNull: string
-    nullable: string
-    nullableAlternative: nullable<decimal> # char
+    nullable: string?
+    nullableAlternative: nullable<string> # char
   date: 
     notNull: DateTimeOffset
     nullable: DateTimeOffset?
@@ -133,12 +133,12 @@ datatypes:
     nullableAlternative: nullable<decimal> # decimal
   nchar: 
     notNull: string
-    nullable: string
-    nullableAlternative: nullable<decimal> # string
+    nullable: string?
+    nullableAlternative: nullable<string> # string
   ntext: 
     notNull: string
-    nullable: string
-    nullableAlternative: nullable<decimal> # string
+    nullable: string?
+    nullableAlternative: nullable<string> # string
   numeric: 
     notNull: decimal
     nullable: decimal?
