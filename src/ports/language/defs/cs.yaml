@@ -69,7 +69,7 @@ inject:
 datatypes: 
   string: 
     notNull: string
-    nullable: string
+    nullable: string?
     nullableAlternative: string    
   bigint: 
     notNull: Int64
@@ -145,8 +145,8 @@ datatypes:
     nullableAlternative: nullable<decimal> # decimal
   nvarchar: 
     notNull: string
-    nullable: string
-    nullableAlternative: nullable<decimal> # string
+    nullable: string?
+    nullableAlternative: nullable<string> # string
   real: 
     notNull: decimal
     nullable: decimal?
@@ -165,11 +165,11 @@ datatypes:
     nullableAlternative: nullable<decimal> # decimal
   text: 
     notNull: string
-    nullable: string
-    nullableAlternative: nullable<decimal> # string
+    nullable: string?
+    nullableAlternative: nullable<string> # string
   time: 
     notNull: string
-    nullable: string
+    nullable: string?
     nullableAlternative: nullable<decimal> # DateTime
   timestamp: 
     notNull: string
@@ -189,7 +189,7 @@ datatypes:
     nullableAlternative: Byte[] # Byte[]
   varchar: 
     notNull: string
-    nullable: string
+    nullable: string?
     nullableAlternative: string
   xml: 
     notNull: XElement
