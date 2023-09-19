@@ -7,18 +7,18 @@
         {
             "name": "Launch Package",
             "type": "go",
+            // "args": ["generate", "--source", "workout", "--template", "md-describe-table", "--copy", "--screen"],
+            // "args": ["project", "create", "--name", "'Antulator API'", "--template", "go-hex-api-small", "-d", "C:\\temp\\projects"],
+            "args": ["code", "generate", "--template", "go-hex-feat-db-create-sql", "--source", "UserLocation", "--verbose"],
+            // "args": ["code", "extract", "-f", "C:\\dev\\projects\\stages\\stagescycling\\powermeter-prod-api\\powermeter-prod-api-stack.yaml"],
+            // "args": ["code", "generate", "--screen", "--source", "calibrations", "-f", "go-hex-snippets", "--export-bykey"],
+            // "args": ["code", "generate", "-t", "go-feature-command", "-e", "FlightImport.BookingSession", "--screen"],
+            // "args": ["source", "FlightImport.BookingSession"],
+            // "args": ["code", "generate", "-t", "git-changelog", "--screen"],
+            // "args": ["source", "person.name"],
             "request": "launch",
-            "mode": "debug",
-            "program": "${workspaceFolder}/src",
-            //  "args": ["generate", "--screen", "-t", "cs-poco", "--demo", "-e", "order", "--project", "C:\\dev\\projects\\mh\\cli\\configuration\\project\\.modelhelper\\project.yaml"]
-            //  "args": ["generate", "--screen", "-t", "cs-poco", "--demo", "-e", "order"]
-            //"args": ["project", "--path", "D:\\projects\\ModelHelper\\.modelhelper\\project.yaml"]
-            // "args": ["generate", "--screen", "--export-bykey", "-t", "cs-poco", "--demo", "--project-path", "D:\\projects\\ModelHelper\\.modelhelper\\project.yaml"]
-            //"args": ["entity", "Batch", "--tree"]
-            "args": ["set", "defcon"]
-            // "args": ["t", "cs-gql-hc-resolver", "--open"]
-            // "args": ["set", "dev", "--name", "Hans-Petter Eitvet", "--email", "hpe@hpe.no"]
-            // "args": ["language", "cs"], 
+            "mode": "auto",
+            "program": "${workspaceFolder}\\main.go"
         }
     ]
 }
