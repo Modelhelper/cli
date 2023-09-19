@@ -18,10 +18,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	_ "embed"
 )
 
-// "fmt"
-var version = "3.0.0-beta2"
+//go:embed version.txt
+var version string
+
 var isBeta = true
 
 func main() {
@@ -98,7 +101,8 @@ func initializeApplication(ctx context.Context) (modelhelper.CommandService, mod
 
 /*
 
-	//%%MH_SNIPPET_QUERY_DEF%%GetCalibration: calibration.NewGetCalibrationHandler(sqlConn, logger),
+	//%%MH_SNIPPET_QUERY_DEF%%
+GetCalibration: calibration.NewGetCalibrationHandler(sqlConn, logger),
 GetCalibration: calibration.NewGetCalibrationHandler(sqlConn, logger),
 
 
