@@ -31,7 +31,7 @@ func ListCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 }
 
 func addFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP("connection", "c", "", "Groups the templates by type, group, language, model or tag")
+	cmd.Flags().StringP("connection", "c", "", "The name of the connection to use")
 	cmd.Flags().String("by", "", "Groups the templates by type, group, language, model or tag")
 	cmd.Flags().StringArray("type", []string{}, "Filter the templates by the name of the type")
 	cmd.Flags().StringArray("lang", []string{}, "Filter the templates by language")
@@ -80,7 +80,7 @@ func listTemplateCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra
 				}
 			}
 
-			conName = options.ConnectionName
+			conName = strings.TrimSpace(options.ConnectionName)
 			conType = connections[conName].Type
 			// con = g.connectionService.Connection(options.ConnectionName)
 		}

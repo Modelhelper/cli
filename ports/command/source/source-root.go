@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/ui"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/text/language"
@@ -28,6 +29,7 @@ func SourceCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 		rootCmd.AddCommand(sub)
 	}
 
+	rootCmd.Flags().StringP("connection", "c", "", "The name of the connection to use")
 	rootCmd.Flags().GetString("connection")
 	rootCmd.Flags().GetBool("demo")
 
@@ -66,11 +68,18 @@ func rootCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 
 				if len(conName) == 0 {
 					for _, v := range connections {
-						conName = v.Name
-						break
+						if strings.Compare(connection, v.Name) == 0 {
+							conName = v.Name
+							break
+						}
 					}
 				}
 
+				if len(conName) == 0 {
+					fmt.Println("Could not find the connection. Please use the --connection flag to specify the connection to use.")
+
+					return
+				}
 				conType = connections[conName].Type
 				// con = g.connectionService.Connection(options.ConnectionName)
 			}
