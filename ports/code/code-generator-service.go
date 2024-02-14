@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"encoding/json"
 	// "go.opencensus.io/examples/exporter"
 )
 
@@ -268,6 +270,20 @@ You could also use mh template or mh t to see a list of all available templates`
 			} else if currentTemplate.Model == "custom" {
 				customGenerator := func() {
 					cstat.TemplatesUsed += 1
+
+					if len(options.ModelPath) > 0 {
+						dat, err := os.ReadFile(options.ModelPath)
+
+						if err == nil {
+
+							// var customModel interface{}
+							err = json.Unmarshal(dat, &options.Custom)
+							if err != nil {
+
+							}
+						}
+
+					}
 
 					model := g.cmc.ToCustomModel(currentTemplate.Key, currentTemplate.Language, prj, options.Custom)
 					// model.PageHeader = simpleGenerate("header", model.PageHeader, model)

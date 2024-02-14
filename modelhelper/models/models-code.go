@@ -68,4 +68,5 @@ type CodeGeneratorOptions struct {
 	RunInteractively    bool
 	BasePath            string // BasePath is the base path for the project
 	Verbose             bool   // If Verbose is true, then the generator will print more information
+	ModelPath           string // ModelPath is the path to the model file
 }

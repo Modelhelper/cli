@@ -62,6 +62,7 @@ func registerFlags(cmd *cobra.Command) {
 
 	// cmd.Flags().String("custom-json", "", "Instructs the program to use this path as root for templates")
 	// cmd.Flags().String("custom-file", "", "Instructs the program to use this path as root for templates")
+	cmd.Flags().String("model", "", "Points to a model file to be used as input")
 
 	cmd.RegisterFlagCompletionFunc("relations", completeRelations)
 }
@@ -100,6 +101,17 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 				}
 
 			}
+
+			if options.ExportPath != "" {
+				// fmt.Printf("Exporting to %s + %s", res.Destination, options.ExportPath)
+				fileLocationWriter := exporter.FileExporter{}
+				fileLocationWriter.Overwrite = options.Overwrite
+				fileLocationWriter.Filename = options.ExportPath
+				_, err := fileLocationWriter.Write(res.Result.Body)
+				if err != nil {
+					fmt.Printf("Err when writing to '%s', err: %v", options.ExportPath, err)
+				}
+			}
 		}
 
 		for _, snippet := range result.Snippets {
@@ -117,6 +129,7 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 				writer := exporter.NewSnippetExporter(snippet.Destination, snippet.SnippetIdentifier)
 				writer.Write(snippet.Result.Body)
 			}
+
 		}
 
 		if options.ExportToClipboard {
@@ -170,6 +183,8 @@ func parseCodeOptions(cmd *cobra.Command, args []string) *models.CodeGeneratorOp
 	options.ConnectionName = conName
 	options.Overwrite = overwriteAll
 	options.Verbose = verboseFlag
+	options.ModelPath, _ = cmd.Flags().GetString("model")
+	options.ExportPath, _ = cmd.Flags().GetString("export-path")
 	if len(basePathFlag) > 0 {
 		options.BasePath = basePathFlag
 	}
