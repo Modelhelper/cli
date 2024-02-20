@@ -718,7 +718,14 @@ where fkc.referenced_object_id = OBJECT_ID(@entityName)
 			}
 			list = append(list, r)
 		}
+
+		cols, err := server.getColumns(r.Schema, r.Name)
+
+		if err == nil {
+			r.Columns = *cols
+		}
 	}
+
 	return &list, nil
 }
 

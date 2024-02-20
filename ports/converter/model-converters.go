@@ -267,9 +267,16 @@ func toEntitySection(from *models.Entity) models.EntityModel {
 
 	out.ModelName = coalesceString(from.Synonym, from.Name)
 
-	for _, column := range from.Columns {
-
+	for i, column := range from.Columns {
 		col := toColumnSection(column, out.Name)
+
+		if i == 0 {
+			col.IsFirst = true
+		}
+
+		if i == len(from.Columns)-1 {
+			col.IsLast = true
+		}
 
 		out.Columns = append(out.Columns, col)
 
@@ -301,7 +308,6 @@ func toEntitySection(from *models.Entity) models.EntityModel {
 			IsNullable: cr.OwnerColumnNullable,
 		}
 
-		out.Children = append(out.Children, child)
 		// children = append(children)
 		child.NameWithoutPrefix = strings.TrimPrefix(cr.Name, out.Name)
 		child.HasPrefix = strings.HasPrefix(cr.Name, out.Name)
@@ -312,6 +318,32 @@ func toEntitySection(from *models.Entity) models.EntityModel {
 		}
 
 		child.ModelName = coalesceString(cr.Synonym, cr.Name)
+
+		if cr.Columns != nil && len(cr.Columns) > 0 {
+			for ci, col := range cr.Columns {
+				childCol := toColumnSection(col, child.Name)
+				if ci == 0 {
+					childCol.IsFirst = true
+				}
+
+				if ci == len(cr.Columns)-1 {
+					childCol.IsLast = true
+				}
+
+				child.Columns = append(child.Columns, childCol)
+				if col.IsPrimaryKey {
+					child.PrimaryKeys = append(child.PrimaryKeys, childCol)
+				} else {
+					child.NonPrimaryColumns = append(child.NonPrimaryColumns, childCol)
+				}
+
+				if col.IsForeignKey {
+					child.ForeignKeys = append(child.ForeignKeys, childCol)
+				}
+			}
+		}
+
+		out.Children = append(out.Children, child)
 	}
 
 	for _, pr := range from.ParentRelations {
