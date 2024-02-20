@@ -294,6 +294,8 @@ func toEntitySection(from *models.Entity) models.EntityModel {
 	for _, cr := range from.ChildRelations {
 		child := models.EntityRelationModel{}
 
+		child.OwnerShcema = out.Schema
+		child.OwnerName = out.Name
 		child.Name = cr.Name
 		child.Schema = cr.Schema
 		child.RelatedColumn = models.EntityColumnProps{

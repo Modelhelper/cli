@@ -201,6 +201,8 @@ type EntityRelationModel struct {
 	IsSelfJoin        bool
 	RelatedColumn     EntityColumnProps // this is either the child or parent in the relation
 	OwnerColumn       EntityColumnProps // this is always the current entity
+	OwnerShcema       string
+	OwnerName         string
 	Name              string
 	Schema            string
 	Type              string
