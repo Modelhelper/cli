@@ -716,14 +716,14 @@ where fkc.referenced_object_id = OBJECT_ID(@entityName)
 			if ok {
 				r.Synonym = syn //.Name
 			}
+			cols, cerr := server.getColumns(r.Schema, r.Name)
+			if cerr == nil {
+				r.Columns = *cols
+			}
+
 			list = append(list, r)
 		}
 
-		cols, err := server.getColumns(r.Schema, r.Name)
-
-		if err == nil {
-			r.Columns = *cols
-		}
 	}
 
 	return &list, nil
