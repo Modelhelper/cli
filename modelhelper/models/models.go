@@ -10,6 +10,8 @@ type CodeTemplateListOptions struct {
 	FilterModels    []string
 	FilterKeys      []string
 	FilterGroups    []string
+	SkipGroups      bool
+	SkipKey         bool
 }
 type SourceListOptions struct {
 	ConnectionName  string
@@ -63,7 +65,7 @@ type Global struct {
 	VariablePostfix string `yaml:"variablePostfix"`
 }
 
-//CodeTemplate represent the full structure of a code template
+// CodeTemplate represent the full structure of a code template
 type CodeTemplate struct {
 	Name             string   //derived
 	Version          string   `yaml:"version"` //Version denotes the version used for the template
@@ -126,6 +128,7 @@ type CustomModel struct {
 	PageHeader                string
 }
 type EntityModel struct {
+	ConnectionType            string
 	RootNamespace             string
 	Namespace                 string
 	Postfix                   string
@@ -209,7 +212,11 @@ type EntityRelationModel struct {
 	HasDescription    bool
 	HasPrefix         bool
 	NameWithoutPrefix string
-	// Columns            []EntityColumnImportModel
+	Columns           []EntityColumnModel
+	NonPrimaryColumns []EntityColumnModel
+	PrimaryKeys       []EntityColumnModel
+	ForeignKeys       []EntityColumnModel
+	UsedAsColumns     []EntityColumnModel
 	// NonIgnoredColumns  []EntityColumnImportModel
 	// IgnoredColumns     []EntityColumnImportModel
 	// PrimaryKeys        []EntityColumnImportModel
@@ -249,6 +256,8 @@ type EntityColumnModel struct {
 	UseLength         bool
 	UsePrecision      bool
 	ForCreate         string
+	IsLast            bool
+	IsFirst           bool
 }
 
 type EntityList []Entity
@@ -387,6 +396,7 @@ type Relation struct {
 	IsSelfJoin          bool
 	HasSynonym          bool
 	Synonym             string
+	Columns             []Column
 	// Level               int
 	// FullPath            string
 	// ReferenceName       string

@@ -50,6 +50,8 @@ Filter the template by using on or more of the following options
 	cmd.Flags().StringArray("model", []string{}, "Filter the templates by model")
 	cmd.Flags().StringArray("key", []string{}, "Filter the templates by key")
 	cmd.Flags().StringArray("group", []string{}, "Filter the templates by group")
+	cmd.Flags().Bool("skip-groups", false, "Will not return the groups associated with the templates")
+	cmd.Flags().Bool("skip-key", false, "Will not return the key associated with the templates")
 
 	// templateCmd.Flags().Bool("open", false, "Opens the template file in default editor or a selection of editors")
 	// 	cmd.Flags().String("editor", "", "The editor to use when opening the file")
@@ -67,6 +69,8 @@ func listTemplateCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra
 		modelFilter, _ := cmd.Flags().GetStringArray("model")
 		keyFilter, _ := cmd.Flags().GetStringArray("key")
 		groupFilter, _ := cmd.Flags().GetStringArray("group")
+		skipGroups, _ := cmd.Flags().GetBool("skip-groups")
+		skipKey, _ := cmd.Flags().GetBool("skip-key")
 
 		options := models.CodeTemplateListOptions{
 			DatabaseType:    db,
@@ -75,9 +79,11 @@ func listTemplateCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra
 			FilterModels:    modelFilter,
 			FilterKeys:      keyFilter,
 			FilterGroups:    groupFilter,
+			SkipGroups:      skipGroups,
+			SkipKey:         skipKey,
 		}
 		templates := app.Code.TemplateService.List(&options)
-		var tp templatePrinter
+		tp := &templatePrinter{options: options}
 
 		ui.PrintConsoleTitle("ModelHelper Templates")
 		fmt.Printf("\nIn the list below you will find all available templates in ModelHelper\n")
@@ -92,35 +98,46 @@ func listTemplateCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra
 				// fmt.Println("")
 				ui.PrintConsoleTitle(k)
 				tp.templates = templatesByName(l)
-				ui.RenderTable(&tp)
+				ui.RenderTable(tp)
 				fmt.Println("")
 			}
 		} else {
 
 			tp.templates = templatesByName(templates)
-			ui.RenderTable(&tp)
+			ui.RenderTable(tp)
 		}
 	}
 }
 
 type templatePrinter struct {
 	templates []models.CodeTemplate
+	options   models.CodeTemplateListOptions
 }
 
-func (t *templatePrinter) Rows() [][]string {
+func (tp *templatePrinter) Rows() [][]string {
 	var rows [][]string
 
-	for _, t := range t.templates {
+	for _, t := range tp.templates {
 		groups := strings.Join(t.Features, ", ")
 		row := []string{
 			t.Name,
 			t.Language,
 			t.Type,
 			t.Model,
-			t.Key,
-			groups,
-			t.Short,
+			// t.Key,
+			// groups,
+			// t.Short,
 		}
+
+		if tp.options.SkipKey == false {
+			row = append(row, t.Key)
+		}
+
+		if tp.options.SkipGroups == false {
+			row = append(row, groups)
+		}
+
+		row = append(row, t.Short)
 
 		rows = append(rows, row)
 	}
@@ -128,17 +145,27 @@ func (t *templatePrinter) Rows() [][]string {
 	return rows
 }
 
-func (t *templatePrinter) Header() []string {
+func (tp *templatePrinter) Header() []string {
 
 	row := []string{
 		"Name",
 		"Language",
 		"Type",
 		"Model",
-		"Key",
-		"Groups",
-		"Description",
+		// "Key",
+		// "Groups",
+		// "Description",
 	}
+
+	if !tp.options.SkipKey {
+		row = append(row, "Key")
+	}
+
+	if !tp.options.SkipGroups {
+		row = append(row, "Groups")
+	}
+
+	row = append(row, "Description")
 
 	return row
 }
