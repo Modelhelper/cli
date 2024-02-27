@@ -22,6 +22,7 @@ func (c *codeModelConverter) ToCustomModel(key string, language string, project 
 		Inject:                    base.Inject,
 		Imports:                   base.Imports,
 		Project:                   base.Project,
+		Feature:                   base.Feature,
 		Developer:                 base.Developer,
 		Options:                   base.Options,
 		PageHeader:                base.PageHeader,
@@ -43,6 +44,7 @@ func (c *codeModelConverter) ToNameModel(key string, language string, project *m
 		Inject:                    base.Inject,
 		Imports:                   base.Imports,
 		Project:                   base.Project,
+		Feature:                   base.Feature,
 		Developer:                 base.Developer,
 		Options:                   base.Options,
 		PageHeader:                base.PageHeader,
@@ -67,6 +69,7 @@ func (c *codeModelConverter) ToCommitHistoryModel(key string, language string, p
 		Developer:                 base.Developer,
 		Options:                   base.Options,
 		PageHeader:                base.PageHeader,
+		Feature:                   base.Feature,
 	}
 	mdl.Name = commitHistory.Name
 	mdl.Features = commitHistory.Messages["feat"]
@@ -99,6 +102,47 @@ func (c *codeModelConverter) ToCommitHistoryModel(key string, language string, p
 
 }
 
+func (c *codeModelConverter) ToFeatureModel(project *models.ProjectConfig) (*models.FeatureModel, []string) {
+	featureSet := models.FeatureModel{}
+	imports := []string{}
+
+	if project.Features != nil {
+
+		// if project.Features.Logger != nil {
+		// 	featureSet.UseLogger = project.Features.Logger.Use
+		// 	imports = append(imports, project.Features.Logger.Imports...)
+		// 	featureSet.Logger = models.FeatureOptions{
+		// 		Namespace:    project.Features.Logger.Namespace,
+		// 		PropertyName: *project.Features.Logger.PropertyName,
+		// 		Type:         *project.Features.Logger.Type,
+		// 	}
+		// }
+
+		// if project.Features.Api != nil {
+		// 	featureSet.UseApi = project.Features.Api.Use
+		// 	imports = append(imports, project.Features.Api.Imports...)
+
+		// 	featureSet.Api = models.FeatureOptions{
+		// 		Namespace:    project.Features.Api.Namespace,
+		// 		PropertyName: *project.Features.Api.PropertyName,
+		// 		Type:         *project.Features.Api.Type,
+		// 	}
+		// }
+
+		// if project.Features.Db != nil {
+
+		// 	featureSet.UseDb = project.Features.Db.Use
+		// 	featureSet.Db = models.DbFeatureOptions{
+		// 		Namespace:    project.Features.Db.Namespace,
+		// 		PropertyName: *project.Features.Db.PropertyName,
+		// 		Type:         *project.Features.Db.Type,
+		// 	}
+		// }
+	}
+
+	return &featureSet, imports
+}
+
 // ToBasicModel implements modelhelper.CodeModelConverter
 func (c *codeModelConverter) ToBasicModel(identifier, language string, project *models.ProjectConfig) *models.BasicModel {
 	b := models.BasicModel{}
@@ -106,15 +150,26 @@ func (c *codeModelConverter) ToBasicModel(identifier, language string, project *
 
 	if project == nil {
 		project = emptyProject()
+
 	}
 
 	if len(project.Options) > 0 {
 		b.Options = project.Options
 	}
+
+	b.Project.Exists = project != nil
 	b.Project.Name = project.Name
 	b.Project.Owner = project.OwnerName
 
 	b.PageHeader = project.Header
+
+	feat, featImports := c.ToFeatureModel(project)
+	imports = append(imports, featImports...)
+	b.Feature = *feat
+
+	if len(project.RootNamespace) > 0 {
+		b.RootNamespace = project.RootNamespace
+	}
 
 	if len(identifier) > 0 {
 		val, found := project.Setup[identifier]
@@ -142,17 +197,23 @@ func (c *codeModelConverter) ToBasicModel(identifier, language string, project *
 
 func emptyProject() *models.ProjectConfig {
 	p := &models.ProjectConfig{
-		Name:        "",
-		Version:     "",
-		DefaultKey:  "",
-		Options:     make(map[string]string),
-		Language:    "",
-		Header:      "",
-		Custom:      nil,
-		Description: "",
-		Setup:       make(map[string]models.Key),
-		Inject:      make(map[string]models.Inject),
-		OwnerName:   "",
+		Name:           "",
+		Version:        "",
+		DefaultKey:     "",
+		Options:        make(map[string]string),
+		Language:       "",
+		Header:         "",
+		Custom:         nil,
+		Description:    "",
+		Setup:          make(map[string]models.Key),
+		Inject:         make(map[string]models.Inject),
+		OwnerName:      "",
+		Features:       nil,
+		CustomFeatures: make(map[string]models.CommonProjectFeature),
+		Locations:      make(map[string]string),
+		Directory:      "",
+		UseHeader:      false,
+		RootNamespace:  "",
 	}
 
 	return p
@@ -183,6 +244,7 @@ func (c *codeModelConverter) ToEntityListModel(identifier, language string, proj
 		Options:                   base.Options,
 		PageHeader:                base.PageHeader,
 		Entities:                  entitylist,
+		Feature:                   base.Feature,
 	}
 
 	return &out
@@ -209,6 +271,7 @@ func (c *codeModelConverter) ToEntityModel(key, language string, project *models
 		Developer:                 base.Developer,
 		Options:                   base.Options,
 		PageHeader:                base.PageHeader,
+		Feature:                   base.Feature,
 		Name:                      entityBase.Name,
 		Schema:                    entityBase.Schema,
 		Type:                      entityBase.Type,

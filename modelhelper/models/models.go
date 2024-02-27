@@ -85,6 +85,9 @@ type CodeTemplate struct {
 	// Export      TemplateExport `yaml:"export"`
 }
 
+// BasicModel represents the basic model for the code generation.
+// It is used to generate the basic files for the project when the templates
+// model is not set or set to basic
 type BasicModel struct {
 	RootNamespace             string
 	Namespace                 string
@@ -97,8 +100,50 @@ type BasicModel struct {
 	Developer                 DeveloperSection
 	Options                   map[string]string
 	PageHeader                string
+	Feature                   FeatureModel
 }
 
+// FeatureModel represents the features that can be used in the project
+// If a feature is configured in the project config file, it will be set to true
+// and the code generation will use the features to generate the code
+type FeatureModel struct {
+	UseLogger  bool
+	UseTracing bool
+	UseMetrics bool
+	UseHealth  bool
+	UseApi     bool
+	UseDb      bool
+	UseAuth    bool
+	UseSwagger bool
+	Logger     FeatureOptions
+	Tracing    FeatureOptions
+	Metrics    FeatureOptions
+	Health     FeatureOptions
+	Api        FeatureOptions
+	Db         DbFeatureOptions
+	Auth       FeatureOptions
+	Swagger    FeatureOptions
+}
+
+type FeatureOptions struct {
+	PropertyName string
+	Prefix       string
+	Postfix      string
+	Namespace    string
+	Type         string
+}
+
+type DbFeatureOptions struct {
+	PropertyName     string
+	Prefix           string
+	Postfix          string
+	Namespace        string
+	Type             string
+	ConnectionMethod string
+}
+
+// NameModel represents the model for the name template
+// If the templates model is set to name, the code generation will use this model
 type NameModel struct {
 	Name                      string
 	RootNamespace             string
@@ -112,7 +157,10 @@ type NameModel struct {
 	Developer                 DeveloperSection
 	Options                   map[string]string
 	PageHeader                string
+	Feature                   FeatureModel
 }
+
+// CustomModel represents the model for the custom template
 type CustomModel struct {
 	Custom                    interface{}
 	RootNamespace             string
@@ -126,6 +174,7 @@ type CustomModel struct {
 	Developer                 DeveloperSection
 	Options                   map[string]string
 	PageHeader                string
+	Feature                   FeatureModel
 }
 type EntityModel struct {
 	ConnectionType            string
@@ -139,6 +188,7 @@ type EntityModel struct {
 	Project                   ProjectSection
 	Developer                 DeveloperSection
 	Options                   map[string]string
+	Feature                   FeatureModel
 	PageHeader                string
 	Name                      string
 	Schema                    string
@@ -174,6 +224,7 @@ type EntityListModel struct {
 	Inject                    []InjectSection
 	Imports                   []string
 	Project                   ProjectSection
+	Feature                   FeatureModel
 	Developer                 DeveloperSection
 	Options                   map[string]string
 	PageHeader                string
@@ -195,6 +246,7 @@ type ProjectSection struct {
 	Name    string
 	Owner   string
 	Version string
+	Exists  bool
 }
 
 type EntityRelationModel struct {

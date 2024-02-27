@@ -52,6 +52,7 @@ type CommitModel struct {
 	Inject                    []InjectSection
 	Imports                   []string
 	Project                   ProjectSection
+	Feature                   FeatureModel
 	Developer                 DeveloperSection
 	Options                   map[string]string
 	PageHeader                string
