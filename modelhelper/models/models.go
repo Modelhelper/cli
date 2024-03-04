@@ -82,6 +82,7 @@ type CodeTemplate struct {
 	Body             string   `yaml:"body"`
 	BodyFile         string   `yaml:"bodyFile"`
 	TemplateFilePath string
+	IsEmbedded       bool
 	// Export      TemplateExport `yaml:"export"`
 }
 

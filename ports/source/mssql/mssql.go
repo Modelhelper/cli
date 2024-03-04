@@ -3,7 +3,10 @@ package mssql
 import (
 	"context"
 	"database/sql"
-	_ "embed"
+	"embed"
+	"io/fs"
+
+	// _ "embed"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -28,6 +31,9 @@ var (
 
 	//go:embed queries/entities.sql
 	selectEntitiesQuery string
+
+	//go:embed *
+	tplsFs embed.FS
 )
 
 type EntityNotFoundError struct {
@@ -41,6 +47,11 @@ func (e *EntityNotFoundError) Error() string {
 type mssqlSource struct {
 	connectionService modelhelper.ConnectionService
 	database          *models.GenericConnection[models.MsSqlConnection]
+}
+
+// CodeTemplates implements modelhelper.SourceService.
+func (c *mssqlSource) CodeTemplates() fs.FS {
+	return tplsFs
 }
 
 func NewMsSqlSource(cs modelhelper.ConnectionService, connectionName string) modelhelper.SourceService {

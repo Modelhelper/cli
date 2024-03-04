@@ -2,11 +2,13 @@ package modelhelper
 
 import (
 	"context"
+	"io/fs"
 	"modelhelper/cli/modelhelper/models"
 )
 
 type CodeTemplateService interface {
-	List(options *models.CodeTemplateListOptions) map[string]models.CodeTemplate
+	// List(options *models.CodeTemplateListOptions, append ...map[string][]byte) map[string]models.CodeTemplate
+	List(options *models.CodeTemplateListOptions, append ...fs.FS) map[string]models.CodeTemplate
 	Load(name string) *models.CodeTemplate
 	Group(by string, templateList map[string]models.CodeTemplate) map[string]map[string]models.CodeTemplate
 }

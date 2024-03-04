@@ -1,12 +1,16 @@
 package modelhelper
 
-import "modelhelper/cli/modelhelper/models"
+import (
+	"io/fs"
+	"modelhelper/cli/modelhelper/models"
+)
 
 type SourceService interface {
 	Entity(name string) (*models.Entity, error)
 	Entities(pattern string) (*[]models.Entity, error)
 	EntitiesFromNames(names []string) (*[]models.Entity, error)
 	EntitiesFromColumn(column string) (*[]models.Entity, error)
+	CodeTemplates() fs.FS
 }
 
 type SourceFactoryService interface {

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	_ "embed"
 	"fmt"
+	"io/fs"
 	"log"
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
@@ -34,6 +35,11 @@ var (
 type postgresSource struct {
 	connectionService modelhelper.ConnectionService
 	database          *models.GenericConnection[models.PostgresConnection]
+}
+
+// CodeTemplates implements modelhelper.SourceService.
+func (server *postgresSource) CodeTemplates() fs.FS {
+	panic("unimplemented")
 }
 
 func NewPostgresSource(cs modelhelper.ConnectionService, connectionName string) modelhelper.SourceService {

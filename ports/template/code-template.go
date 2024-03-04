@@ -1,6 +1,8 @@
 package template
 
 import (
+	"io"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"modelhelper/cli/modelhelper"
@@ -26,7 +28,7 @@ func NewCodeTemplateService(cfg *models.Config) modelhelper.CodeTemplateService 
 }
 
 // List implements modelhelper.CodeTemplateService
-func (t *codeTemplateService) List(options *models.CodeTemplateListOptions) map[string]models.CodeTemplate {
+func (t *codeTemplateService) List(options *models.CodeTemplateListOptions, append ...fs.FS) map[string]models.CodeTemplate {
 	if len(t.config.Templates.Code) == 0 {
 		return nil
 	}
@@ -46,6 +48,16 @@ func (t *codeTemplateService) List(options *models.CodeTemplateListOptions) map[
 				t.Name = codeFile.fileNameFromDir
 			}
 			templates[codeFile.fileNameFromDir] = *t
+		}
+	}
+
+	if len(append) > 0 {
+		for _, a := range append {
+			ts := getCodeTemplatesFromFS(a)
+
+			for k, t := range ts {
+				templates[k] = t
+			}
 		}
 	}
 
@@ -69,6 +81,22 @@ func (t *codeTemplateService) List(options *models.CodeTemplateListOptions) map[
 	}
 
 	return templates
+}
+
+func loadTemplateFromBytes(data []byte, isEmbedded bool) (*models.CodeTemplate, error) {
+	var t *models.CodeTemplate
+
+	err := yaml.Unmarshal(data, &t)
+	if err != nil {
+		log.Fatalf("cannot unmarshal data: %v", err)
+		return nil, err
+	}
+
+	if t != nil {
+		t.TemplateFilePath = ""
+		t.IsEmbedded = isEmbedded
+	}
+	return t, nil
 }
 
 func (p *codeTemplateService) getFileList(options *models.CodeTemplateListOptions) []*codeFile {
@@ -112,6 +140,55 @@ func getCodeTemplateFiles(path string) []*codeFile {
 	})
 
 	return files
+}
+
+func getCodeTemplatesFromFS(fileSys fs.FS) map[string]models.CodeTemplate {
+	templates := make(map[string]models.CodeTemplate)
+
+	fs.WalkDir(fileSys, ".", func(path string, d fs.DirEntry, err error) error {
+
+		if !d.IsDir() && (strings.HasSuffix(d.Name(), "yaml") || strings.HasSuffix(d.Name(), "yml")) {
+			name := convertFileNameToTemplateName(path, d.Name())
+
+			file, err := fileSys.Open(d.Name())
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			data, err := io.ReadAll(file)
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			tpl, err := loadTemplateFromBytes(data, true)
+
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			templates[name] = *tpl
+
+		}
+
+		return nil
+	})
+
+	// for _, codeFile := range files {
+	// 	// name := convertFileNameToTemplateName(path, p)
+
+	// 	t, err := loadTemplateFromFile(codeFile.fullPath)
+	// 	if err != nil {
+	// 		log.Fatalln(err)
+	// 	}
+
+	// 	if t != nil {
+	// 		if codeFile != nil {
+	// 			t.Name = codeFile.fileNameFromDir
+	// 		}
+	// 		templates[codeFile.fileNameFromDir] = *t
+	// 	}
+	// }
+	return templates
 }
 
 func getDatabaseTemplateFiles(path, dbType string) []*codeFile {
@@ -332,6 +409,7 @@ func loadTemplateFromFile(fileName string) (*models.CodeTemplate, error) {
 
 	if t != nil {
 		t.TemplateFilePath = fileName
+		t.IsEmbedded = false
 	}
 	return t, nil
 }

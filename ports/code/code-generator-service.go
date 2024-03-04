@@ -106,7 +106,7 @@ You could also use mh template or mh t to see a list of all available templates`
 		DatabaseType: con.Type,
 	}
 
-	allTemplates := g.templateService.List(templateOptions)
+	allTemplates := g.templateService.List(templateOptions, src.CodeTemplates())
 
 	options.Templates = selectTemplates(allTemplates, options.Templates, options.FeatureTemplates)
 

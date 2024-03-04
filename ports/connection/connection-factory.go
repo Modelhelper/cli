@@ -85,6 +85,11 @@ func (c *connectionListService) Connections() (map[string]*models.ConnectionList
 		return nil
 	})
 
+	fileMap["demo"] = &models.ConnectionList{
+		Name: "demo",
+		Type: "file",
+	}
+
 	return fileMap, nil
 
 }

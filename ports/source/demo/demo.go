@@ -3,6 +3,7 @@ package demo
 import (
 	"embed"
 	"fmt"
+	"io/fs"
 	"log"
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
@@ -16,8 +17,32 @@ import (
 //go:embed entities/*
 var entities embed.FS
 
+//go:embed templates/*
+var templates embed.FS
+
 type demoSource struct {
 	// connectionService modelhelper.ConnectionService
+}
+
+// CodeTemplates implements modelhelper.SourceService.
+func (server *demoSource) CodeTemplates() fs.FS {
+	return templates
+
+	// list := make(map[string][]byte)
+
+	// files, _ := templates.ReadDir(".")
+	// fs.WalkDir()
+	// for _, file := range files {
+	// 	info, _ := file.Info()
+
+	// 	if !info.IsDir() && (strings.HasSuffix(info.Name(), "yaml") || strings.HasSuffix(info.Name(), "yml")) {
+	// 		fileContent, _ := templates.Open(file.Name())
+	// 		content, _ := io.ReadAll(fileContent)
+	// 		list[file.Name()] = content
+	// 	}
+	// }
+
+	// return list
 }
 
 func NewDemoSource() modelhelper.SourceService {
