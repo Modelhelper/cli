@@ -10,8 +10,16 @@ import (
 	"os/exec"
 	"strings"
 
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/jedib0t/go-pretty/v6/table"
+
 	"github.com/spf13/cobra"
 )
+
+type presentSimulationListModel struct {
+	templates []models.CodeTemplate
+	options   models.CodeTemplateListOptions
+}
 
 func ListCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
@@ -196,4 +204,119 @@ func templatesByName(templates map[string]models.CodeTemplate) []models.CodeTemp
 		return templateArray[i].Name < templateArray[j].Name
 	})
 	return templateArray
+}
+
+func (m presentSimulationListModel) Init() tea.Cmd {
+	return nil
+}
+
+func (m presentSimulationListModel) getPagedata() {
+}
+
+func (m presentSimulationListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	switch msg := msg.(type) {
+
+	// case errMsg:
+	// 	m.err = msg
+	// 	return m, nil
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "q", "esc", "ctrl+c":
+			// m.quitting = true
+			return m, tea.Quit
+			// case "h", "left":
+			// 	fmt.Printf("\n\nprevious\n")
+			// case "r", "right":
+			// 	fmt.Printf("\n\next\n")
+			// // if m.paginator.HasPreviousPage() {
+			// // 	m.paginator.PreviousPage()
+
+			// // 	page, err := m.app.Query.Antulator.GetSimulationList.Handle(m.ctx, m.pageSize, m.paginator.NextPage() .Page())
+			// // 	if err != nil {
+			// // 		m.err = err
+			// // 		return m, nil
+			// // 	}
+
+			// // 	m.currentPage = page
+			// // 	m.simulations = page.Simulations
+			// // }
+			// case "enter":
+			// 	if m.currentPage != nil && m.currentPage.PageNumber < m.currentPage.TotalPages {
+
+			// 		nextPage := m.currentPage.PageNumber + 1
+
+			// 		page, err := m.app.Query.Antulator.GetSimulationList.Handle(m.ctx, m.pageSize, nextPage)
+
+			// 		if err != nil {
+			// 			m.err = err
+			// 			fmt.Printf("\n\nError: %s\n", err)
+			// 			return m, nil
+			// 		}
+
+			// 		m.currentPage = page
+
+			// 		// m.simulations = page.Simulations
+			// 		m.simulations = append(m.simulations, page.Simulations...)
+			// 	}
+
+			// 	if m.currentPage != nil && m.currentPage.PageNumber == m.currentPage.TotalPages {
+			// 		fmt.Printf("\nNo more pages\n")
+			// 		return m, tea.Quit
+			// 	}
+			// 	return m, nil
+
+			// default:
+			// 	return m, nil
+		}
+
+	default:
+		return m, nil
+	}
+
+	return m, cmd
+}
+
+func (m presentSimulationListModel) View() string {
+	var b strings.Builder
+
+	// if m.err != nil {
+	// 	return m.err.Error()
+	// }
+	b.WriteString(fmt.Sprintf("\n\n\tTemplates\n\t-------------------\n\n"))
+	var rows []table.Row
+	for _, template := range m.templates {
+		rows = append(rows, table.Row{
+			template.Name,
+			template.Language,
+			template.Type,
+			template.Model,
+			template.Key,
+			template.Features,
+			template.Description,
+		})
+	}
+
+	t := table.NewWriter()
+	t.AppendHeader(table.Row{"Name", "Language", "Name", "Duration", "Wasp", "Mac", "Use Room sensor", "Bypass"})
+	t.AppendRows(rows)
+	table := t.Render()
+
+	b.WriteString(table)
+
+	// if m.currentPage != nil && m.currentPage.PageNumber < m.currentPage.TotalPages {
+	// 	b.WriteString(fmt.Sprintf("\n\nPage:%d of %d\n", m.currentPage.PageNumber, m.currentPage.TotalPages))
+	// 	b.WriteString("\nPress enter to see more. Press q, esc or ctr+c to quit.")
+	// }
+
+	// if m.quitting {
+	// 	b.WriteString("\n")
+	// }
+
+	// b.WriteString("  " + m.paginator.View())
+	// b.WriteString("\n\n  h/l ←/→ page • q: quit\n")
+	return b.String()
+
+	// return str
 }
