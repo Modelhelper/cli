@@ -72,6 +72,10 @@ func (c *codeModelConverter) ToCommitHistoryModel(key string, language string, p
 		Feature:                   base.Feature,
 	}
 	mdl.Name = commitHistory.Name
+
+	mdl.AllConventionalCommits = make(map[string][]models.Commit)
+	mdl.AllConventionalCommits = commitHistory.Messages
+
 	mdl.Features = commitHistory.Messages["feat"]
 	mdl.Fixes = commitHistory.Messages["fix"]
 	mdl.Refactors = commitHistory.Messages["refactor"]
