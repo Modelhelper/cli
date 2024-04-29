@@ -57,11 +57,13 @@ type CommitModel struct {
 	Options                   map[string]string
 	PageHeader                string
 	IsConventialCommits       bool
-	HasFeatures               bool
 	Features                  []Commit
-	HasRefactors              bool
 	Refactors                 []Commit
+	HasFeatures               bool
+	HasRefactors              bool
 	HasFixes                  bool
+	HasAuthors                bool
+	HasBreakingChanges        bool
 	Fixes                     []Commit
 	Docs                      []Commit
 	Performance               []Commit
@@ -70,9 +72,8 @@ type CommitModel struct {
 	Ci                        []Commit
 	Chores                    []Commit
 	Reverts                   []Commit
-	HasBreakingChanges        bool
 	BreakingChanges           []Commit
-	HasAuthors                bool
+	AllConventionalCommits    map[string][]Commit
 	Authors                   map[string]Author
 }
 
