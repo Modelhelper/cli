@@ -43,10 +43,6 @@ Filter the template by using on or more of the following options
 --model <model> (e.g --model entity), filters by model
 --group <groupname> (e.g --group cs-dpr-full), filters by group
 
-
--- hva med liste på gruppenavn
--- hva med liste på tags
-
 `,
 		Run: listTemplateCommandHandler(app),
 	}
