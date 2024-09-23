@@ -161,6 +161,7 @@ func (c *codeModelConverter) ToBasicModel(identifier, language string, project *
 		b.Options = project.Options
 	}
 
+	b.Name = project.Name
 	b.Project.Exists = project != nil
 	b.Project.Name = project.Name
 	b.Project.Owner = project.OwnerName
