@@ -32,8 +32,8 @@
             // "args": ["code", "generate", "-t", "go-feature-command", "-e", "FlightImport.BookingSession", "--screen"],
             // "args": ["source", "Antulator.Simulation"],
             // "args": ["code", "generate", "-t", "git-changelog", "--screen"],
-            // "args": ["source", "solders", "-c","sc-out"],
-            "args": ["project", "--model"],
+            "args": ["code", "generate", "-t","ts-svelte-page-server", "--screen"],
+            // "args": ["project", "--model"],
             "request": "launch",
             "mode": "auto",
         // "program": "${file}"
