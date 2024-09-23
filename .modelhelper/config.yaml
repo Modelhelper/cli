@@ -28,6 +28,7 @@ locations:
   feature: ./features/{{.Name | singular | kebab}} 
   feature-sql: ./features/{{.Name | singular | kebab}}/sql-queries
   docs: ./docs/markdown
+  route: ./src/routes
 
 features:
   api: 
