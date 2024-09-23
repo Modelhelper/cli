@@ -10,8 +10,10 @@ type CodeTemplateListOptions struct {
 	FilterModels    []string
 	FilterKeys      []string
 	FilterGroups    []string
-	SkipGroups      bool
-	SkipKey         bool
+	HideColumns     map[string]bool
+	// SkipGroups      bool
+	// SkipKey         bool
+
 }
 type SourceListOptions struct {
 	ConnectionName  string
@@ -101,6 +103,7 @@ type BasicModel struct {
 	Options                   map[string]string
 	PageHeader                string
 	Feature                   FeatureModel
+	Name                      string
 }
 
 // FeatureModel represents the features that can be used in the project
