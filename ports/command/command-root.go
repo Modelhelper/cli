@@ -40,8 +40,8 @@ func createRootCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
-			slog := app.Info.Slogan()
-			fmt.Print(slog)
+			slogan := app.Info.Slogan()
+			fmt.Printf("\n%s\n", slogan)
 		},
 	}
 }
