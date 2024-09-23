@@ -39,6 +39,7 @@ func main() {
 	// 		os.Exit(3)
 	// 	}
 	// }()
+	defer handlePanic()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -54,6 +55,13 @@ func main() {
 		}
 	} else {
 		cmnd.Execute(ctx)
+	}
+}
+
+func handlePanic() {
+	if err := recover(); err != nil {
+		// slog.Error("context", "main", "message", "Caught panic", "error", err)
+		// slog.Error(string(debug.Stack()))
 	}
 }
 
