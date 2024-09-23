@@ -96,7 +96,7 @@ func NewConnectionService(cfg *models.Config) modelhelper.ConnectionService {
 func loadConnectionListFromFile(fileName string) (*models.ConnectionList, error) {
 	var t *models.ConnectionList
 
-	dat, e := ioutil.ReadFile(fileName)
+	dat, e := os.ReadFile(fileName)
 	if e != nil {
 		log.Fatalf("cannot load file: %v", e)
 		return nil, e
@@ -117,7 +117,7 @@ func loadConnectionListFromFile(fileName string) (*models.ConnectionList, error)
 func loadGenericConnection[T models.GenericConnectionType](fileName string) (*models.GenericConnection[T], error) {
 	t := &models.GenericConnection[T]{}
 
-	dat, e := ioutil.ReadFile(fileName)
+	dat, e := os.ReadFile(fileName)
 	if e != nil {
 		log.Fatalf("cannot load file: %v", e)
 		return nil, e
