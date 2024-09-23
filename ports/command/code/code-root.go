@@ -14,6 +14,7 @@ func NewCodeRootCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 		NewGenerateCodeCommand(app),
 		NewChangelogCommand(app),
 		NewVariableExtractorCommand(),
+		NewTemplatesCommand(app),
 	}
 
 	rootCmd := &cobra.Command{
