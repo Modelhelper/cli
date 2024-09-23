@@ -4,16 +4,83 @@ version: "3.0.0-beta4"
 name: modelhelper-cli 
 
 setup: 
+  ports-repo: 
+    postfix: Repo
+    namespace: repo
   model: 
     postfix: Model
     namespace: models
+  core-command:
+    namespace: command
+    imports:
+      - "context"
         
 locations:
-  mail: ./
-  model: ./modelhelper/models
-  core-command: ./core/commands 
+  main: ./
+  core: ./core
+  model: ./core/models
+  core-command: ./core/command
   core-query: ./core/query 
-  ports-controller: ./ports/api/controllers 
-  ports-validator: ./ports/api/validators 
-  features: ./features/{.Name | singular | kebab}
-  # model: "./core/models/{{.Name | singular | kebab}}" # relative to the .modelhelper project folder
+  ports-controller: ./ports/api/http/controllers 
+  ports-validator: ./ports/api/http/validators 
+  ports-api: ./ports/api/http 
+  ports-repo: ./repos
+  feature: ./features/{{.Name | singular | kebab}} 
+  feature-sql: ./features/{{.Name | singular | kebab}}/sql-queries
+  docs: ./docs/markdown
+  route: ./src/routes
+
+features:
+  api: 
+    type: rest
+    namespace: api
+    imports: 
+      - "github.com/antulator/antulator-api/core/models"
+
+  db: 
+    type: repo
+    use: true
+    namespace: db
+    imports: 
+      - "github.com/antulator/antulator-api/core/models"
+
+  auth:
+    propertyName: auth
+    namespace: auth
+    use: false
+    imports: 
+      - db "github.com/antulator/antulator-api/core/models"
+  logger:
+    propertyName: logger
+    type: logging.StagesLogger
+    namespace: logger
+    # use: true
+    inject: true
+    imports: 
+      - logging "bitbucket.org/VismoXClub2/gopkg/stages-logging"
+
+  tracing:
+    propertyName: tracing
+    namespace: tracing
+    use: false
+    imports: 
+      - db "github.com/antulator/antulator-api/core/models"
+
+  metrics:
+    propertyName: metrics
+    namespace: metrics
+    use: true
+    imports: 
+      - db "github.com/antulator/antulator-api/core/models"
+
+  health:
+    propertyName: health
+    namespace: health
+    use: true
+    imports: 
+      - db "github.com/antulator/antulator-api/core/models"
+  
+  swagger:
+    propertyName: swagger
+    namespace: swagger
+    use: true    

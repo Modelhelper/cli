@@ -1,7 +1,7 @@
 ﻿language: sql # must be the same as template e.g cs, go, java (normally this should be the language file extension e.g startup.cs )
 version: 3.0
 
-short: Language defintion for Go (Golang from Google)
+short: Language defintion for SQL
   
 
 usesNamespace: false

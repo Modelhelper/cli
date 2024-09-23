@@ -13,9 +13,9 @@ import (
 func NewTemplatesCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	cmd := &cobra.Command{
-		Use: "template",
-
-		Short: "Creates a new project in the current working directory",
+		Use:     "template [command] [options]",
+		Aliases: []string{"t"},
+		Short:   "Work with project templates",
 
 		Run: func(cmd *cobra.Command, args []string) {
 
@@ -34,7 +34,7 @@ func templateListCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 		Use:     "list",
 		Aliases: []string{"ls"},
 
-		Short: "List all available project templates",
+		Short: "Lists all available project templates",
 
 		Run: func(cmd *cobra.Command, args []string) {
 

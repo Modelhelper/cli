@@ -39,12 +39,21 @@ func GetLines(input string) int {
 }
 
 func PluralForm(input string) string {
+
+	if strings.ToLower(input) == "data" {
+		return input
+	}
+
 	pluralize := pluralize.NewClient()
 	output := pluralize.Plural(input)
 
 	return output
 }
 func SingularForm(input string) string {
+	if strings.ToLower(input) == "data" {
+		return input
+	}
+
 	pluralize := pluralize.NewClient()
 	output := pluralize.Singular(input)
 

@@ -157,3 +157,12 @@ datatypes:
   json: 
     notNull: string
     nullable: sql.NullString     
+  jsonb: 
+    notNull: string
+    nullable: sql.NullString     
+  _varchar: 
+    notNull: "[]string"
+    nullable: "[]string"
+  _int:
+    notNull: "[]int"
+    nullable: "[]int"

@@ -1,4 +1,4 @@
-package template
+package code
 
 import (
 	"fmt"
@@ -21,14 +21,29 @@ type presentSimulationListModel struct {
 	options   models.CodeTemplateListOptions
 }
 
-func ListCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
+func NewTemplateListCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"ls"},
 		Args:    cobra.MaximumNArgs(1),
 		Short:   "List all templates or view content of a single template",
+		Long: `With this command you can list all available templates, snippet and blocks
+		
+		with the use of --by option you can group the various templates either by type, language
+		group or tag.
+		
+A template can exist in one or more groups making it possible to generate different
+outcome based on what you need
 
+Filtering the templates:
+Filter the template by using on or more of the following options
+--lang <langcodes> (e.g --lang cs), filters by language
+--type <type> (e.g --type block), filters by type
+--model <model> (e.g --model entity), filters by model
+--group <groupname> (e.g --group cs-dpr-full), filters by group
+
+`,
 		Run: listTemplateCommandHandler(app),
 	}
 
@@ -39,6 +54,8 @@ func ListCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 	cmd.Flags().StringArray("model", []string{}, "Filter the templates by model")
 	cmd.Flags().StringArray("key", []string{}, "Filter the templates by key")
 	cmd.Flags().StringArray("group", []string{}, "Filter the templates by group")
+
+	cmd.Flags().StringArray("hide", []string{}, "Hide the columns in the table")
 
 	// templateCmd.Flags().Bool("open", false, "Opens the template file in default editor or a selection of editors")
 	// 	cmd.Flags().String("editor", "", "The editor to use when opening the file")
@@ -56,6 +73,13 @@ func listTemplateCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra
 		modelFilter, _ := cmd.Flags().GetStringArray("model")
 		keyFilter, _ := cmd.Flags().GetStringArray("key")
 		groupFilter, _ := cmd.Flags().GetStringArray("group")
+		hideCols, _ := cmd.Flags().GetStringArray("hide")
+
+		mc := make(map[string]bool)
+
+		for _, c := range hideCols {
+			mc[c] = true
+		}
 
 		options := models.CodeTemplateListOptions{
 			DatabaseType:    db,
@@ -64,6 +88,7 @@ func listTemplateCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra
 			FilterModels:    modelFilter,
 			FilterKeys:      keyFilter,
 			FilterGroups:    groupFilter,
+			HideColumns:     mc,
 		}
 		templates := app.Code.TemplateService.List(&options)
 		tp := &templatePrinter{options: options}
@@ -101,22 +126,43 @@ func (tp *templatePrinter) Rows() [][]string {
 	var rows [][]string
 
 	for _, t := range tp.templates {
+		ok := false
 		groups := strings.Join(t.Features, ", ")
 		row := []string{
 			t.Name,
 			t.Language,
-			t.Type,
-			t.Model,
+
+			// t.Type,
+			// t.Model,
 			// t.Key,
 			// groups,
 			// t.Short,
 		}
 
-		row = append(row, t.Key)
+		_, ok = tp.options.HideColumns["type"]
+		if !ok {
+			row = append(row, t.Type)
+		}
+		_, ok = tp.options.HideColumns["model"]
+		if !ok {
+			row = append(row, t.Model)
+		}
+		_, ok = tp.options.HideColumns["key"]
+		if !ok {
+			row = append(row, t.Key)
+		}
 
-		row = append(row, groups)
+		_, ok = tp.options.HideColumns["groups"]
+		if !ok {
 
-		row = append(row, t.Short)
+			row = append(row, groups)
+		}
+		_, ok = tp.options.HideColumns["desc"]
+		if !ok {
+			row = append(row, t.Short)
+		}
+
+		// row = append(row, t.Short)
 
 		rows = append(rows, row)
 	}
@@ -125,22 +171,39 @@ func (tp *templatePrinter) Rows() [][]string {
 }
 
 func (tp *templatePrinter) Header() []string {
-
+	ok := false
 	row := []string{
 		"Name",
 		"Language",
-		"Type",
-		"Model",
+		// "Type",
+		// "Model",
 		// "Key",
 		// "Groups",
 		// "Description",
 	}
 
-	row = append(row, "Key")
+	_, ok = tp.options.HideColumns["type"]
+	if !ok {
+		row = append(row, "Type")
+	}
+	_, ok = tp.options.HideColumns["model"]
+	if !ok {
+		row = append(row, "Model")
+	}
+	_, ok = tp.options.HideColumns["key"]
+	if !ok {
+		row = append(row, "Key")
+	}
 
-	row = append(row, "Groups")
+	_, ok = tp.options.HideColumns["groups"]
+	if !ok {
 
-	row = append(row, "Description")
+		row = append(row, "Groups")
+	}
+	_, ok = tp.options.HideColumns["desc"]
+	if !ok {
+		row = append(row, "Description")
+	}
 
 	return row
 }

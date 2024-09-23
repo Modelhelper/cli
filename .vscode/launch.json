@@ -22,7 +22,7 @@
         {
             "name": "Launch Package",
             "type": "go",
-            "args": ["code", "generate", "--source", "Antulator.SimulationSensor", "--feature", "go-repo", "--screen"],
+            // "args": ["code", "generate", "--source", "Antulator.SimulationSensor", "--feature", "go-repo", "--screen"],
             // "args": ["project", "create", "--name", "'Antulator API'", "--template", "go-hex-api-small", "-d", "C:\\temp\\projects"],
             // "args": ["code", "generate", "--template", "go-db-interface", "--source", "Antulator.Simulation", "--verbose"],
             // "args": ["code", "generate", "--template", "go-hex-feat-db-create-sql", "--source", "UserLocation", "--verbose"],
@@ -32,8 +32,8 @@
             // "args": ["code", "generate", "-t", "go-feature-command", "-e", "FlightImport.BookingSession", "--screen"],
             // "args": ["source", "Antulator.Simulation"],
             // "args": ["code", "generate", "-t", "git-changelog", "--screen"],
-            // "args": ["source", "solders", "-c","sc-out"],
-            // "args": ["source", "ls", "-c","pg-prod"],
+            "args": ["code", "generate", "-t","ts-svelte-page-server", "--screen"],
+            // "args": ["project", "--model"],
             "request": "launch",
             "mode": "auto",
         // "program": "${file}"

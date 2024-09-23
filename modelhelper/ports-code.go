@@ -13,6 +13,7 @@ type CodeTemplateService interface {
 
 type CodeGeneratorService interface {
 	Generate(ctx context.Context, options *models.CodeGeneratorOptions) (*models.CodeGenerateResult, error)
+	// GetModel
 }
 
 type TemplateTypes interface {
