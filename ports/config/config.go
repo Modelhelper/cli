@@ -36,7 +36,7 @@ func NewConfigLoader() modelhelper.ConfigService {
 	return &rootConfig{}
 }
 
-func New() *models.Config {
+// func New() *models.Config {
 
 	usr, err := user.Current()
 	if err != nil {
