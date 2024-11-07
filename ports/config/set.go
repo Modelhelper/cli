@@ -1,8 +1,9 @@
 package config
 
 import (
-	"io/ioutil"
+	"log/slog"
 	"modelhelper/cli/modelhelper/models"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -142,7 +143,7 @@ func SetLangDefLocation(loc string) error {
 }
 
 func update(cfg *models.Config) error {
-
+	slog.Info("Updating config")
 	d, err := yaml.Marshal(&cfg)
 
 	if err != nil {
@@ -151,7 +152,7 @@ func update(cfg *models.Config) error {
 	}
 
 	path := filepath.Join(Location(), "config.yaml")
-	err = ioutil.WriteFile(path, d, 0777)
+	err = os.WriteFile(path, d, 0777)
 
 	return err
 
