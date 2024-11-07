@@ -15,6 +15,7 @@ func SourceCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 	subCommands := []*cobra.Command{
 		ListCommand(app),
+		NewCopySourceCommand(app),
 	}
 
 	rootCmd := &cobra.Command{
