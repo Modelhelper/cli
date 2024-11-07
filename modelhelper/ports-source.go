@@ -9,6 +9,16 @@ type SourceService interface {
 	EntitiesFromColumn(column string) (*[]models.Entity, error)
 }
 
+type DatabaseMaintenaceService interface {
+	IndexesFragmentation() (int, error)
+	RebuildIndexes() (int, error)
+	ShrinkDatabase() (int, error)
+}
+
+type DatabaseService interface {
+	BulkCopy(source string, dest string, sourceQuery string, destTable string) (int, error)
+}
+
 type SourceFactoryService interface {
 	NewSource(conType, conName string) (SourceService, error)
 }
@@ -46,5 +56,8 @@ type ConnectionService interface {
 	Connections() (map[string]*models.ConnectionList, error)
 	Connection(name string) (any, error)
 	BaseConnection(name string) (*models.ConnectionList, error)
-	// Create()
+	SetDefault(name string) error
+	Create(con *models.ConnectionList) error
+	Update(con *models.ConnectionList) error
+	Delete(name string) error
 }
