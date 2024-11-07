@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"modelhelper/cli/modelhelper"
 	cli "modelhelper/cli/ports/app"
 	"modelhelper/cli/ports/code"
@@ -17,6 +18,7 @@ import (
 	"modelhelper/cli/ports/template"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"syscall"
 
 	_ "embed"
@@ -44,8 +46,24 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	cfgs := config.NewConfigService()
 	// mainCtx := context.WithCancel()
-	cmnd, ai := initializeApplication(ctx)
+	if !cfgs.ConfigExists() {
+		cfg, err := cfgs.Create()
+		if err != nil {
+			fmt.Println(err)
+			panic(err)
+		}
+
+		// fmt.Println("Config created", cfg)
+		err = cfgs.SaveConfig(cfg)
+		if err != nil {
+			fmt.Println(err)
+			panic(err)
+		}
+	}
+
+	cmnd, ai := initializeApplication(ctx, cfgs)
 
 	if !ai.IsInitialized() {
 		err := ai.Initialize()
@@ -60,18 +78,19 @@ func main() {
 
 func handlePanic() {
 	if err := recover(); err != nil {
-		// slog.Error("context", "main", "message", "Caught panic", "error", err)
-		// slog.Error(string(debug.Stack()))
+		slog.Error("context", "main", "message", "Caught panic", "error", err)
+		slog.Error(string(debug.Stack()))
 	}
 }
 
-func initializeApplication(ctx context.Context) (modelhelper.CommandService, modelhelper.AppInitializer) {
-	cfgs := config.NewConfigService()
+func initializeApplication(ctx context.Context, cfgs modelhelper.ConfigService) (modelhelper.CommandService, modelhelper.AppInitializer) {
 	cfg, _ := cfgs.Load()
 
 	prjs := project.NewProjectConfigService()
 	infs := cli.NewCliInfo("modelhelper", version, isBeta)
-	tpls := template.NewCodeTemplateService(cfg)
+
+	tpls := template.NewCodeTemplateService(cfg, prjs.TemplatePath())
+
 	lngs := language.NewLanguageDefinitionService(cfg)
 	tcg := code.NewCodeGenerator(tpls, lngs)
 	cons := connection.NewConnectionService(cfg)
@@ -94,7 +113,7 @@ func initializeApplication(ctx context.Context) (modelhelper.CommandService, mod
 	mha.LanguageService = lngs
 	cmnd := command.NewCobraCli(mha)
 
-	ai := cli.NewCliInitializer(ctx, infs, cfgs)
+	ai := cli.NewCliInitializer(ctx, infs, cfgs, cons)
 	return cmnd, ai
 }
 
