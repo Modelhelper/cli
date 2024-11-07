@@ -1,7 +1,6 @@
 package connection
 
 import (
-	"io/ioutil"
 	"log"
 	"modelhelper/cli/modelhelper"
 	"modelhelper/cli/modelhelper/models"
@@ -14,6 +13,46 @@ import (
 
 type connectionListService struct {
 	cfg *models.Config
+}
+
+// Create implements modelhelper.ConnectionService.
+func (c *connectionListService) Create(con *models.ConnectionList) error {
+
+	bytes, err := yaml.Marshal(&con)
+	if err != nil {
+		log.Fatalf("cannot marshal data: %v", err)
+		return err
+	}
+
+	err = os.WriteFile(filepath.Join(c.cfg.DirectoryName, "connections", con.Name+".yaml"), bytes, 0644)
+	if err != nil {
+		log.Fatalf("cannot write file: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+// Delete implements modelhelper.ConnectionService.
+func (c *connectionListService) Delete(name string) error {
+	// write deletion code for file connection here
+	err := os.Remove(filepath.Join(c.cfg.DirectoryName, "connections", name+".yaml"))
+	if err != nil {
+		log.Fatalf("cannot delete file: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+// Update implements modelhelper.ConnectionService.
+func (c *connectionListService) Update(con *models.ConnectionList) error {
+	panic("unimplemented")
+}
+
+// SetDefault implements modelhelper.ConnectionService.
+func (c *connectionListService) SetDefault(name string) error {
+	panic("unimplemented")
 }
 
 // BaseConnection implements modelhelper.ConnectionService
