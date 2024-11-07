@@ -45,6 +45,7 @@ func registerFlags(cmd *cobra.Command) {
 
 	cmd.Flags().Bool("overwrite", false, "Overwrite any existing file when exporting to file on disk")
 	cmd.Flags().BoolP("verbose", "v", false, "Prints verbose messages, default false")
+	cmd.Flags().BoolP("interactive", "i", false, "Goes into interactive mode, default false")
 
 	cmd.Flags().Bool("code-only", false, "Writes only the generated code to the console, no stats, no messages - only code, default false")
 
@@ -70,6 +71,11 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 	return func(cmd *cobra.Command, args []string) {
 
 		options := parseCodeOptions(cmd, args)
+
+		if options.RunInteractively {
+
+		}
+
 		result, err := app.Code.Generator.Generate(cmd.Root().Context(), options)
 		if err != nil {
 			// handle error
@@ -166,6 +172,7 @@ func parseCodeOptions(cmd *cobra.Command, args []string) *models.CodeGeneratorOp
 	basePathFlag, _ := cmd.Flags().GetString("base-path")
 	overwriteAll, _ := cmd.Flags().GetBool("overwrite")
 	verboseFlag, _ := cmd.Flags().GetBool("verbose")
+	interactiveFlag, _ := cmd.Flags().GetBool("interactive")
 
 	options.Name = name
 	options.CodeOnly = codeOnly
@@ -183,6 +190,7 @@ func parseCodeOptions(cmd *cobra.Command, args []string) *models.CodeGeneratorOp
 	options.ConnectionName = conName
 	options.Overwrite = overwriteAll
 	options.Verbose = verboseFlag
+	options.RunInteractively = interactiveFlag
 	options.ModelPath, _ = cmd.Flags().GetString("model")
 	options.ExportPath, _ = cmd.Flags().GetString("export-path")
 	if len(basePathFlag) > 0 {
