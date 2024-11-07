@@ -20,6 +20,15 @@ type defaultProject struct {
 	Config models.ProjectConfig
 }
 
+// TemplatePath implements modelhelper.ProjectConfigService.
+func (p *defaultProject) TemplatePath() string {
+	bp := p.BasePath()
+	if len(bp) == 0 {
+		return ""
+	}
+	return filepath.Join(p.BasePath(), constants.ProjectRootFolderName, "templates")
+}
+
 // BasePath implements modelhelper.ProjectConfigService
 func (p *defaultProject) BasePath() string {
 	bp, exist := path.FindBaseDirFromFoldername(path.CurrentDirectory(), constants.ProjectRootFolderName)

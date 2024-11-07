@@ -25,8 +25,8 @@ func OpenCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 func openTemplate(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 
-		// cfg := app.Config
-		// editor := getEditor(cfg)
+		//cfg := app.Config
+		//editor := getEditor(cfg)
 
 		// tl := tpl.TemplateLoader{
 		// 	// Directory: app.TemplateFolder(cfg.Templates.Location),

@@ -14,6 +14,7 @@ type ProjectConfigService interface {
 	FindReleatedProjects(startPath string) []string
 	FindNearestProjectDir() (string, bool)
 	BasePath() string
+	TemplatePath() string
 }
 
 type ProjectGenerator interface {

@@ -69,7 +69,7 @@ func listTemplateCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra
 		tp := &templatePrinter{options: options}
 
 		ui.PrintConsoleTitle("ModelHelper Templates")
-		fmt.Printf("\nIn the list below you will find all available templates in ModelHelper\n")
+		fmt.Printf("\nIn the list below you will find all available templates in ModelHelper\n\n")
 
 		if len(group) > 0 {
 			grp := app.Code.TemplateService.Group(group, templates)

@@ -59,7 +59,6 @@ Filter the template by using on or more of the following options
 
 	// templateCmd.Flags().Bool("open", false, "Opens the template file in default editor or a selection of editors")
 	// 	cmd.Flags().String("editor", "", "The editor to use when opening the file")
-
 	return cmd
 }
 

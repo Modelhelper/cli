@@ -13,7 +13,8 @@ import (
 )
 
 type codeTemplateService struct {
-	config *models.Config
+	config              *models.Config
+	projectTemplatePath string
 }
 
 type codeFile struct {
@@ -21,8 +22,8 @@ type codeFile struct {
 	fileNameFromDir string
 }
 
-func NewCodeTemplateService(cfg *models.Config) modelhelper.CodeTemplateService {
-	return &codeTemplateService{cfg}
+func NewCodeTemplateService(cfg *models.Config, projectTemplatePath string) modelhelper.CodeTemplateService {
+	return &codeTemplateService{config: cfg, projectTemplatePath: projectTemplatePath}
 }
 
 // List implements modelhelper.CodeTemplateService
@@ -47,6 +48,27 @@ func (t *codeTemplateService) List(options *models.CodeTemplateListOptions) map[
 			}
 			templates[codeFile.fileNameFromDir] = *t
 		}
+	}
+
+	if t.projectTemplatePath != "" {
+		projectCodeFiles := getCodeTemplateFiles(t.projectTemplatePath)
+		// if err != nil {
+		// 	log.Fatalln(err)
+		// }
+		for _, codeFile := range projectCodeFiles {
+			projectTemplate, err := loadTemplateFromFile(codeFile.fullPath)
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			if projectTemplate != nil {
+				if codeFile != nil {
+					projectTemplate.Name = codeFile.fileNameFromDir
+				}
+				templates[codeFile.fileNameFromDir] = *projectTemplate
+			}
+		}
+
 	}
 
 	if options != nil {
@@ -117,6 +139,7 @@ func getCodeTemplateFiles(path string) []*codeFile {
 func getDatabaseTemplateFiles(path, dbType string) []*codeFile {
 	typeConverter := make(map[string]string)
 	typeConverter["sqlserver"] = "mssql"
+	typeConverter["ms"] = "mssql"
 	typeConverter["mssql"] = "mssql"
 	typeConverter["mysql"] = "mysql"
 	typeConverter["postgres"] = "postgres"
@@ -287,6 +310,13 @@ func listGrouper(key string, template models.CodeTemplate, list []string) map[st
 
 // Load implements modelhelper.CodeTemplateService
 func (t *codeTemplateService) Load(name string) *models.CodeTemplate {
+	list := t.List(nil)
+
+	for k, tpl := range list {
+		if k == name {
+			return &tpl
+		}
+	}
 
 	return nil
 }
