@@ -1,0 +1,48 @@
+version: 3
+name: tutorial-strings
+body: |+
+  This is a template using pipelines
+
+  Singular
+  ---------------------------------------
+  Child         {{ "Child" | singular}}
+  Person        {{ "Person" | singular}}
+  Appendix      {{ "Appendix" | singular}}
+
+  Plural:
+  ---------------------------------------
+  Child         {{ "Child" | plural}}
+  Person        {{ "Person" | plural}}
+  Appendix      {{ "Appendix" | plural}}
+
+  DataTypes
+  ---------------------------------------
+  varchar       {{ "varchar" | datatype }}
+  bigint        {{ "bigint" | datatype }}
+  int           {{ "int" | datatype }}
+  nvarchar      {{ "nvarchar" | datatype }}
+
+  Nullable datatypes
+  ---------------------------------------
+  bool          {{ "bool" | datatype | nullable}}
+  varchar       {{ "varchar" | datatype | nullable }}
+  bigint        {{ "bigint" | datatype | nullable }}
+  int           {{ "int" | datatype | nullable }}
+  nvarchar      {{ "nvarchar" | datatype | nullable}}
+
+  nullcheck
+  ---------------------------------------
+  int (null)    {{ "int" | datatypeN true }}
+  bool (!null)  {{ "bool" | datatypeN false }}
+
+  Casing
+  ---------------------------------------
+  upper         {{ "upper" | upper }}
+  lower         {{ "lower" | lower }}
+
+  camelCase     {{ "ThisIsASentence" | camel }}
+  PascalCase    {{ "ThisIsASentence" | pascal }}
+  Words         {{ "ThisIsASentence" | words }}
+  Sentence      {{ "ThisIsASentence" | sentence }}
+  Snake         {{ "ThisIsASentence" | snake }}
+  Kebab         {{ "ThisIsASentence" | kebab }}
