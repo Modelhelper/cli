@@ -111,6 +111,7 @@ type GenericConnectionType interface {
 type GenericConnection[T GenericConnectionType] struct {
 	Name        string                     `json:"name" yaml:"name"`
 	Description string                     `json:"description" yaml:"description,omitempty"`
+	Type        string                     `json:"type" yaml:"type"`
 	Connection  T                          `json:"connection" yaml:"connection"`
 	Groups      map[string]ConnectionGroup `json:"groups,omitempty" yaml:"groups,omitempty"`
 	Options     map[string]string          `json:"options,omitempty" yaml:"options,omitempty"`
@@ -120,12 +121,13 @@ type GenericConnection[T GenericConnectionType] struct {
 }
 
 type ConnectionList struct {
-	Name        string                     `json:"name" yaml:"name"`
-	Type        string                     `json:"type" yaml:"type"`
-	Description string                     `json:"description" yaml:"description,omitempty"`
-	Groups      map[string]ConnectionGroup `json:"groups,omitempty" yaml:"groups,omitempty"`
-	Options     map[string]string          `json:"options,omitempty" yaml:"options,omitempty"`
-	Synonyms    map[string]string          `json:"synonyms,omitempty" yaml:"synonyms,omitempty"`
-	Path        string
-	IsDefault   bool
+	Name             string                     `json:"name" yaml:"name"`
+	Type             string                     `json:"type" yaml:"type"`
+	Description      string                     `json:"description" yaml:"description,omitempty"`
+	ConnectionString string                     `json:"connectionString" yaml:"connectionString"`
+	Groups           map[string]ConnectionGroup `json:"groups,omitempty" yaml:"groups,omitempty"`
+	Options          map[string]string          `json:"options,omitempty" yaml:"options,omitempty"`
+	Synonyms         map[string]string          `json:"synonyms,omitempty" yaml:"synonyms,omitempty"`
+	Path             string
+	IsDefault        bool
 }
