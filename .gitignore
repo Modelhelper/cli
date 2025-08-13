@@ -16,3 +16,5 @@ bin
 src/server/static/
 
 .VSCodeCounter/
+
+CLAUDE.md
