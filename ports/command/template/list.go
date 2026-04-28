@@ -116,7 +116,7 @@ func (tp *templatePrinter) Rows() [][]string {
 
 		row = append(row, groups)
 
-		row = append(row, t.Short)
+		// row = append(row, t.Short)
 
 		rows = append(rows, row)
 	}
@@ -140,7 +140,7 @@ func (tp *templatePrinter) Header() []string {
 
 	row = append(row, "Groups")
 
-	row = append(row, "Description")
+	// row = append(row, "Description")
 
 	return row
 }
@@ -261,7 +261,7 @@ func (m presentSimulationListModel) View() string {
 			template.Model,
 			template.Key,
 			template.Features,
-			template.Description,
+			// template.Description,
 		})
 	}
 
