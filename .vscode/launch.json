@@ -22,7 +22,7 @@
         {
             "name": "Launch Package",
             "type": "go",
-            "args": ["template", "ls"],
+            "args": ["source", "ls"],
             // "args": ["code", "generate", "--source", "Antulator.SimulationSensor", "--feature", "go-repo", "--screen"],
             // "args": ["project", "create", "--name", "'Antulator API'", "--template", "go-hex-api-small", "-d", "C:\\temp\\projects"],
             // "args": ["code", "generate", "--template", "go-db-interface", "--source", "Antulator.Simulation", "--verbose"],
