@@ -158,7 +158,7 @@ func (tp *templatePrinter) Rows() [][]string {
 		}
 		_, ok = tp.options.HideColumns["desc"]
 		if !ok {
-			row = append(row, t.Short)
+			// row = append(row, t.Short)
 		}
 
 		// row = append(row, t.Short)
@@ -201,7 +201,7 @@ func (tp *templatePrinter) Header() []string {
 	}
 	_, ok = tp.options.HideColumns["desc"]
 	if !ok {
-		row = append(row, "Description")
+		// row = append(row, "Description")
 	}
 
 	return row
