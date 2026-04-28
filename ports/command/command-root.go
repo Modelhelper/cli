@@ -12,6 +12,7 @@ import (
 	"modelhelper/cli/ports/command/serve"
 	"modelhelper/cli/ports/command/source"
 	"modelhelper/cli/ports/command/template"
+	"modelhelper/cli/ports/command/uuid"
 
 	"github.com/spf13/cobra"
 )
@@ -75,6 +76,7 @@ func (cc *cobraCommand) subCommands() []*cobra.Command {
 		NewVersionCommand(cc.application.Info),
 		NewCompletionCommand(),
 		connection.NewConnectionCommand(cc.application),
+		uuid.NewUUIDRootCommand(cc.application),
 	}
 
 }
