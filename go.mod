@@ -61,6 +61,7 @@ require (
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/go-git/go-git/v5 v5.9.0
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
+	github.com/google/uuid v1.6.0
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jedib0t/go-pretty/v6 v6.5.4
 	github.com/lib/pq v1.10.9
