@@ -87,6 +87,10 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 		// var flock = sync.Mutex{}
 
 		for _, res := range result.Files {
+			if res.Result == nil { // the template failed, the error is already printed
+				continue
+			}
+
 			content := []byte(res.Result.Body)
 			if options.ExportToScreen {
 				screenWriter := exporter.ScreenExporter{}
@@ -127,6 +131,10 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 		}
 
 		for _, snippet := range result.Snippets {
+			if snippet.Result == nil {
+				continue
+			}
+
 			content := []byte(snippet.Result.Body)
 			if options.ExportToScreen {
 				screenWriter := exporter.ScreenExporter{}

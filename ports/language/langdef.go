@@ -23,22 +23,42 @@ type langDefService struct {
 }
 
 // List implements modelhelper.LanguageDefinitionService
-func (*langDefService) List() map[string]models.LanguageDefinition {
-	files, _ := loadInternalFiles()
-	return files
+func (s *langDefService) List() map[string]models.LanguageDefinition {
+	return s.definitions()
 }
 
 // GetDefinition implements modelhelper.LanguageDefinitionService
-func (*langDefService) GetDefinition(lang string) *models.LanguageDefinition {
-	langs, _ := loadInternalFiles()
-
-	l, ok := langs[lang]
+func (s *langDefService) GetDefinition(lang string) *models.LanguageDefinition {
+	l, ok := s.definitions()[lang]
 
 	if ok {
 		return &l
 	}
 
 	return nil
+}
+
+// definitions returns the definitions built into the CLI with the ones in the folder set as
+// languages.definitions in the config laid over them. A language in the folder replaces the
+// built in language with the same name, so languages can be added or changed without a rebuild.
+func (s *langDefService) definitions() map[string]models.LanguageDefinition {
+	defs, _ := loadInternalFiles()
+
+	if s.cfg == nil || len(s.cfg.Languages.Definitions) == 0 {
+		return defs
+	}
+
+	external, err := loadFromPath(s.cfg.Languages.Definitions)
+	if err != nil {
+		// the folder does not exist, use the built in definitions
+		return defs
+	}
+
+	for name, def := range external {
+		defs[name] = def
+	}
+
+	return defs
 }
 
 func NewLanguageDefinitionService(cfg *models.Config) modelhelper.LanguageDefinitionService {

@@ -5,6 +5,7 @@ import (
 	"github.com/Modelhelper/cli/v3/modelhelper"
 	"github.com/Modelhelper/cli/v3/modelhelper/models"
 	"github.com/Modelhelper/cli/v3/ui"
+	"sort"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/text/language"
@@ -44,7 +45,7 @@ type languageTableRenderer struct {
 }
 
 func (d *languageTableRenderer) Header() []string {
-	h := []string{"Language", "Version", "Datatypes", "Imports", "Keys", "Injects", "Description"}
+	h := []string{"Language", "Version", "Datatypes", "Imports", "Keys", "Injects", "Description", "Source"}
 
 	return h
 }
@@ -54,8 +55,11 @@ func (d *languageTableRenderer) Rows() [][]string {
 	p := message.NewPrinter(language.English)
 
 	for _, row := range d.rows {
-		// un := "No"
-		// ci := "No"
+		source := row.Path
+		if len(source) == 0 {
+			source = "built in"
+		}
+
 		r := []string{
 			row.Language,
 			row.Version,
@@ -64,10 +68,13 @@ func (d *languageTableRenderer) Rows() [][]string {
 			p.Sprintf("%d", len(row.Keys)),
 			p.Sprintf("%d", len(row.Inject)),
 			row.Short,
+			source,
 		}
 
 		rows = append(rows, r)
 	}
+
+	sort.Slice(rows, func(i, j int) bool { return rows[i][0] < rows[j][0] })
 
 	return rows
 }

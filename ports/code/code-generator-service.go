@@ -154,7 +154,8 @@ You could also use mh template or mh t to see a list of all available templates`
 					cstat.TemplatesUsed += 1
 
 					model := g.cmc.ToBasicModel(currentTemplate.Key, currentTemplate.Language, prj)
-					o, _ := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
+					o, genErr := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
+					reportTemplateError(currentTemplate.Name, genErr)
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
 
@@ -169,7 +170,8 @@ You could also use mh template or mh t to see a list of all available templates`
 					model := g.cmc.ToNameModel(currentTemplate.Key, currentTemplate.Language, prj, options.Name)
 					// model.PageHeader = simpleGenerate("header", model.PageHeader, model)
 
-					o, _ := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
+					o, genErr := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
+					reportTemplateError(currentTemplate.Name, genErr)
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
 
@@ -244,7 +246,8 @@ You could also use mh template or mh t to see a list of all available templates`
 						model.Inject[x].Name = simpleGenerate("injprop", inj.Name, model)
 					}
 
-					o, _ := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
+					o, genErr := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
+					reportTemplateError(currentTemplate.Name, genErr)
 
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
@@ -264,7 +267,8 @@ You could also use mh template or mh t to see a list of all available templates`
 					model := g.cmc.ToCommitHistoryModel(currentTemplate.Key, currentTemplate.Language, prj, ch)
 					// model.PageHeader = simpleGenerate("header", model.PageHeader, model)
 
-					o, _ := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
+					o, genErr := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
+					reportTemplateError(currentTemplate.Name, genErr)
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
 
@@ -292,7 +296,8 @@ You could also use mh template or mh t to see a list of all available templates`
 					model := g.cmc.ToCustomModel(currentTemplate.Key, currentTemplate.Language, prj, options.Custom)
 					// model.PageHeader = simpleGenerate("header", model.PageHeader, model)
 
-					o, _ := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
+					o, genErr := g.generator.Generate(ctx, &currentTemplate, model, templateOptions)
+					reportTemplateError(currentTemplate.Name, genErr)
 					code := createCodeResultFile(o, &currentTemplate, model, locationFound, locationPath)
 					appendCodeResult(result, code)
 
@@ -564,4 +569,11 @@ func testTypes() map[string]models.CodeTypeImportModel {
 		Key:         "key",
 	}
 	return tl
+}
+
+// reportTemplateError tells the user why a template did not produce anything, the template is skipped
+func reportTemplateError(name string, err error) {
+	if err != nil {
+		fmt.Printf("Error when generating template '%s': %v\n", name, err)
+	}
 }
