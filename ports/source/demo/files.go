@@ -168,7 +168,14 @@ func (f *fileEntity) toSourceEntity() models.Entity {
 	cols := []models.Column{}
 	id := 0
 
-	for colName, col := range f.Columns {
+	colNames := make([]string, 0, len(f.Columns))
+	for colName := range f.Columns {
+		colNames = append(colNames, colName)
+	}
+	sort.Strings(colNames) // map order is random, keep the generated output stable
+
+	for _, colName := range colNames {
+		col := f.Columns[colName]
 		id++
 		colId := id
 		if col.ID > 0 {
@@ -198,7 +205,7 @@ func (f *fileEntity) toSourceEntity() models.Entity {
 
 		cols = append(cols, ec)
 	}
-	sort.Sort(SortColumnById(cols))
+	sort.Stable(SortColumnById(cols))
 
 	ent.Columns = cols
 	return ent
