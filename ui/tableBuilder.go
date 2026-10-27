@@ -16,33 +16,34 @@ type TableConverter interface {
 func RenderTable(tc TableConverter) {
 
 	table := CreateTableWithColumnSeparator(tc.Header())
-	table.AppendBulk(tc.Rows())
+	// table.AppendBulk(tc.Rows())
+	table.Bulk(tc.Rows())
 
 	table.Render()
 }
 
 func CreateStandardTable(header []string) *tablewriter.Table {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(header)
-	table.SetBorder(false) // Set Border to false
-	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-	table.SetRowLine(false)
-	table.SetColumnSeparator(" ")
-	table.SetCenterSeparator("-")
-	table.SetHeaderLine(true)
+	table.Header(header)
+	// table.Border(false) // Set Border to false
+	// table.HeaderAlignment(tablewriter.ALIGN_LEFT)
+	// table.SetRowLine(false)
+	// table.SetColumnSeparator(" ")
+	// table.SetCenterSeparator("-")
+	// table.SetHeaderLine(true)
 
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetRowSeparator("-")
+	// table.SetCenterSeparator("")
+	// table.SetColumnSeparator("")
+	// table.SetRowSeparator("-")
 
 	return table
 }
 
 func CreateTableWithColumnSeparator(header []string) *tablewriter.Table {
 	table := CreateStandardTable(header)
-	table.SetAutoWrapText(false)
-	table.SetCenterSeparator("+")
-	table.SetColumnSeparator("|")
+	// table.SetAutoWrapText(false)
+	// table.SetCenterSeparator("+")
+	// table.SetColumnSeparator("|")
 
 	return table
 }
@@ -50,11 +51,11 @@ func CreateTableWithColumnSeparator(header []string) *tablewriter.Table {
 func CreateTableWithColumnAndRowSeparator(header []string) *tablewriter.Table {
 	table := CreateStandardTable(header)
 
-	table.SetRowLine(true)
-	table.SetBorder(true) // Set Border to false
+	// table.SetRowLine(true)
+	// table.SetBorder(true) // Set Border to false
 
-	table.SetCenterSeparator("+")
-	table.SetColumnSeparator("|")
+	// table.SetCenterSeparator("+")
+	// table.SetColumnSeparator("|")
 
 	return table
 }
