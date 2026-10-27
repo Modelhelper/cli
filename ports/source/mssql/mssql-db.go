@@ -6,7 +6,7 @@ import (
 	"log"
 	"modelhelper/cli/modelhelper"
 
-	mssql "github.com/denisenkom/go-mssqldb"
+	mssql "github.com/microsoft/go-mssqldb"
 )
 
 type msSqlDatabaseService struct {
