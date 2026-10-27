@@ -2,7 +2,7 @@
 
 ModelHelper (`mh`) reads the structure of a database and turns it into code. Point it at a table, pick a template, and get a struct, a repository, a controller, or whatever the template describes. The templates are plain YAML files, so you can change them or write your own.
 
-> **Status:** beta. The CLI is being rewritten from C# to Go, so some commands are unfinished and details may change.
+> **Status:** beta. The CLI was rewritten from C# to Go. A few commands are still unfinished and details may change.
 
 ## What it does
 
@@ -140,7 +140,7 @@ The template format and the full set of templates are documented in [Modelhelper
 
 ## Contributing
 
-You are welcome to contribute, but for now I will not approve any pull requests. The project is in the middle of a rewrite from C# to Go.
+Contributions are welcome. Read [CONTRIBUTING.md](.github/CONTRIBUTING.md) for how to report issues, open pull requests and set up a development environment. For new features, please open an issue first.
 
 ## Community
 
