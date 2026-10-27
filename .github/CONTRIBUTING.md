@@ -1,66 +1,61 @@
-# Vue.js Contributing Guide
+# Contributing to the ModelHelper CLI
 
-Hi! I’m really excited that you are interested in contributing to the ModelHelper templates. Before submitting your contribution though, please make sure to take a moment and read through the following guidelines.
+Thanks for wanting to help. Contributions are welcome: bug reports, fixes, new features and documentation. Please read this page before you open a pull request.
 
-- [Code of Conduct](https://github.com/Modelhelper/cli/blob/dev/.github/CODE_OF_CONDUCT.md)
-- [Issue Reporting Guidelines](#issue-reporting-guidelines)
-- [Pull Request Guidelines](#pull-request-guidelines)
-- [Development Setup](#development-setup)
-- [Project Structure](#project-structure)
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
+- [Reporting issues](#reporting-issues)
+- [Pull requests](#pull-requests)
+- [Development setup](#development-setup)
+- [Committing changes](#committing-changes)
+- [Project structure](#project-structure)
 
-## Issue Reporting Guidelines
+## Reporting issues
 
-- Always use [https://github.com/Modelhelper/cli/issues](https://github.com/Modelhelper/cli/issues/new/choose) to create new issues.
+Use [GitHub issues](https://github.com/Modelhelper/cli/issues/new/choose). For a bug, include the `mh` command you ran, what you expected, what happened, and the output of `mh version`.
 
-## Pull Request Guidelines
+Templates and agent skills live in their own repositories: [Modelhelper/templates](https://github.com/Modelhelper/templates) and [Modelhelper/skills](https://github.com/Modelhelper/skills). Report template problems there.
 
-- The `master` branch is basically just a snapshot of the latest stable release. All development should be done in dedicated branches. **Do not submit PRs against the `master` branch.**
+## Pull requests
 
-- Checkout a topic branch from the relevant branch, e.g. `develop`, and merge back against that branch.
+- Branch from `main` and open the pull request against `main`.
+- For a new feature, open an issue first and describe what you want to add and why. That way you know it fits before you spend time on it.
+- For a bug fix, describe the bug in the pull request, and say how you reproduced it. Reference the issue if there is one.
+- Keep a pull request to one change. Several small commits are fine, they are squashed when merged.
+- Add or update tests when you change behaviour, and update the docs when a command or option changes.
+- Run `gofmt` and `go vet ./...` on what you change.
 
-- Work in the `src` folder and **DO NOT** checkin `dist` in the commits.
+## Development setup
 
-- It's OK to have multiple small commits as you work on the PR - we will let GitHub automatically squash it before merging.
+You need Go (see `go.mod` for the version).
 
-- Make sure `go test` passes. (see [development setup](#development-setup))
-
-- If adding new feature:
-  - Add accompanying test case.
-  - Provide convincing reason to add this feature. Ideally you should open a suggestion issue first and have it greenlighted before working on it.
-
-- If fixing a bug:
-  - If you are resolving a special issue, add `(fix #xxxx[,#xxx])` (#xxxx is the issue id) in your PR title for a better release log, e.g. `update entities encoding/decoding (fix #3899)`.
-  - Provide detailed description of the bug in the PR. Live demo preferred.
-  - Add appropriate test coverage if applicable.
-
-## Development Setup
-
-You will need to have Go installed.
-
-After cloning the repo, run:
-
-``` bash
-$ go test # or yarn
+```bash
+git clone https://github.com/Modelhelper/cli.git
+cd cli
+go build -o mh ./cmd/mh
+go test ./...
 ```
 
-### Committing Changes
+You can try the CLI without a database or a config for your own sources by using the demo source:
 
-Commit messages should follow the [commit message convention](./COMMIT_CONVENTION.md) so that changelogs can be automatically generated. Commit messages will be automatically validated upon commit. 
-
-### Commonly used Go commands
-
-``` bash
-# watch and auto re-build dist/vue.js
-$ go run main.go
-
-# run the full test suite, include linting / type checking
-$ go test
-
-# build all dist files, including npm packages
-$ go build
+```bash
+go run ./cmd/mh code generate -t go-struct --demo -s order --screen
 ```
 
+Code generation needs templates, see [Modelhelper/templates](https://github.com/Modelhelper/templates) and run `mh` once to set up your config.
 
-## Project Structure
+A few tests fail on a clean checkout today because they depend on the machine they run on (`ports/code`, `ports/connection` and `utils/path`). If a test you did not touch fails, check that it also fails on `main` before you spend time on it.
 
-TBD
+## Committing changes
+
+Commit messages follow the [commit message convention](./COMMIT_CONVENTION.md), for example `fix(project): keep empty folders` or `feat(code): add --db option`. The convention is not enforced by a hook, so check your messages before you push.
+
+## Project structure
+
+| Folder | Contents |
+|--------|----------|
+| `cmd/mh` | The `main` package, builds the `mh` binary |
+| `modelhelper` | Interfaces and models shared by the rest of the code |
+| `ports` | The implementations: `command` (cobra commands), `code`, `template`, `project`, `source` (mssql, postgres, demo), `config`, `connection` and so on |
+| `ui` | Terminal tables, prompts and colours |
+| `utils` | Small helpers: text casing, template functions, paths |
+| `schemas` | JSON schemas for config files |
