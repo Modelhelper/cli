@@ -102,8 +102,12 @@ You could also use mh template or mh t to see a list of all available templates`
 	// 	if len(options.TemplatePath) == 0 {
 	// 		options.TemplatePath = g.cfg.Templates.Code[0]
 	// 	}
+	dbType := "mssql" // ponytail: demo has no real connection, so use mssql SQL templates
+	if con != nil {
+		dbType = con.Type
+	}
 	templateOptions := &models.CodeTemplateListOptions{
-		DatabaseType: con.Type,
+		DatabaseType: dbType,
 	}
 
 	allTemplates := g.templateService.List(templateOptions)
