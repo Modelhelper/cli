@@ -74,25 +74,30 @@ func getProjectSourceFiles(path string) []*models.SourceFile {
 			return err
 		}
 
-		if !info.IsDir() {
-			dirName, fname := filepath.Split(fullPath)
-
-			rel := relativePath(path, dirName)
-
-			b, _ := ioutil.ReadFile(fullPath)
-			snippets := extractSnippetIdentifiers(b)
-
-			file := models.SourceFile{
-				DirectoryName: dirName,
-				RelativePath:  rel,
-				FileName:      fname,
-				Content:       b,
-				Snippets:      snippets,
+		if info.IsDir() {
+			if fullPath != path {
+				rel, _ := filepath.Rel(path, fullPath)
+				files = append(files, &models.SourceFile{DirectoryName: fullPath, RelativePath: rel, IsDir: true})
 			}
-
-			files = append(files, &file)
-
+			return nil
 		}
+
+		dirName, fname := filepath.Split(fullPath)
+		rel, _ := filepath.Rel(path, dirName)
+		if rel == "." {
+			rel = ""
+		}
+
+		b, _ := ioutil.ReadFile(fullPath)
+		snippets := extractSnippetIdentifiers(b)
+
+		files = append(files, &models.SourceFile{
+			DirectoryName: dirName,
+			RelativePath:  rel,
+			FileName:      fname,
+			Content:       b,
+			Snippets:      snippets,
+		})
 
 		return nil
 	})
@@ -143,13 +148,15 @@ func coalesceString(name ...string) string {
 	return output
 }
 
-func relativePath(path, file string) string {
-	return strings.Replace(file, path, "", -1)
-}
 func parseBody(model *models.ProjectTemplateModel, files []*models.SourceFile) []*models.SourceFile {
 	fout := []*models.SourceFile{}
 
 	for _, f := range files {
+		if f.IsDir {
+			fout = append(fout, f)
+			continue
+		}
+
 		b := generate(string(f.Content), model)
 		f.Content = b
 		fout = append(fout, &models.SourceFile{

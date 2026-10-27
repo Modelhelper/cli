@@ -64,8 +64,6 @@ func NewGenerateProjectCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 						fmt.Printf("Err %v", err)
 					}
 
-					fileCnt = len(src)
-
 					root, err := app.Project.Generator.GenerateRootDirectoryName(tpl.RootDirectory, mdl)
 					if err != nil {
 						fmt.Printf("Err %v", err)
@@ -79,7 +77,13 @@ func NewGenerateProjectCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 					fmt.Printf("\nSource files created at this location: \n\t** %s **\n\n", path)
 					for _, srcFile := range src {
-						fmt.Printf("\t%s\n", filepath.Join(path, srcFile.FileName))
+						if srcFile.IsDir {
+							fmt.Printf("\t%s/\n", filepath.Join(path, srcFile.RelativePath))
+							continue
+						}
+
+						fileCnt++
+						fmt.Printf("\t%s\n", filepath.Join(path, srcFile.RelativePath, srcFile.FileName))
 					}
 
 				}
@@ -166,6 +170,13 @@ func currentDirectory() string {
 func writeFilesToLocation(destination string, files []*models.SourceFile) {
 	for _, file := range files {
 		path := filepath.Join(destination, file.RelativePath, file.FileName)
+
+		if file.IsDir {
+			if err := os.MkdirAll(path, 0700); err != nil {
+				fmt.Printf("Could not create '%s'", path)
+			}
+			continue
+		}
 
 		d, _ := filepath.Split(path)
 		if _, err := os.Stat(d); os.IsNotExist(err) {

@@ -70,6 +70,7 @@ type SourceFile struct {
 	DirectoryName string
 	RelativePath  string
 	FileName      string
+	IsDir         bool // a directory entry (FileName is empty), keeps empty folders from the template
 	Snippets      []string
 	Content       []byte
 }
