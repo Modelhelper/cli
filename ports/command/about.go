@@ -2,8 +2,8 @@ package command
 
 import (
 	"fmt"
-	"github.com/Modelhelper/cli/modelhelper"
-	"github.com/Modelhelper/cli/ports/project"
+	"github.com/Modelhelper/cli/v3/modelhelper"
+	"github.com/Modelhelper/cli/v3/ports/project"
 
 	"github.com/spf13/cobra"
 )

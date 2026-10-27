@@ -2,8 +2,8 @@ package source
 
 import (
 	"fmt"
-	"github.com/Modelhelper/cli/modelhelper"
-	"github.com/Modelhelper/cli/ports/source/mssql"
+	"github.com/Modelhelper/cli/v3/modelhelper"
+	"github.com/Modelhelper/cli/v3/ports/source/mssql"
 
 	"github.com/spf13/cobra"
 )

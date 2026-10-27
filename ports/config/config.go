@@ -2,10 +2,10 @@ package config
 
 import (
 	"fmt"
+	"github.com/Modelhelper/cli/v3/modelhelper"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
 	"log"
 	"log/slog"
-	"github.com/Modelhelper/cli/modelhelper"
-	"github.com/Modelhelper/cli/modelhelper/models"
 	"os"
 	"path/filepath"
 

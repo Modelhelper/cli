@@ -2,11 +2,11 @@ package source
 
 import (
 	"fmt"
-	"github.com/Modelhelper/cli/modelhelper"
-	"github.com/Modelhelper/cli/modelhelper/models"
-	"github.com/Modelhelper/cli/ports/source"
-	"github.com/Modelhelper/cli/ui"
-	"github.com/Modelhelper/cli/utils/slice"
+	"github.com/Modelhelper/cli/v3/modelhelper"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
+	"github.com/Modelhelper/cli/v3/ports/source"
+	"github.com/Modelhelper/cli/v3/ui"
+	"github.com/Modelhelper/cli/v3/utils/slice"
 	"sort"
 	"strings"
 

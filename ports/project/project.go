@@ -2,12 +2,12 @@ package project
 
 import (
 	"fmt"
+	"github.com/Modelhelper/cli/v3/modelhelper"
+	"github.com/Modelhelper/cli/v3/modelhelper/constants"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
+	"github.com/Modelhelper/cli/v3/utils/path"
 	"io/ioutil"
 	"log"
-	"github.com/Modelhelper/cli/modelhelper"
-	"github.com/Modelhelper/cli/modelhelper/constants"
-	"github.com/Modelhelper/cli/modelhelper/models"
-	"github.com/Modelhelper/cli/utils/path"
 	"os"
 	"path/filepath"
 	"strings"

@@ -2,10 +2,10 @@ package code
 
 import (
 	"fmt"
+	"github.com/Modelhelper/cli/v3/modelhelper"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
 	"io/ioutil"
 	"log"
-	"github.com/Modelhelper/cli/modelhelper"
-	"github.com/Modelhelper/cli/modelhelper/models"
 	"os"
 	"regexp"
 	"strings"

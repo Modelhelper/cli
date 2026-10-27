@@ -1,4 +1,4 @@
-//tree package works with nodes that can
+// tree package works with nodes that can
 package tree
 
 import (

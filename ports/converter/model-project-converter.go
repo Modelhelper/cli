@@ -1,8 +1,8 @@
 package converter
 
 import (
-	"github.com/Modelhelper/cli/modelhelper"
-	"github.com/Modelhelper/cli/modelhelper/models"
+	"github.com/Modelhelper/cli/v3/modelhelper"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
 )
 
 type projectModelConverter struct{}

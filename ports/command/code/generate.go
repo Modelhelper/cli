@@ -2,9 +2,9 @@ package code
 
 import (
 	"fmt"
-	"github.com/Modelhelper/cli/modelhelper"
-	"github.com/Modelhelper/cli/modelhelper/models"
-	"github.com/Modelhelper/cli/ports/exporter"
+	"github.com/Modelhelper/cli/v3/modelhelper"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
+	"github.com/Modelhelper/cli/v3/ports/exporter"
 	"strings"
 
 	"github.com/atotto/clipboard"

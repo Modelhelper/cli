@@ -1,9 +1,9 @@
 package config
 
 import (
-	"github.com/Modelhelper/cli/modelhelper/models"
-	"github.com/Modelhelper/cli/ports/config"
-	"github.com/Modelhelper/cli/ui"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
+	"github.com/Modelhelper/cli/v3/ports/config"
+	"github.com/Modelhelper/cli/v3/ui"
 	"os/exec"
 	"path/filepath"
 

@@ -2,11 +2,11 @@ package source
 
 import (
 	"fmt"
-	"github.com/Modelhelper/cli/modelhelper"
-	"github.com/Modelhelper/cli/modelhelper/models"
-	"github.com/Modelhelper/cli/ports/source/demo"
-	"github.com/Modelhelper/cli/ports/source/mssql"
-	"github.com/Modelhelper/cli/ports/source/postgres"
+	"github.com/Modelhelper/cli/v3/modelhelper"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
+	"github.com/Modelhelper/cli/v3/ports/source/demo"
+	"github.com/Modelhelper/cli/v3/ports/source/mssql"
+	"github.com/Modelhelper/cli/v3/ports/source/postgres"
 	"strings"
 	"unicode"
 )

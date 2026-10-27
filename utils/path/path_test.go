@@ -1,8 +1,8 @@
 package path_test
 
 import (
-	"github.com/Modelhelper/cli/modelhelper/constants"
-	"github.com/Modelhelper/cli/utils/path"
+	"github.com/Modelhelper/cli/v3/modelhelper/constants"
+	"github.com/Modelhelper/cli/v3/utils/path"
 	"path/filepath"
 	"testing"
 )

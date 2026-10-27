@@ -1,6 +1,6 @@
 package modelhelper
 
-import "github.com/Modelhelper/cli/modelhelper/models"
+import "github.com/Modelhelper/cli/v3/modelhelper/models"
 
 type SourceService interface {
 	Entity(name string) (*models.Entity, error)

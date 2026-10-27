@@ -1,4 +1,4 @@
-module github.com/Modelhelper/cli
+module github.com/Modelhelper/cli/v3
 
 go 1.27
 

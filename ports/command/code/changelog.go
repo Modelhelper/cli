@@ -2,10 +2,10 @@ package code
 
 import (
 	"fmt"
-	"github.com/Modelhelper/cli/modelhelper"
-	"github.com/Modelhelper/cli/modelhelper/models"
-	"github.com/Modelhelper/cli/ui"
-	"github.com/Modelhelper/cli/utils/path"
+	"github.com/Modelhelper/cli/v3/modelhelper"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
+	"github.com/Modelhelper/cli/v3/ui"
+	"github.com/Modelhelper/cli/v3/utils/path"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/text/language"

@@ -1,8 +1,8 @@
 package config
 
 import (
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
 	"log/slog"
-	"github.com/Modelhelper/cli/modelhelper/models"
 	"os"
 	"path/filepath"
 	"strings"

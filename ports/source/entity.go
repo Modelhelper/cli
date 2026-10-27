@@ -1,8 +1,8 @@
 package source
 
 import (
-	"github.com/Modelhelper/cli/modelhelper/models"
-	"github.com/Modelhelper/cli/scratchpad/tree"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
+	"github.com/Modelhelper/cli/v3/scratchpad/tree"
 
 	"github.com/gookit/color"
 	"golang.org/x/text/language"

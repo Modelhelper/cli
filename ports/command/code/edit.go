@@ -2,8 +2,8 @@ package code
 
 import (
 	"fmt"
+	"github.com/Modelhelper/cli/v3/modelhelper"
 	"log/slog"
-	"github.com/Modelhelper/cli/modelhelper"
 	"os"
 	"os/exec"
 

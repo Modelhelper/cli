@@ -6,10 +6,10 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"github.com/Modelhelper/cli/v3/modelhelper"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
+	"github.com/Modelhelper/cli/v3/utils/text"
 	"log"
-	"github.com/Modelhelper/cli/modelhelper"
-	"github.com/Modelhelper/cli/modelhelper/models"
-	"github.com/Modelhelper/cli/utils/text"
 	"strconv"
 	"strings"
 

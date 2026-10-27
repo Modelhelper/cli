@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	"github.com/Modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/v3/modelhelper"
 
 	"github.com/charmbracelet/huh"
 )

@@ -3,11 +3,11 @@ package language
 import (
 	"embed"
 	"fmt"
+	"github.com/Modelhelper/cli/v3/modelhelper"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
 	"io/fs"
 	"io/ioutil"
 	"log"
-	"github.com/Modelhelper/cli/modelhelper"
-	"github.com/Modelhelper/cli/modelhelper/models"
 	"os"
 	"path/filepath"
 	"strings"

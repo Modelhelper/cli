@@ -3,8 +3,8 @@ package vault
 import (
 	"encoding/json"
 	"errors"
+	"github.com/Modelhelper/cli/v3/scratchpad/cipher"
 	"io"
-	"github.com/Modelhelper/cli/scratchpad/cipher"
 	"os"
 	"sync"
 )

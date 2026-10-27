@@ -2,8 +2,8 @@ package extractor
 
 import (
 	"fmt"
+	"github.com/Modelhelper/cli/v3/modelhelper"
 	"io/ioutil"
-	"github.com/Modelhelper/cli/modelhelper"
 	"regexp"
 )
 

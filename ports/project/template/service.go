@@ -2,10 +2,10 @@ package template
 
 import (
 	"fmt"
+	"github.com/Modelhelper/cli/v3/modelhelper"
+	"github.com/Modelhelper/cli/v3/modelhelper/constants"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
 	"io/ioutil"
-	"github.com/Modelhelper/cli/modelhelper"
-	"github.com/Modelhelper/cli/modelhelper/constants"
-	"github.com/Modelhelper/cli/modelhelper/models"
 	"os"
 	"path/filepath"
 	"strings"

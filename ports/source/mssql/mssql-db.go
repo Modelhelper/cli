@@ -3,8 +3,8 @@ package mssql
 import (
 	"database/sql"
 	"errors"
+	"github.com/Modelhelper/cli/v3/modelhelper"
 	"log"
-	"github.com/Modelhelper/cli/modelhelper"
 
 	mssql "github.com/microsoft/go-mssqldb"
 )

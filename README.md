@@ -18,7 +18,7 @@ Supported sources: SQL Server (`mssql`) and PostgreSQL (`postgres`). There is al
 You need Go (see `go.mod` for the version). Install the latest version with:
 
 ```bash
-go install github.com/Modelhelper/cli/cmd/mh@latest
+go install github.com/Modelhelper/cli/v3/cmd/mh@latest
 ```
 
 This puts an `mh` binary in `$(go env GOBIN)`, or in `$(go env GOPATH)/bin` if `GOBIN` is not set. Make sure that folder is on your `PATH`.

@@ -2,7 +2,7 @@ package modelhelper
 
 import (
 	"context"
-	"github.com/Modelhelper/cli/modelhelper/models"
+	"github.com/Modelhelper/cli/v3/modelhelper/models"
 )
 
 type ProjectConfigService interface {
