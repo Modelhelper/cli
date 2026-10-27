@@ -35,10 +35,14 @@ func templateDetailCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 		Run: func(cmd *cobra.Command, args []string) {
 
-			fmt.Println("mh project template detail")
-			tpl := app.Project.TemplateService.Load(args[0])
+			tpl := app.Code.TemplateService.Load(args[0])
+			if tpl == nil {
+				fmt.Printf("Template '%s' not found, use 'mh code template list' to see all templates\n", args[0])
+				return
+			}
 
-			fmt.Printf("name: %s, lang: %s", tpl.Name, tpl.Language)
+			fmt.Printf("name:     %s\nlanguage: %s\ntype:     %s\nkey:      %s\nmodel:    %s\nfile:     %s\nsource:   %s\n\n%s\n",
+				tpl.Name, tpl.Language, tpl.Type, tpl.Key, tpl.Model, tpl.FileName, tpl.TemplateFilePath, tpl.Body)
 		},
 	}
 
