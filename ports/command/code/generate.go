@@ -78,8 +78,8 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 
 		result, err := app.Code.Generator.Generate(cmd.Root().Context(), options)
 		if err != nil {
-			// handle error
 			fmt.Println(err)
+			return
 		}
 		sb := strings.Builder{}
 
@@ -101,9 +101,12 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 				fileLocationWriter := exporter.FileExporter{}
 				fileLocationWriter.Overwrite = options.Overwrite
 				fileLocationWriter.Filename = res.Destination
-				_, err := fileLocationWriter.Write(res.Result.Body)
+				n, err := fileLocationWriter.Write(res.Result.Body)
 				if err != nil {
 					fmt.Printf("Err when writing to '%s', err: %v", res.Destination, err)
+				} else if n > 0 && result.Statistics != nil {
+					result.Statistics.FilesExported++
+					result.Statistics.FilesCreated++
 				}
 
 			}
@@ -113,9 +116,12 @@ func codeCommandHandler(app *modelhelper.ModelhelperCli) func(cmd *cobra.Command
 				fileLocationWriter := exporter.FileExporter{}
 				fileLocationWriter.Overwrite = options.Overwrite
 				fileLocationWriter.Filename = options.ExportPath
-				_, err := fileLocationWriter.Write(res.Result.Body)
+				n, err := fileLocationWriter.Write(res.Result.Body)
 				if err != nil {
 					fmt.Printf("Err when writing to '%s', err: %v", options.ExportPath, err)
+				} else if n > 0 && result.Statistics != nil {
+					result.Statistics.FilesExported++
+					result.Statistics.FilesCreated++
 				}
 			}
 		}
