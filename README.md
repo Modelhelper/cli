@@ -2,7 +2,6 @@
 
 ModelHelper (`mh`) reads the structure of a database and turns it into code. Point it at a table, pick a template, and get a struct, a repository, a controller, or whatever the template describes. The templates are plain YAML files, so you can change them or write your own.
 
-> **Status:** beta. The CLI was rewritten from C# to Go. A few commands are still unfinished and details may change.
 
 ## What it does
 
@@ -12,6 +11,18 @@ ModelHelper (`mh`) reads the structure of a database and turns it into code. Poi
 - **Copy data between sources.** Copy tables from one SQL Server connection to another.
 
 Supported sources: SQL Server (`mssql`) and PostgreSQL (`postgres`). There is also a built-in demo source, so you can try the CLI without a database.
+
+## Why use it when you can ask an AI?
+
+AI assistants are good at code that has not been written before. A lot of the code in a real project is not like that. The repository for the tenth table looks like the repository for the ninth, and the same goes for the structs, the controllers and the queries. For that kind of code, a template does the job well:
+
+- **It costs no tokens.** The CLI does not call a model. Generating a file takes milliseconds, and you can spend your AI budget on the parts that need thinking.
+- **The output is the same every time.** The same table and template give the same code. There is nothing to re-read for surprises, and the result does not change between runs or between people.
+- **Your conventions are written down once.** Naming, error handling, logging and folder layout live in the template, and every table follows them.
+- **It works offline** and with databases that you cannot send to an external service. Code generation reads the structure of your tables, not the data.
+- **Fixing a template fixes everything after it.** If you change how a repository handles errors, regenerate and the change applies to every table.
+
+This is not either/or. Use `mh` for the code that repeats, and an AI assistant for the rest: business logic, tests, refactoring, and writing the templates themselves. The [Modelhelper skills](https://github.com/Modelhelper/skills) let Claude Code write a template from your existing code, so the AI does that work once and the CLI repeats it.
 
 ## Install
 
