@@ -40,6 +40,10 @@ func createRootCommand(app *modelhelper.ModelhelperCli) *cobra.Command {
 
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
+			if f := cmd.Flags().Lookup("code-only"); f != nil && f.Value.String() == "true" {
+				return
+			}
+
 			slogan := app.Info.Slogan()
 			fmt.Printf("\n%s\n", slogan)
 		},
