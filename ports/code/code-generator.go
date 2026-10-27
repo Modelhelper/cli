@@ -102,7 +102,7 @@ func (g *codeGenerator) fromFiles(currentTemplate *models.CodeTemplate, o *model
 	pattern := filepath.Join(dir, "*")
 
 	drivers := template.Must(template.New(currentTemplate.Name).Funcs(
-		funcmap.FullFuncMap(dt, ndt)).ParseGlob(pattern))
+		funcmap.FuncMap(funcmap.FullFuncMap(dt, ndt), funcmap.LanguageMap(lang))).ParseGlob(pattern))
 
 	return drivers
 }
