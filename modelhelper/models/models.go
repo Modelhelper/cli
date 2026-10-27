@@ -44,6 +44,8 @@ type Datatype struct {
 	Nullable            string      `json:"nullable" yaml:"nullable"`
 	NullableAlternative string      `json:"nullableAlternative" yaml:"nullableAlternative"`
 	DefaultValue        interface{} `json:"defaultValue" yaml:"defaultValue"`
+	Imports             []string    `json:"imports" yaml:"imports"`                 // what the notNull type needs to be imported
+	NullableImports     []string    `json:"nullableImports" yaml:"nullableImports"` // what the nullable type needs to be imported
 }
 
 type Inject struct {

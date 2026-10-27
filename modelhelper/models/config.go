@@ -70,6 +70,7 @@ type LanguageDefinition struct {
 	Global         Global              `json:"global" yaml:"global"`
 	Short          string              `json:"short" yaml:"short"`
 	Description    string              `json:"description" yaml:"description"`
+	ReservedWords  []string            `json:"reservedWords" yaml:"reservedWords"` // words that can not be used as a name, see the safe template function
 	Path           string
 	// CanInject                 bool                       `json:"canInject" yaml:"canInject"`
 	// UsesNamespace             bool                       `json:"usesNamespace" yaml:"usesNamespace"`
