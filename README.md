@@ -15,15 +15,21 @@ Supported sources: SQL Server (`mssql`) and PostgreSQL (`postgres`). There is al
 
 ## Install
 
-There are no packaged releases yet, so build it from source. You need Go (see `go.mod` for the version).
+You need Go (see `go.mod` for the version). Install the latest version with:
+
+```bash
+go install github.com/Modelhelper/cli/cmd/mh@latest
+```
+
+This puts an `mh` binary in `$(go env GOBIN)`, or in `$(go env GOPATH)/bin` if `GOBIN` is not set. Make sure that folder is on your `PATH`.
+
+To build from a clone instead:
 
 ```bash
 git clone https://github.com/Modelhelper/cli.git
 cd cli
-go build -o mh ./main.go
+go build -o mh ./cmd/mh
 ```
-
-Put the `mh` binary somewhere on your `PATH`.
 
 You also need a set of templates. They live in a separate repository, [Modelhelper/templates](https://github.com/Modelhelper/templates). Clone it next to the CLI.
 

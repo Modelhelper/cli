@@ -2,7 +2,7 @@ package config
 
 import (
 	"log/slog"
-	"modelhelper/cli/modelhelper/models"
+	"github.com/Modelhelper/cli/modelhelper/models"
 	"os"
 	"path/filepath"
 	"strings"

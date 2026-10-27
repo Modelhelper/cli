@@ -2,10 +2,10 @@ package config
 
 import (
 	"fmt"
-	"modelhelper/cli/modelhelper"
-	"modelhelper/cli/modelhelper/models"
-	"modelhelper/cli/ports/source"
-	"modelhelper/cli/ui"
+	"github.com/Modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/modelhelper/models"
+	"github.com/Modelhelper/cli/ports/source"
+	"github.com/Modelhelper/cli/ui"
 
 	"github.com/gookit/color"
 )

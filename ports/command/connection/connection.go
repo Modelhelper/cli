@@ -2,7 +2,7 @@ package connection
 
 import (
 	"fmt"
-	"modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/modelhelper"
 	"sort"
 
 	"github.com/charmbracelet/huh"

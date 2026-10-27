@@ -6,9 +6,9 @@ import (
 	_ "embed"
 	"fmt"
 	"log"
-	"modelhelper/cli/modelhelper"
-	"modelhelper/cli/modelhelper/models"
-	"modelhelper/cli/utils/text"
+	"github.com/Modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/modelhelper/models"
+	"github.com/Modelhelper/cli/utils/text"
 	"strconv"
 	"strings"
 

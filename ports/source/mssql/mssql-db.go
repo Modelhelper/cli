@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"log"
-	"modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/modelhelper"
 
 	mssql "github.com/microsoft/go-mssqldb"
 )

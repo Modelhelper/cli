@@ -3,8 +3,8 @@ package project
 import (
 	"fmt"
 	"io/ioutil"
-	"modelhelper/cli/modelhelper"
-	"modelhelper/cli/modelhelper/models"
+	"github.com/Modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/modelhelper/models"
 	"os"
 	"path/filepath"
 	"time"

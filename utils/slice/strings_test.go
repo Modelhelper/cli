@@ -1,7 +1,7 @@
 package slice_test
 
 import (
-	"modelhelper/cli/utils/slice"
+	"github.com/Modelhelper/cli/utils/slice"
 	"testing"
 )
 

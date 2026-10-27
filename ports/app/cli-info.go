@@ -3,8 +3,8 @@ package app
 import (
 	"fmt"
 	"math/rand"
-	"modelhelper/cli/modelhelper"
-	"modelhelper/cli/ports/config"
+	"github.com/Modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/ports/config"
 	"os"
 	"os/user"
 	"path/filepath"

@@ -1,7 +1,7 @@
 package modelhelper
 
 import (
-	"modelhelper/cli/modelhelper/models"
+	"github.com/Modelhelper/cli/modelhelper/models"
 )
 
 type CreateConfigService interface {

@@ -1,8 +1,8 @@
 package command
 
 import (
-	"modelhelper/cli/modelhelper/models"
-	"modelhelper/cli/ui"
+	"github.com/Modelhelper/cli/modelhelper/models"
+	"github.com/Modelhelper/cli/ui"
 	"os/exec"
 )
 

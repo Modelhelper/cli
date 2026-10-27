@@ -2,11 +2,11 @@ package template
 
 import (
 	"fmt"
-	"modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/modelhelper"
 	"sort"
 
-	"modelhelper/cli/modelhelper/models"
-	"modelhelper/cli/ui"
+	"github.com/Modelhelper/cli/modelhelper/models"
+	"github.com/Modelhelper/cli/ui"
 	"os/exec"
 	"strings"
 

@@ -2,7 +2,7 @@ package project
 
 import (
 	"fmt"
-	"modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/modelhelper"
 
 	"github.com/spf13/cobra"
 )

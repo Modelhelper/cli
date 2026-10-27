@@ -3,7 +3,7 @@ package code
 import (
 	"fmt"
 	"log/slog"
-	"modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/modelhelper"
 	"os"
 	"os/exec"
 

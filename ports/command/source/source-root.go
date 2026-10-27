@@ -2,8 +2,8 @@ package source
 
 import (
 	"fmt"
-	"modelhelper/cli/modelhelper"
-	"modelhelper/cli/ui"
+	"github.com/Modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/ui"
 	"strings"
 
 	"github.com/spf13/cobra"

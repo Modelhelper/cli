@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"modelhelper/cli/scratchpad/cipher"
+	"github.com/Modelhelper/cli/scratchpad/cipher"
 	"os"
 	"sync"
 )

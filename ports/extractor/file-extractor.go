@@ -3,7 +3,7 @@ package extractor
 import (
 	"fmt"
 	"io/ioutil"
-	"modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/modelhelper"
 	"regexp"
 )
 

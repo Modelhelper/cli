@@ -2,9 +2,9 @@ package language
 
 import (
 	"fmt"
-	"modelhelper/cli/modelhelper"
-	"modelhelper/cli/modelhelper/models"
-	"modelhelper/cli/ui"
+	"github.com/Modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/modelhelper/models"
+	"github.com/Modelhelper/cli/ui"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/text/language"

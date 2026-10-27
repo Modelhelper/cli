@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-	"modelhelper/cli/modelhelper"
-	"modelhelper/cli/modelhelper/models"
+	"github.com/Modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/modelhelper/models"
 	"os"
 	"path/filepath"
 

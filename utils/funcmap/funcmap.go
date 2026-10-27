@@ -1,7 +1,7 @@
 package funcmap
 
 import (
-	casing "modelhelper/cli/utils/text"
+	casing "github.com/Modelhelper/cli/utils/text"
 	"text/template"
 )
 

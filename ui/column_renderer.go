@@ -1,6 +1,6 @@
 package ui
 
-import "modelhelper/cli/modelhelper/models"
+import "github.com/Modelhelper/cli/modelhelper/models"
 
 type SortColumnById []models.Column
 type SortColumnByName []models.Column

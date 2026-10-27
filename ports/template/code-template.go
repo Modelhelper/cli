@@ -3,8 +3,8 @@ package template
 import (
 	"io/ioutil"
 	"log"
-	"modelhelper/cli/modelhelper"
-	"modelhelper/cli/modelhelper/models"
+	"github.com/Modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/modelhelper/models"
 	"os"
 	"path/filepath"
 	"strings"

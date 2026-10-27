@@ -3,8 +3,8 @@ package project
 import (
 	"encoding/json"
 	"fmt"
-	"modelhelper/cli/modelhelper"
-	"modelhelper/cli/ports/converter"
+	"github.com/Modelhelper/cli/modelhelper"
+	"github.com/Modelhelper/cli/ports/converter"
 
 	"github.com/spf13/cobra"
 )

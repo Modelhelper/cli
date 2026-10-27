@@ -3,7 +3,7 @@ package files
 import (
 	"fmt"
 	"io/fs"
-	"modelhelper/cli/modelhelper/models"
+	"github.com/Modelhelper/cli/modelhelper/models"
 	"sort"
 )
 
