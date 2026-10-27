@@ -36,7 +36,7 @@ func (p *projectGeneratorService) BuildTemplateModel(options *models.ProjectTemp
 }
 
 func (p *projectGeneratorService) GenerateRootDirectoryName(rootFolderTemplateName string, model *models.ProjectTemplateModel) (string, error) {
-	b := generate(rootFolderTemplateName, model)
+	b := generate("rootDirectory", rootFolderTemplateName, model)
 	return string(b), nil
 }
 
@@ -157,7 +157,7 @@ func parseBody(model *models.ProjectTemplateModel, files []*models.SourceFile) [
 			continue
 		}
 
-		b := generate(string(f.Content), model)
+		b := generate(filepath.Join(f.RelativePath, f.FileName), string(f.Content), model)
 		f.Content = b
 		fout = append(fout, &models.SourceFile{
 			DirectoryName: f.DirectoryName, RelativePath: f.RelativePath, FileName: f.FileName, Content: b})
@@ -166,15 +166,23 @@ func parseBody(model *models.ProjectTemplateModel, files []*models.SourceFile) [
 	return fout
 }
 
-func generate(tbody string, model *models.ProjectTemplateModel) []byte {
-	t := tpl.New("project-source").Funcs(stringMap())
-	t, err := t.Parse(tbody)
+// generate renders tbody with the model. When the body can not be parsed or executed it is returned
+// untouched, with a warning naming the file, so the user can see why placeholders are left in it
+func generate(name, tbody string, model *models.ProjectTemplateModel) []byte {
+	// "${{{ .Name }}_X}" (an env var with a templated name) lexes as "{{" + "{ .Name", which does not parse,
+	// so emit the literal "${" separately
+	tbody = strings.ReplaceAll(tbody, "${{{", `${{"{"}}{{`)
+
+	t, err := tpl.New(name).Funcs(stringMap()).Parse(tbody)
 	if err != nil {
-		// fmt.Printf("Err: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Warning: '%s' was copied as is, it could not be parsed: %v\n", name, err)
 		return []byte(tbody)
 	}
+
 	buf := new(bytes.Buffer)
-	t.Execute(buf, model)
+	if err := t.Execute(buf, model); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: '%s' was only partly translated: %v\n", name, err)
+	}
 
 	return buf.Bytes()
 }
@@ -194,6 +202,7 @@ func stringMap() tpl.FuncMap {
 		"kebab":    kebabCase,
 		"dot":      DotCase,
 		"title":    titleCase,
+		"proper":   titleCase,
 		"pascal":   pascalCase,
 		"camel":    camelCase,
 		// "nullable":  nullableDatatype,
